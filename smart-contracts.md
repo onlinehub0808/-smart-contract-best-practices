@@ -255,28 +255,37 @@ One of the best lessons from the DAO is that slowing down processes arbitrarily 
 
 Akin to watching for unknown activities, an assert guard performs like a circuit breaker, but instead focuses on scenarios where an attacker can force a set of tests to fail. This however, does mean that the tests have to be written in Solidity as well, and assumes that tests are bug free as well. If an assert failure is triggers, the developers are allowed back in to upgrade the code, and only in those scenarios.
 
+### Noted Security Blog Posts
 
-### Security Related References
+#### Writing Safer Contracts
 
-https://chriseth.github.io/notes/talks/safe_solidity
-http://www.comp.nus.edu.sg/~loiluu/papers/oyente.pdf
-https://medium.com/@hrishiolickel/why-smart-contracts-fail-undiscovered-bugs-and-what-we-can-do-about-them-119aa2843007#.54r5efv5x
-https://blog.slock.it/deja-vu-dao-smart-contracts-audit-results-d26bc088e32e#.x9frbu72d
-https://medium.com/@peterborah/we-need-fault-tolerant-smart-contracts-ec1b56596dbc
-http://hackingdistributed.com/2016/06/22/smart-contract-escape-hatches/
-http://hackingdistributed.com/2016/06/18/analysis-of-the-dao-exploit/
-http://hackingdistributed.com/2016/06/16/scanning-live-ethereum-contracts-for-bugs/
-http://martin.swende.se/blog/Devcon1-and-contract-security.html
-https://medium.com/@ConsenSys/assert-guards-towards-automated-code-bounties-safe-smart-contract-coding-on-ethereum-8e74364b795c#.93rkl4sb7
-https://blog.ethereum.org/2016/06/10/smart-contract-security/
-https://blog.ethereum.org/2016/06/19/thinking-smart-contract-security/
-https://medium.com/@coriacetic/in-bits-we-trust-4e464b418f0b#.a6fva8txo
-http://publications.lib.chalmers.se/records/fulltext/234939/234939.pdf [Safer Smart Contracts through type-driven development]
-https://github.com/LeastAuthority/ethereum-analyses
-https://github.com/Bunjin/Rouleth/blob/master/Security.md
-http://vessenes.com/deconstructing-thedao-attack-a-brief-code-tour/
-http://vessenes.com/more-ethereum-attacks-race-to-empty-is-the-real-deal/
-http://vessenes.com/ethereum-griefing-wallets-send-w-throw-considered-harmful/
+- [How to Write Safe Smart Contracts](https://chriseth.github.io/notes/talks/safe_solidity): Blog post from Devcon 1 from the creator or Solidity
+- [Making Smart Contracts Smarter](http://www.comp.nus.edu.sg/~loiluu/papers/oyente.pdf) (Loi Luu, Duc-Hiep Chu, Prateek Saxena, Hrishi Olickel, Aquinas Hobor)
+- [We need fault-tolerant smart contracts](https://medium.com/@peterborah/we-need-fault-tolerant-smart-contracts-ec1b56596dbc) (Peter Borah)
+- [We need Escape Hatches](http://hackingdistributed.com/2016/06/22/smart-contract-escape-hatches/) (Hacking Distributed)
+- [Thinking about Smart Contract Security](https://blog.ethereum.org/2016/06/19/thinking-smart-contract-security/) (Vitalik Buterin)
+- [Assert Guards: Towards Automated Code Bounties & Safe Smart Contract Coding on Ethereum](https://medium.com/@ConsenSys/assert-guards-towards-automated-code-bounties-safe-smart-contract-coding-on-ethereum-8e74364b795c) (Simon de la Rouviere)
+- [Safer Smart Contracts through type-driven development](http://publications.lib.chalmers.se/records/fulltext/234939/234939.pdf) (Jack Pettersson and Robert Edström)
+- [In Bits We Trust?](https://medium.com/@coriacetic/in-bits-we-trust-4e464b418f0b) (David Xiao)
+
+#### Common Contract Errors
+
+- [Smart Contract Security](https://blog.ethereum.org/2016/06/10/smart-contract-security/) (Christian Reitwiessner)
+- [More Ethereum Attacks: Race-to-empty is the Real Deal](http://vessenes.com/more-ethereum-attacks-race-to-empty-is-the-real-deal/)
+- [Devcon1 and Ethereum contract Security](http://martin.swende.se/blog/Devcon1-and-contract-security.html)
+- [Potential Attacks against Rouleth contract](https://github.com/Bunjin/Rouleth/blob/master/Security.md)
+- [Ethereum Griefing Wallets: Send w/Throw Is Dangerous](http://vessenes.com/ethereum-griefing-wallets-send-w-throw-considered-harmful/)
+
+#### DAO-related Security Posts
+
+- [Deja Vu DAO Smart Contracts Audit Results](https://blog.slock.it/deja-vu-dao-smart-contracts-audit-results-d26bc088e32e#.x9frbu72d) (Stephen Tual)
+- [DAO Call for Moratorium](http://hackingdistributed.com/2016/05/27/dao-call-for-moratorium/) (Dino Mark, Vlad Zamfir, and Emin Gün Sirer)
+- [Analysis of the DAO Exploit](http://hackingdistributed.com/2016/06/18/analysis-of-the-dao-exploit/) (Phil Daian/Hacking Distributed)
+- [Deconstructing the DAO Attack](http://vessenes.com/deconstructing-thedao-attack-a-brief-code-tour/) (Peter Vessenes)
+
+#### Other
+
+[Least Authority Security Audit](https://github.com/LeastAuthority/ethereum-analyses)
 
 ### License
 
