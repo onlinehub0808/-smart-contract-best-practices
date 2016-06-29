@@ -2,6 +2,23 @@
 
 This document outlines the best practices for smart contract development around security: making sure one gets rid of most of the errors and also strategies for mitigating problems if they do occur.
 
+## Security Notifications
+
+This is a list of resources that will often highlight discovered exploits in Ethereum or Solidity:
+
+- [Ethereum Blog](https://blog.ethereum.org/): The official Ethereum blog
+- [Hacking Distributed](http://hackingdistributed.com/): Professor Sirer's blog with regular posts on cryptocurrencies and security
+- [Vessenes.com](http://vessenes.com/): Peter Vessenes blog
+
+It's highly recommended that you****regularly* read all these sources, as exploits they note may impact your contracts.
+
+Additionally, this is a list of community members who may write about security:
+- Vitalik Buterin: [Twitter](https://twitter.com/vitalikbuterin), [Github](https://github.com/vbuterin), [Reddit](https://www.reddit.com/user/vbuterin), [Ethereum Blog](https://blog.ethereum.org/author/vitalik-buterin/)
+- Dr. Christian Reitwiessner: [Twitter](https://twitter.com/ethchris), [Github](https://github.com/chriseth), [Ethereum Blog](https://blog.ethereum.org/author/christian_r/)
+- Gavin Wood: [Twitter](https://twitter.com/gavofyork), [Blog](http://gavwood.com/), [Github](https://github.com/gavofyork)
+- Dr. Emin Gun Sirer: [Twitter](https://twitter.com/el33th4xor)
+- Vladimir Zamfir: [Twitter](https://twitter.com/vladzamfir), [Github](https://github.com/vladzamfir), [Ethereum Blog](https://blog.ethereum.org/author/vlad/)
+
 ## Recommendations for Smart Contract Security in Solidity
 
 ### Proper Handling of External Calls
@@ -257,7 +274,7 @@ Akin to watching for unknown activities, an assert guard performs like a circuit
 
 ### Noted Security Blog Posts
 
-#### Writing Safer Contracts
+##### Writing Safer Contracts
 
 - [How to Write Safe Smart Contracts](https://chriseth.github.io/notes/talks/safe_solidity): Blog post from Devcon 1 from the creator or Solidity
 - [Making Smart Contracts Smarter](http://www.comp.nus.edu.sg/~loiluu/papers/oyente.pdf) (Loi Luu, Duc-Hiep Chu, Prateek Saxena, Hrishi Olickel, Aquinas Hobor)
@@ -268,7 +285,7 @@ Akin to watching for unknown activities, an assert guard performs like a circuit
 - [Safer Smart Contracts through type-driven development](http://publications.lib.chalmers.se/records/fulltext/234939/234939.pdf) (Jack Pettersson and Robert Edström)
 - [In Bits We Trust?](https://medium.com/@coriacetic/in-bits-we-trust-4e464b418f0b) (David Xiao)
 
-#### Common Contract Errors
+##### Common Contract Errors
 
 - [Smart Contract Security](https://blog.ethereum.org/2016/06/10/smart-contract-security/) (Christian Reitwiessner)
 - [More Ethereum Attacks: Race-to-empty is the Real Deal](http://vessenes.com/more-ethereum-attacks-race-to-empty-is-the-real-deal/)
@@ -276,7 +293,7 @@ Akin to watching for unknown activities, an assert guard performs like a circuit
 - [Potential Attacks against Rouleth contract](https://github.com/Bunjin/Rouleth/blob/master/Security.md)
 - [Ethereum Griefing Wallets: Send w/Throw Is Dangerous](http://vessenes.com/ethereum-griefing-wallets-send-w-throw-considered-harmful/)
 
-#### DAO-related Security Posts
+##### DAO-related Security Posts
 
 - [Deja Vu DAO Smart Contracts Audit Results](https://blog.slock.it/deja-vu-dao-smart-contracts-audit-results-d26bc088e32e#.x9frbu72d) (Stephen Tual)
 - [DAO Call for Moratorium](http://hackingdistributed.com/2016/05/27/dao-call-for-moratorium/) (Dino Mark, Vlad Zamfir, and Emin Gün Sirer)
