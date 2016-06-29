@@ -1,4 +1,4 @@
-# Smart Contract Best Practices
+# Ethereum Contract Security Techniques and Tips
 
 This document outlines the best practices for smart contract development around security: making sure one gets rid of most of the errors and also strategies for mitigating problems if they do occur.
 
@@ -283,6 +283,7 @@ Akin to watching for unknown activities, an assert guard performs like a circuit
 - [Thinking about Smart Contract Security](https://blog.ethereum.org/2016/06/19/thinking-smart-contract-security/) (Vitalik Buterin)
 - [Assert Guards: Towards Automated Code Bounties & Safe Smart Contract Coding on Ethereum](https://medium.com/@ConsenSys/assert-guards-towards-automated-code-bounties-safe-smart-contract-coding-on-ethereum-8e74364b795c) (Simon de la Rouviere)
 - [Safer Smart Contracts through type-driven development](http://publications.lib.chalmers.se/records/fulltext/234939/234939.pdf) (Jack Pettersson and Robert Edström)
+- [Simple Contracts are Better Contracts](https://blog.blockstack.org/simple-contracts-are-better-contracts-what-we-can-learn-from-the-dao-6293214bad3a)
 - [In Bits We Trust?](https://medium.com/@coriacetic/in-bits-we-trust-4e464b418f0b) (David Xiao)
 
 ##### Common Contract Errors
