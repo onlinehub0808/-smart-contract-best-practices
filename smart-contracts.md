@@ -1,6 +1,6 @@
 # Ethereum Contract Security Techniques and Tips
 
-This document outlines the best practices for smart contract development around security: making sure one gets rid of most of the errors and also strategies for mitigating problems if they do occur.
+[The DAO](https://github.com/slockit/DAO), a crowdfunded investment contract that had substantial security flaws, highlights the importance of security and proper software engineering of blockchain-based contracts. This document outlines collected security tips and techniques for smart contract development. This material is provided as is - and may not reflect best practice. Pull requests are welcome.
 
 ## Security Notifications
 
