@@ -2,7 +2,7 @@
 
 Check out the guide below.
 
-https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracs.md
+https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md
 
 Have changes? Send pull requests? Think something should be changed/edit and discussed? Open an issue.
 
