@@ -280,4 +280,4 @@ http://vessenes.com/ethereum-griefing-wallets-send-w-throw-considered-harmful/
 
 ### License
 
-Licensed under Creative Commons (https://creativecommons.org/licenses/by-nc-sa/4.0/). Attribution-NonCommercial-ShareAlike 4.0 International.
+Licensed under [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-nc-sa/4.0/)
