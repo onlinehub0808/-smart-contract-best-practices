@@ -113,9 +113,9 @@ If one is using a fallback function to deal with ether, one has to keep in mind 
 
 We recommend a coding convention that makes it more visible which contracts are untrusted.  For example, some abstract contracts are implementable by 3rd parties.  Having a prefix or some other convention, would make it clearer to identify untrusted contracts, from the rest of the system’s trusted contracts. At minimum, some comments to indicate this.
 
-## Common Attacks
+## Known Attacks
 
-### Call depth attack.
+### Call depth attack
 
 (it is sometimes also referred as the call stack attack)
 
@@ -244,13 +244,13 @@ Part of the solution is to carefully review the visibilities of all function and
 
 Designing your contract in the right way is a key aspect of defensive programming, which aims to reduce the risk from newly discovered bugs:
 
-### Deployment:
+### Deployment
 
 Before moving the mainnet, it can be prudent to first deploy the code to the testnet. Here, the code can be tested. In order to incentivize attackers, one can offer bug bounties for finding exploits in the testnet code.
 
 When deploying on the main chain, one might want to the use the optimizer. This reduces the bytecode required and can sometimes be useful to fit large contracts into
 
-### On-Chain:
+### On-Chain
 
 There should be the assumption that even if you used all the tools at hand, bugs could still slip in. Thus, one should be prepared for this, by using various on-chain mechanisms to either revert or replace faulty code.
 
@@ -296,7 +296,7 @@ Akin to watching for unknown activities, an assert guard performs like a circuit
 
 - **Editor Security Warnings**: Editors will soon alert for common security errors, not just compilation errors. Browser Solidity is getting these features soon.
 
-- **New functional languages that compile to EVM bytecode**: Functional languages gives certain guarantees over procedural languages like Solidity, namely immutability within a function and strong compile time checking. This can reduce the risk of errors by providing deterministic behavior. For more see [this](https://plus.google.com/u/0/events/cmqejp6d43n5cqkdl3iu0582f4k), Curry-Howard correspondence, and linear logic.
+- **New functional languages that compile to EVM bytecode**: Functional languages gives certain guarantees over procedural languages like Solidity, namely immutability within a function and strong compile time checking. This can reduce the risk of errors by providing deterministic behavior. (for more see [this](https://plus.google.com/u/0/events/cmqejp6d43n5cqkdl3iu0582f4k), Curry-Howard correspondence, and linear logic)
 
 ## Noted Security Blog Posts
 
@@ -316,7 +316,7 @@ Akin to watching for unknown activities, an assert guard performs like a circuit
 
 - [Smart Contract Security](https://blog.ethereum.org/2016/06/10/smart-contract-security/) (Christian Reitwiessner)
 - [More Ethereum Attacks: Race-to-empty is the Real Deal](http://vessenes.com/more-ethereum-attacks-race-to-empty-is-the-real-deal/)
-- [Devcon1 and Ethereum contract Security](http://martin.swende.se/blog/Devcon1-and-contract-security.html)
+- [Devcon1 and Ethereum Contract Security](http://martin.swende.se/blog/Devcon1-and-contract-security.html)
 - [Potential Attacks against Rouleth contract](https://github.com/Bunjin/Rouleth/blob/master/Security.md)
 - [Ethereum Griefing Wallets: Send w/Throw Is Dangerous](http://vessenes.com/ethereum-griefing-wallets-send-w-throw-considered-harmful/)
 
