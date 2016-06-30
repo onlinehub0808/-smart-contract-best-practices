@@ -318,10 +318,17 @@ Akin to watching for unknown activities, an assert guard performs like a circuit
 - [DAO Call for Moratorium](http://hackingdistributed.com/2016/05/27/dao-call-for-moratorium/) (Dino Mark, Vlad Zamfir, and Emin Gün Sirer)
 - [Analysis of the DAO Exploit](http://hackingdistributed.com/2016/06/18/analysis-of-the-dao-exploit/) (Phil Daian/Hacking Distributed)
 - [Deconstructing the DAO Attack](http://vessenes.com/deconstructing-thedao-attack-a-brief-code-tour/) (Peter Vessenes)
+- [Chasing the DAO Attacker's Wake](https://pdaian.com/blog/chasing-the-dao-attackers-wake/) (Phil Daian)
 
 ##### Other
 
 [Least Authority Security Audit](https://github.com/LeastAuthority/ethereum-analyses)
+
+## Reviewers
+
+The following people have reviewed this document (date and commit they reviewed in parentheses):
+
+-
 
 ## License
 
