@@ -4,7 +4,7 @@
 
 ## General Philosophy
 
-Ethereum and the concept of blockchain programming are relatively new and therefore you should expect an ongoing number of bugs, security risks, and changing best practice - even if you follow the security practices noted in this document. Further, blockchain programming requires a different engineering mindset as it is much closer to hardware programming or financial services programming with high cost to failure and limited release opportunities, unlike the rapid and forgiving iteration cycles of web or mobile development.
+Ethereum and complex blockchain programs are relatively new and therefore you should expect an ongoing number of bugs, security risks, and changing best practice - even if you follow the security practices noted in this document. Further, blockchain programming requires a different engineering mindset as it is much closer to hardware programming or financial services programming with high cost to failure and limited release opportunities, unlike the rapid and forgiving iteration cycles of web or mobile development.
 
 As a result, beyond protecting yourself against currently known hacks, it's critical to follow a different philosophy of development:
 
@@ -14,10 +14,14 @@ As a result, beyond protecting yourself against currently known hacks, it's crit
   - fix and iterate on the code when errors are discovered
   - provide superuser power to a party or many parties
 
-- **Conduct a thoughtful and carefully staged rollout** with substantial testing, hacking bounties, clear alpha releases, etc.
+- **Conduct a thoughtful and carefully staged rollout**
+  - Test contracts thoroughly, adding in all newly discovered failure cases
+  - Provide hacking bounties starting from alpha testnet releases
+  - Rollout in phases, with increasing usage and testing in each phase
 
 - **Keep contracts simple** - complexity increases the likelihood of errors
   - Ensure the contract logic simple, especially at first when the code is untested
+  - Modularize code, minimizing performance optimizations at the cost of readability; legibility increases audibility
   - Put logic that requires decentralization on the blockchain, and put other logic off; this allows you to continue rapid iteration off the blockchain
 
 - **Follow all key security resources** (Gitter, Twitter, blogs, Reddit accounts of key members), as newly discovered issues can be quickly exploited
@@ -33,15 +37,21 @@ This is a list of resources that will often highlight discovered exploits in Eth
 - [Ethereum Blog](https://blog.ethereum.org/): The official Ethereum blog
 - [Hacking Distributed](http://hackingdistributed.com/): Professor Sirer's blog with regular posts on cryptocurrencies and security
 - [Vessenes.com](http://vessenes.com/): Peter Vessenes blog
+- [Network Stats](https://ethstats.net/)
 
-It's highly recommended that you****regularly* read all these sources, as exploits they note may impact your contracts.
+It's highly recommended that you *regularly* read all these sources, as exploits they note may impact your contracts.
 
 Additionally, this is a list of community members who may write about security:
-- Vitalik Buterin: [Twitter](https://twitter.com/vitalikbuterin), [Github](https://github.com/vbuterin), [Reddit](https://www.reddit.com/user/vbuterin), [Ethereum Blog](https://blog.ethereum.org/author/vitalik-buterin/)
-- Dr. Christian Reitwiessner: [Twitter](https://twitter.com/ethchris), [Github](https://github.com/chriseth), [Ethereum Blog](https://blog.ethereum.org/author/christian_r/)
-- Gavin Wood: [Twitter](https://twitter.com/gavofyork), [Blog](http://gavwood.com/), [Github](https://github.com/gavofyork)
-- Dr. Emin Gun Sirer: [Twitter](https://twitter.com/el33th4xor)
-- Vladimir Zamfir: [Twitter](https://twitter.com/vladzamfir), [Github](https://github.com/vladzamfir), [Ethereum Blog](https://blog.ethereum.org/author/vlad/)
+
+- **Vitalik Buterin**: [Twitter](https://twitter.com/vitalikbuterin), [Github](https://github.com/vbuterin), [Reddit](https://www.reddit.com/user/vbuterin), [Ethereum Blog](https://blog.ethereum.org/author/vitalik-buterin/)
+- **Dr. Christian Reitwiessner**: [Twitter](https://twitter.com/ethchris), [Github](https://github.com/chriseth), [Ethereum Blog](https://blog.ethereum.org/author/christian_r/)
+- **Gavin Wood**: [Twitter](https://twitter.com/gavofyork), [Blog](http://gavwood.com/), [Github](https://github.com/gavofyork)
+- **Dr. Emin Gun Sirer**: [Twitter](https://twitter.com/el33th4xor)
+- **Vladimir Zamfir**: [Twitter](https://twitter.com/vladzamfir), [Github](https://github.com/vladzamfir), [Ethereum Blog](https://blog.ethereum.org/author/vlad/)
+
+## Key Security Tools
+
+- [Oyente](http://www.comp.nus.edu.sg/~loiluu/papers/oyente.pdf), an upcoming tool, will analyze Ethereum code to find common vulnerabilities (e.g., Transaction Order Dependence, no checking for exceptions)
 
 ## Recommendations for Smart Contract Security in Solidity
 
@@ -61,15 +71,52 @@ The most important point is the same for both, whether using ExternalContract.do
 
 The return value of all raw external calls should be checked to see if it failed or not.
 
+```
 function doSomething() {
-	if(!address.call.value(100000)()) { throw; }
+    if(!address.call.value(100000)()) { throw; }
 }
+```
 
 NOTE: beware of this pattern for potentially deadlocking a contract. See that section.
 
 Explicit comments should be made as to why the return value isn’t checked, if that is desired. Checking this is primarily due to the call depth attack.
 
+### Design Patterns to avoid external calls:
+
+The more ideal scenario is to try and avoid external calls where possible. This is particularly apparent when ether needs to be sent around, across contracts. It’s a potential cascade of calls.
+
+### Push vs Pull & Asynchrony
+
+A recommendation around this is to move to a pull vs push system. For example, let’s say a DAO needs to be paid out. The funds are sent to that address. Instead of in the same transaction, sending & splitting the funds when it reaches the DAO, the DAO simply logs that it received funds. Now, each participant who was supposed to receive must go and withdraw their funds from the DAO when they want to. So, now the call stack is reduced and attack space is reduced.
+
+Generally, although asynchrony sometimes requires multiple transactions, it is a safer pattern in general, because you reduce the potential attack space. In the future of Ethereum, with lower block times & potentially having to interact across shards, asynchrony might become a more needed pattern besides just for security concerns.
+
+### Rounding & Integer Division Error
+
+Currently in Solidity, when dividing integers (uint) it rounds down to the nearest integer. If not properly checked it can eventually lead to potential leakage over time.
+
+Fixed point types are currently being implemented in Solidity (ie fixed, ufixed, etc). Until it becomes available, the best bet is make sure that the rounding down is taken into account, or that one increases the granularity of the division moving the decimal places.
+
+### Function & Event Labels
+
+We recommend that event names are not too similar to their function counterparts as other authors have suggested, to avoid confusion with functions that have a very similar name. In some smart contracts, they are simply differentiated with capitalising one, over the other. Perhaps a standard such as “Log” in front events would help mitigate this potential issue.
+
+### Visibility
+
+Explicitly label the visibility of functions and state variables. Functions can be specified as being external, public, internal or private. For state variables, external is not possible.
+
+### Fallback functions
+
+If one is using a fallback function to deal with ether, one has to keep in mind that send() does not forward any gas. It only has access to a stipend of 2300 gas, which is enough to usually just be able to emit an event that a contract has received some ether.  It is recommended that fallback functions only spend up to 2300 gas, to not break send() behavior. It is recommended that a proper function be used if computation consuming more than 2300 gas is desired.
+
+### Naming of untrusted contracts
+
+We recommend a coding convention that makes it more visible which contracts are untrusted.  For example, some abstract contracts are implementable by 3rd parties.  Having a prefix or some other convention, would make it clearer to identify untrusted contracts, from the rest of the system’s trusted contracts. At minimum, some comments to indicate this.
+
+## Common Attacks
+
 ### Call depth attack.
+
 (it is sometimes also referred as the call stack attack)
 
 Even if it is known that the likelihood of failure in a sub-execution is possible, this can be forced to happen through a call depth attack. There’s a limit to how deep the call stack can become in one transaction (limit of 1024). Thus an attacker can build up a chain of calls and then call a contract, forcing subsequent calls to fail even if enough gas is available. It has to be a call, within a call, within a call, etc.
@@ -145,17 +192,6 @@ To summarise the protection against external call attacks:
 - Move external calls to the end of functions.
 If this can’t be done, make extremely sure that state manipulation across functions won’t be possible.
 
-
-## Design Patterns to avoid external calls:
-
-The more ideal scenario is to try and avoid external calls where possible. This is particularly apparent when ether needs to be sent around, across contracts. It’s a potential cascade of calls.
-
-### Push vs Pull & Asynchrony
-
-A recommendation around this is to move to a pull vs push system. For example, let’s say a DAO needs to be paid out. The funds are sent to that address. Instead of in the same transaction, sending & splitting the funds when it reaches the DAO, the DAO simply logs that it received funds. Now, each participant who was supposed to receive must go and withdraw their funds from the DAO when they want to. So, now the call stack is reduced and attack space is reduced.
-
-Generally, although asynchrony sometimes requires multiple transactions, it is a safer pattern in general, because you reduce the potential attack space. In the future of Ethereum, with lower block times & potentially having to interact across shards, asynchrony might become a more needed pattern besides just for security concerns.
-
 ### Gas Manipulation Attacks
 
 Manipulating the amount of elements in an array can increase gas costs substantially, forcing a lock up to a certain gas limit. Taking the previous example, of wanting to pay out some stakeholders iteratively, it might seem fine, assuming that the amount of stakeholders won’t inflate too much. The attacker would buy up, say 10000 tokens, and then split all 10000 tokens amongst 10000 addresses, causing the amount of iterations to increase, potentially forcing a lock.
@@ -196,19 +232,6 @@ A way around this could be to use block numbers and estimate time that has passe
 
 Since a transaction is in the mempool for a short while, one can know what actions will occur, before it is properly recorded (included in a block). This can be troublesome for things like decentralized markets, where a transaction to buy some tokens can be seen, and a market order implemented before the other transaction gets included. Protecting against is difficult, as it would come down to the specific contract itself. For example, in markets, it would be better to implement batch auctions (this also protects against high frequency trading concerns). Another potential way to use a pre-commit scheme (“I’m going to submit the details later”).
 
-### Rounding & Integer Division Error
-
-Currently in Solidity, when dividing integers (uint) it rounds down to the nearest integer. If not properly checked it can eventually lead to potential leakage over time.
-
-Fixed point types are currently being implemented in Solidity (ie fixed, ufixed, etc). Until it becomes available, the best bet is make sure that the rounding down is taken into account, or that one increases the granularity of the division moving the decimal places.
-
-### Function & Event Labels
-
-We recommend that event names are not too similar to their function counterparts as other authors have suggested, to avoid confusion with functions that have a very similar name. In some smart contracts, they are simply differentiated with capitalising one, over the other. Perhaps a standard such as “Log” in front events would help mitigate this potential issue.
-
-### Visibility
-
-Explicitly label the visibility of functions and state variables. Functions can be specified as being external, public, internal or private. For state variables, external is not possible.
 
 ### Leech attack
 
@@ -216,53 +239,10 @@ If your contract is an oracle, it may want protection from leeches that will use
 
 Part of the solution is to carefully review the visibilities of all function and state variable.
 
-### Fallback functions
 
-If one is using a fallback function to deal with ether, one has to keep in mind that send() does not forward any gas. It only has access to a stipend of 2300 gas, which is enough to usually just be able to emit an event that a contract has received some ether.  It is recommended that fallback functions only spend up to 2300 gas, to not break send() behavior. It is recommended that a proper function be used if computation consuming more than 2300 gas is desired.
+## Software Engineering Techniques
 
-### Naming of untrusted contracts
-
-We recommend a coding convention that makes it more visible which contracts are untrusted.  For example, some abstract contracts are implementable by 3rd parties.  Having a prefix or some other convention, would make it clearer to identify untrusted contracts, from the rest of the system’s trusted contracts. At minimum, some comments to indicate this.
-
-## Mitigation Strategies
-
-In order to mitigate potential besides the potential errors the occur, we give recommendations what to do during development, deployment & on-chain.
-
-### In Development:
-
-### Keep It Simple, Stupid!
-Contracts constructed using small, auditable components should be more debuggable than monolithic contracts. And if there has ever been an inappropriate place for inscrutable optimization hacks and space-saving syntax, it is in smart contracts. Legibility is auditability.
-
-### Comprehensive Test Suite
-A comprehensive test suite helps everyone, from you, to other developers, to users, to auditors, to new developers that want to contribute to your project.
-
-### Editors detecting vulnerabilities
-
-Work is being done to put warnings into certain editors. Browser Solidity is getting these features soon.
-
-Oyente is an upcoming tool that analyses one’s code and finds some of these common vulnerabilities such transaction order dependence and not checking for exceptions.
-
-### Functional Languages
-
-Solidity is a procedural language.
-
-Functional languages gives certain guarantees over procedural. The reasons why it gives better guarantees is because:
-
-Essentially, the guarantees are provided by a richer type system. Ensuring that a program/function is properly typed proves that this formula has a certain structure.
-
-The type system of procedural languages like Solidity are less fine-grained than those of functional languages.
-
-With Solidity, you can ensure that a function that returns a uint256 will not return an address, for example. (notice that there is still no guarantee that the function wouldn’t throw, whereas in functional languages this is usually guaranteed).
-
-With a more sophisticated type system, rich enough to express behavior such as ‘fungible resources’, (in short, a resource that cannot be copied, see resource on linear types below), one can prove more advanced properties of functions.
-
-In a pure functional language like Haskell the functions used are stateless. This means that they act like mathematical functions in that they are completely determined by their return value given specific input values. From this it becomes possible to prove mathematically that your program exhibit certain behaviour.
-
-FOR MORE READING:
-Greg Merediths linear types can change the blochchain https://plus.google.com/u/0/events/cmqejp6d43n5cqkdl3iu0582f4k
-
-Curry-Howard correspondence (types as propositions, programs as proofs)
-Linear logic
+Designing your contract in the right way is a key aspect of defensive programming, which aims to reduce the risk from newly discovered bugs:
 
 ### Deployment:
 
@@ -296,7 +276,13 @@ One of the best lessons from the DAO is that slowing down processes arbitrarily 
 
 Akin to watching for unknown activities, an assert guard performs like a circuit breaker, but instead focuses on scenarios where an attacker can force a set of tests to fail. This however, does mean that the tests have to be written in Solidity as well, and assumes that tests are bug free as well. If an assert failure is triggers, the developers are allowed back in to upgrade the code, and only in those scenarios.
 
-### Noted Security Blog Posts
+## Future improvements
+
+- **Editor Security Warnings**: Editors will soon alert for common security errors, not just compilation errors. Browser Solidity is getting these features soon.
+
+- **New functional languages that compile to EVM bytecode**: Functional languages gives certain guarantees over procedural languages like Solidity, namely immutability within a function and strong compile time checking. This can reduce the risk of errors by providing deterministic behavior. For more see [this](https://plus.google.com/u/0/events/cmqejp6d43n5cqkdl3iu0582f4k), Curry-Howard correspondence, and linear logic.
+
+## Noted Security Blog Posts
 
 ##### Writing Safer Contracts
 
@@ -325,10 +311,10 @@ Akin to watching for unknown activities, an assert guard performs like a circuit
 - [Analysis of the DAO Exploit](http://hackingdistributed.com/2016/06/18/analysis-of-the-dao-exploit/) (Phil Daian/Hacking Distributed)
 - [Deconstructing the DAO Attack](http://vessenes.com/deconstructing-thedao-attack-a-brief-code-tour/) (Peter Vessenes)
 
-#### Other
+##### Other
 
 [Least Authority Security Audit](https://github.com/LeastAuthority/ethereum-analyses)
 
-### License
+## License
 
 Licensed under [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-nc-sa/4.0/)
