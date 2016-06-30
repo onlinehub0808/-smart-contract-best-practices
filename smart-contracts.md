@@ -284,22 +284,6 @@ One of the best lessons from the DAO is that slowing down processes arbitrarily 
 
 Akin to watching for unknown activities, an assert guard performs like a circuit breaker, but instead focuses on scenarios where an attacker can force a set of tests to fail. This however, does mean that the tests have to be written in Solidity as well, and assumes that tests are bug free as well. If an assert failure is triggers, the developers are allowed back in to upgrade the code, and only in those scenarios.
 
-
-### Automatic deprecation
-
-
-### Versioning
-
-
-### Lock payout for time period
-
-
-### Using free tokens to represent assets in alpha/beta
-
-
-### White listing of users
-
-
 ## Future improvements
 
 - **Editor Security Warnings**: Editors will soon alert for common security errors, not just compilation errors. Browser Solidity is getting these features soon.
