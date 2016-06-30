@@ -4,7 +4,7 @@
 
 ## General Philosophy
 
-Ethereum and complex blockchain programs are relatively new and therefore you should expect an ongoing number of bugs, security risks, and changing best practice - even if you follow the security practices noted in this document. Further, blockchain programming requires a different engineering mindset as it is much closer to hardware programming or financial services programming with high cost to failure and limited release opportunities, unlike the rapid and forgiving iteration cycles of web or mobile development.
+Ethereum and complex blockchain programs are new and therefore you should expect an ongoing number of bugs, security risks, and changing best practice - even if you follow the security practices noted in this document. Further, blockchain programming requires a different engineering mindset as it is much closer to hardware programming or financial services programming with high cost to failure and limited release opportunities, unlike the rapid and forgiving iteration cycles of web or mobile development.
 
 As a result, beyond protecting yourself against currently known hacks, it's critical to follow a different philosophy of development:
 
@@ -275,6 +275,22 @@ One of the best lessons from the DAO is that slowing down processes arbitrarily 
 ### Assert Guards
 
 Akin to watching for unknown activities, an assert guard performs like a circuit breaker, but instead focuses on scenarios where an attacker can force a set of tests to fail. This however, does mean that the tests have to be written in Solidity as well, and assumes that tests are bug free as well. If an assert failure is triggers, the developers are allowed back in to upgrade the code, and only in those scenarios.
+
+
+### Automatic deprecation
+
+
+### Versioning
+
+
+### Lock payout for time period
+
+
+### Using free tokens to represent assets in alpha/beta
+
+
+### White listing of users
+
 
 ## Future improvements
 
