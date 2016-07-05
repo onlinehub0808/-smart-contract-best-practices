@@ -120,6 +120,29 @@ A recommendation around this is to move to a pull vs push system. For example, l
 
 Generally, although asynchrony sometimes requires multiple transactions, it is a safer pattern in general, because you reduce the potential attack space. In the future of Ethereum, with lower block times & potentially having to interact across shards, asynchrony might become a more needed pattern besides just for security concerns.
 
+For example, here's a withdrawRefund example in an auction contract.
+
+```
+contract auction {
+  address highestBidder;
+  uint highestBid;
+  mapping(address => uint) refunds;
+  function bid() {
+    if (msg.value < highestBid) throw;
+    if (highestBidder != 0)
+      refunds[highestBidder] += highestBid;
+    highestBidder = msg.sender;
+    highestBid = msg.value;
+  }
+  function withdrawRefund() {
+    uint refund = refunds[msg.sender];
+    refunds[msg.sender] = 0;
+    if (!msg.sender.send(refund))
+     refunds[msg.sender] = refund;
+  }
+}
+```
+
 ### Fallback functions
 
 If one is using a fallback function to deal with ether, one has to keep in mind that send() does not forward any gas. It only has access to a stipend of 2300 gas, which is enough to usually just be able to emit an event that a contract has received some ether.  It is recommended that fallback functions only spend up to 2300 gas, to not break send() behavior. It is recommended that a proper function be used if computation consuming more than 2300 gas is desired.
