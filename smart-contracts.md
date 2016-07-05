@@ -370,9 +370,51 @@ Circuit breakers are automated stop-gaps that stops any contract code automatica
 
 Under certain circumstances it can force the whole contract to be locked down if unexpected behaviour starts to occur. If not resolved, it will remain in stasis. Circuit breakers are not just useful for things like protecting ether. Any rate limit can be picked up. A generic can be done by sending requests through a proxy and logging function signatures and ether transfer and then locking requests if anything out of the ordinary is happening.
 
-### Speed Bumps/Rate Limiting
+### Speed Bumps/Rate Limiting (Delay contract actions)
 
-One of the best lessons from the DAO is that slowing down processes arbitrarily may allow for time to respond to them when they behave unexpectedly. There are obvious user experience tradeoffs here, and speed bumps may be best implemented inside of circuit breaker logic so that they are only triggered in exceptional circumstances.
+Speed bumps slow down actions, so that if malicious actions occur, there is time to recover. For example, [The DAO](https://github.com/slockit/DAO/) required 27 days between a successful request to split the DAO and the ability to do so. This ensured the funds were kept within the contract, allowing a greater likelihood of recovery (other fundamental flaws made this functionality useless without a fork in Ethereum). Speed bumps can be combined with other techniques (like circuit breakers or root access) for maximal effectiveness.
+
+Example:
+
+```
+struct RequestedWithdrawal {
+    uint amount;
+    uint time;
+}
+
+mapping (address => uint) balances;
+mapping (address => RequestedWithdrawal) requestedWithdrawals;
+uint constant withdrawalWaitPeriod = 28 days; // 4 weeks
+
+function requestWithdrawal() {
+    if (balances[msg.sender] > 0) {
+	uint amountToWithdraw = balances[msg.sender];
+	balances[msg.sender] = 0; // for simplicity, we withdraw everything;
+	// presumably, the deposit function prevents new deposits when withdrawals are in progress
+
+	requestedWithdrawals[msg.sender] = RequestedWithdrawal({
+	    amount: amountToWithdraw,
+	    time: now
+	  };
+    }
+}
+
+function withdraw() {
+    bool withdrawalAllowed = requestedWithdrawals[msg.sender] &&
+	requestedWithdrawals[msg.sender].amount > 0;
+    withdrawalAllowed = withdrawalAllowed &&
+	now > requestWithdrawals[msg.sender].time + withdrawalWaitPeriod;
+
+    if(withdrawalAllowed) {
+	uint amountToWithdraw = requestedWithdrawals[msg.sender].amount;
+	requestedWithdrawals[msg.sender].amount = 0;
+
+	if(!msg.sender.send(amountToWithdraw)) {
+	    throw;
+	}
+    }
+}
+```
 
 ### Assert Guards
 
