@@ -176,9 +176,18 @@ We recommend that event names are not too similar to their function counterparts
 
 Explicitly label the visibility of functions and state variables. Functions can be specified as being external, public, internal or private. For state variables, external is not possible.
 
-### Naming of untrusted contracts
+### Mark untrusted contracts
 
-We recommend a coding convention that makes it more visible which contracts are untrusted.  For example, some abstract contracts are implementable by 3rd parties.  Having a prefix or some other convention, would make it clearer to identify untrusted contracts, from the rest of the system’s trusted contracts. At minimum, some comments to indicate this.
+Mark which contracts are untrusted.  For example, some abstract contracts are implementable by 3rd parties. Use a prefix, or at minimum a comment, to highlight untrusted contracts.
+
+```
+// bad
+Bank.withdraw(100);
+
+// good
+ExternalBank.withdraw(100);
+Bank.withdraw(100); // external bank maintained by XYZ Corp
+```
 
 ## Known Attacks
 
