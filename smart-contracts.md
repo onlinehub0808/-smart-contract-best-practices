@@ -79,15 +79,25 @@ The most important point is the same for both, whether using ExternalContract.do
 
 The return value of all raw external calls should be checked to see if it failed or not.
 
+Explicit comments should be made as to why the return value isn’t checked, if that is desired. Checking this is primarily due to the call depth attack.
+
+Here is an example of checking the return value:
+
 ```
 function doSomething() {
     if(!address.call.value(100000)()) { throw; }
 }
 ```
 
-NOTE: beware of this pattern for potentially deadlocking a contract. See that section.
+NOTE: beware of this pattern for potentially deadlocking a contract...
 
-Explicit comments should be made as to why the return value isn’t checked, if that is desired. Checking this is primarily due to the call depth attack.
+### Deadlocking Through Forcing Unexpected Throws
+
+Let’s assume one wants to iterate through an array to pay users accordingly. In some circumstances, one wants to make sure that a contract call succeeding (like having paid the address). If not, one should throw. The issue in this scenario is that if one call fails, you are reverting the whole payout system, essentially forcing a deadlock. No one gets paid, because one address is forcing an error.
+
+((code snippet)) ((insert from https://blog.ethereum.org/2016/06/19/thinking-smart-contract-security/))
+
+The recommended pattern is that each user should withdraw their payout themselves.
 
 ### Design Patterns to avoid external calls:
 
@@ -138,14 +148,6 @@ Thus:
 All raw external calls should be examined and handled carefully for errors.  In most cases, the return values should be checked and handled carefully.  We recommend explicit comments in the code when such a return value is deliberately not checked.
 
 As you can see, the call depth attack can be a malicious attack on a contract for the purpose of failing a subsequent call. Thus even if you know what code will be executed, it could still be forced to fail.
-
-### Deadlocking Through Forcing Unexpected Throws
-
-Let’s assume one wants to iterate through an array to pay users accordingly. In some circumstances, one wants to make sure that a contract call succeeding (like having paid the address). If not, one should throw. The issue in this scenario is that if one call fails, you are reverting the whole payout system, essentially forcing a deadlock. No one gets paid, because one address is forcing an error.
-
-((code snippet)) ((insert from https://blog.ethereum.org/2016/06/19/thinking-smart-contract-security/))
-
-The recommended pattern is that each user should withdraw their payout themselves.
 
 ### Reentrant Attacks
 
