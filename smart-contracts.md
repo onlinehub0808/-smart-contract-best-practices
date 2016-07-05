@@ -344,7 +344,7 @@ Part of the solution is to carefully review the visibilities of all function and
 
 ## Software Engineering Techniques
 
-Designing your contract in the right way is a key aspect of defensive programming, which aims to reduce the risk from newly discovered bugs:
+Designing your contract for unknown, often unknowable, failure scenarios is a key aspect of defensive programming, which aims to reduce the risk from newly discovered bugs. We list potential techniques you can use to mitigate many unknown failure scenarios.
 
 ### Deployment
 
@@ -377,6 +377,44 @@ One of the best lessons from the DAO is that slowing down processes arbitrarily 
 ### Assert Guards
 
 Akin to watching for unknown activities, an assert guard performs like a circuit breaker, but instead focuses on scenarios where an attacker can force a set of tests to fail. This however, does mean that the tests have to be written in Solidity as well, and assumes that tests are bug free as well. If an assert failure is triggers, the developers are allowed back in to upgrade the code, and only in those scenarios.
+
+### Contract Rollout
+
+Contracts should have a substantial and prolonged testing period - before substantial money is put at risk.
+
+At minimum, you should:
+
+- Have a full test suite with 100% test coverage
+- Deploy on your own testnet
+- Deploy on the public testnet with substantial testing and bug bounties
+- Exhaustive testing should allow various players to interact with the contract at volume
+- Deploy on the mainnet in beta with limits to the amount at risk
+
+##### Automatic Deprecation
+
+During testing, you can force an automatic deprecation by preventing any actions after a certain time period. For example, an alpha contract may work for several weeks and then automatically shut down all actions, except for the final withdrawal.
+
+```
+modifier isActive() {
+  if (now > SOME_BLOCK_NUMBER) {
+    throw;
+  }
+  _
+}
+
+function deposit()
+  isActive() {
+    // some code
+  }
+
+function withdraw() {
+  // some code
+}
+
+```
+##### Use fake Ether or restrict amount of Ether per user/contract
+
+In the early stages, you can use tokens to represent large amounts of Ether, or restrict the amount of Ether for any user (or for the entire contract) - reducing the risk.
 
 ## Security-related Documentation and Procedures
 When launching a contract that will have substantial funds or is required to be mission critical, it is important to include proper documentation. Some documentation related to security includes:
