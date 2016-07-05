@@ -298,8 +298,41 @@ One of the best lessons from the DAO is that slowing down processes arbitrarily 
 
 Akin to watching for unknown activities, an assert guard performs like a circuit breaker, but instead focuses on scenarios where an attacker can force a set of tests to fail. This however, does mean that the tests have to be written in Solidity as well, and assumes that tests are bug free as well. If an assert failure is triggers, the developers are allowed back in to upgrade the code, and only in those scenarios.
 
-## Future improvements
+## Security-related Documentation and Procedures
+When launching a contract that will have substantial funds or is required to be mission critical, it is important to include proper documentation. Some documentation related to security includes:
 
+**Status**
+
+- Where current code is deployed
+- Current status of deployed code (including outstanding issues, performance stats, etc.)
+
+**Known Issues**
+
+- Key risks with contract
+- e.g., You can lose all your money, hacker can vote for certain outcomes
+- All known bugs/limitations
+- Potential attacks and mitigants
+- Potential conflicts of interest (e.g., will be using yourself, like Slock.it did with the DAO)
+
+**History**
+
+- Testing (including usage stats, discovered bugs, length of testing)
+- People who have reviewed code (and their key feedback)
+
+**Procedures**
+
+- Notification process if bug is discovered
+- Wind down process if something goes wrong (e.g., funders will get percentage of your balance before attack, from remaining funds)
+- If hacker bounty*provided for discovered bugs, responsible disclosure policy, where to report, etc
+- Recourse in case of failure (e.g., insurance, penalty fund, no recourse)
+
+**Contact Information**
+
+- Who to contact with issues
+- Names of programmers and/or other important parties
+- Chat room where questions can be asked
+
+## Future improvements
 - **Editor Security Warnings**: Editors will soon alert for common security errors, not just compilation errors. Browser Solidity is getting these features soon.
 
 - **New functional languages that compile to EVM bytecode**: Functional languages gives certain guarantees over procedural languages like Solidity, namely immutability within a function and strong compile time checking. This can reduce the risk of errors by providing deterministic behavior. (for more see [this](https://plus.google.com/u/0/events/cmqejp6d43n5cqkdl3iu0582f4k), Curry-Howard correspondence, and linear logic)
