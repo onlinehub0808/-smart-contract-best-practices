@@ -150,9 +150,52 @@ We recommend a coding convention that makes it more visible which contracts are 
 
 Even if it is known that the likelihood of failure in a sub-execution is possible, this can be forced to happen through a call depth attack. There’s a limit to how deep the call stack can become in one transaction (limit of 1024). Thus an attacker can build up a chain of calls and then call a contract, forcing subsequent calls to fail even if enough gas is available. It has to be a call, within a call, within a call, etc.
 
-For example:
+For example, looking at the auction code from previously:
 
-((add code snippet of call depth attack))
+```
+//DO NOT USE. THIS IS VULNERABLE.
+contract auction {
+  address highestBidder;
+  uint highestBid;
+  mapping(address => uint) refunds;
+  function bid() {
+    if (msg.value < highestBid) throw;
+    if (highestBidder != 0)
+      refunds[highestBidder] += highestBid;
+    highestBidder = msg.sender;
+    highestBid = msg.value;
+  }
+  function withdrawRefund() {
+    uint refund = refunds[msg.sender];
+    refunds[msg.sender] = 0;
+    msg.sender.send(refund); //vulnerable line.
+    refunds[msg.sender] = refund;
+  }
+}
+```
+
+The send() can fail if the call depth is too large, causing ether to not be sent. However it would be marked as if it did send. As previously shown, the external call should be checked for errors. This example, the state would just revert to the previous state.
+
+```
+contract auction {
+  address highestBidder;
+  uint highestBid;
+  mapping(address => uint) refunds;
+  function bid() {
+    if (msg.value < highestBid) throw;
+    if (highestBidder != 0)
+      refunds[highestBidder] += highestBid;
+    highestBidder = msg.sender;
+    highestBid = msg.value;
+  }
+  function withdrawRefund() {
+    uint refund = refunds[msg.sender];
+    refunds[msg.sender] = 0;
+    if (!msg.sender.send(refund))
+     refunds[msg.sender] = refund;
+  }
+}
+```
 
 Thus:
 
@@ -337,6 +380,8 @@ When launching a contract that will have substantial funds or is required to be 
 - **New functional languages that compile to EVM bytecode**: Functional languages gives certain guarantees over procedural languages like Solidity, namely immutability within a function and strong compile time checking. This can reduce the risk of errors by providing deterministic behavior. (for more see [this](https://plus.google.com/u/0/events/cmqejp6d43n5cqkdl3iu0582f4k), Curry-Howard correspondence, and linear logic)
 
 ## Noted Security Blog Posts
+
+A lot of this document contains code, examples and insights gained from various parts already written by the community. Here are noted posts.
 
 ##### Writing Safer Contracts
 
