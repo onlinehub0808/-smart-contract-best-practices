@@ -131,7 +131,7 @@ contract auction {
     function bid() {
 	if (msg.value < highestBid) throw;
 	if (highestBidder != 0)
-	  refunds[highestBidder] += highestBid;
+	    refunds[highestBidder] += highestBid;
 	highestBidder = msg.sender;
 	highestBid = msg.value;
     }
@@ -140,7 +140,7 @@ contract auction {
 	uint refund = refunds[msg.sender];
 	refunds[msg.sender] = 0;
 	if (!msg.sender.send(refund))
-	 refunds[msg.sender] = refund;
+	   refunds[msg.sender] = refund;
       }
 }
 ```
@@ -202,10 +202,11 @@ contract auction {
     function bid() {
 	if (msg.value < highestBid) throw;
 	if (highestBidder != 0)
-	  refunds[highestBidder] += highestBid;
+	    refunds[highestBidder] += highestBid;
 	highestBidder = msg.sender;
 	highestBid = msg.value;
     }
+
     function withdrawRefund() {
 	uint refund = refunds[msg.sender];
 	refunds[msg.sender] = 0;
