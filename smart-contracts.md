@@ -168,7 +168,7 @@ Currently in Solidity, when dividing integers (uint) it rounds down to the neare
 
 Fixed point types are currently being implemented in Solidity (ie fixed, ufixed, etc). Until it becomes available, the best bet is make sure that the rounding down is taken into account, or that one increases the granularity of the division moving the decimal places.
 
-### Name functions and events differently
+### Differentiate functions and events
 
 Favor capitalization and a *Log* prefix in front of events, to prevent the risk of confusion between functions and events (this was a mistake made in [The DAO](https://github.com/slockit/DAO/) ). For functions, always start with a lowercase letter.
 
