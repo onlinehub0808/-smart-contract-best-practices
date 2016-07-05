@@ -52,8 +52,6 @@ This is a list of resources that will often highlight discovered exploits in Eth
   - [Solidity](https://gitter.im/ethereum/solidity)
   - [Go-Ethereum](https://gitter.im/ethereum/go-ethereum)
   - [CPP-Ethereum](https://gitter.im/ethereum/cpp-ethereum)
-  - [web3.js](https://gitter.im/ethereum/web3.js)
-  - [Mix IDE](https://gitter.im/ethereum/mix)
   - [Research](https://gitter.im/ethereum/research)
 - [Ethereum Blog](https://blog.ethereum.org/): The official Ethereum blog
 - [Hacking Distributed](http://hackingdistributed.com/): Professor Sirer's blog with regular posts on cryptocurrencies and security
