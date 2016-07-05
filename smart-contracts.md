@@ -124,6 +124,21 @@ Generally, although asynchrony sometimes requires multiple transactions, it is a
 
 If one is using a fallback function to deal with ether, one has to keep in mind that send() does not forward any gas. It only has access to a stipend of 2300 gas, which is enough to usually just be able to emit an event that a contract has received some ether.  It is recommended that fallback functions only spend up to 2300 gas, to not break send() behavior. It is recommended that a proper function be used if computation consuming more than 2300 gas is desired.
 
+Example:
+
+```
+contract Receiver {
+
+    event ReceivedEther(address _from, uint256 _eth);
+
+    function() {
+        if(msg.value > 0) {
+            ReceivedEther(msg.sender, msg.value);
+        }
+    }
+}
+```
+
 ### Rounding & Integer Division Error
 
 Currently in Solidity, when dividing integers (uint) it rounds down to the nearest integer. If not properly checked it can eventually lead to potential leakage over time.
