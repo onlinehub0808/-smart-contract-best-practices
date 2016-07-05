@@ -172,9 +172,27 @@ Fixed point types are currently being implemented in Solidity (ie fixed, ufixed,
 
 We recommend that event names are not too similar to their function counterparts as other authors have suggested, to avoid confusion with functions that have a very similar name. In some smart contracts, they are simply differentiated with capitalising one, over the other. Perhaps a standard such as “Log” in front events would help mitigate this potential issue.
 
-### Visibility
+#### Explicitly mark visibility in functions and state variables
 
 Explicitly label the visibility of functions and state variables. Functions can be specified as being external, public, internal or private. For state variables, external is not possible.
+
+```
+// bad
+uint x; // the default is public protected, but it should be made explicit
+function transfer() {
+
+}
+
+// good
+uint public protected y;
+function transfer public () {
+
+}
+
+function internalAction private () {
+
+}
+```
 
 ### Naming of untrusted contracts
 
