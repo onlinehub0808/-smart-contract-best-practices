@@ -124,22 +124,24 @@ For example, here's a withdrawRefund example in an auction contract.
 
 ```
 contract auction {
-  address highestBidder;
-  uint highestBid;
-  mapping(address => uint) refunds;
-  function bid() {
-    if (msg.value < highestBid) throw;
-    if (highestBidder != 0)
-      refunds[highestBidder] += highestBid;
-    highestBidder = msg.sender;
-    highestBid = msg.value;
-  }
-  function withdrawRefund() {
-    uint refund = refunds[msg.sender];
-    refunds[msg.sender] = 0;
-    if (!msg.sender.send(refund))
-     refunds[msg.sender] = refund;
-  }
+    address highestBidder;
+    uint highestBid;
+    mapping(address => uint) refunds;
+
+    function bid() {
+	if (msg.value < highestBid) throw;
+	if (highestBidder != 0)
+	  refunds[highestBidder] += highestBid;
+	highestBidder = msg.sender;
+	highestBid = msg.value;
+    }
+
+    function withdrawRefund() {
+	uint refund = refunds[msg.sender];
+	refunds[msg.sender] = 0;
+	if (!msg.sender.send(refund))
+	 refunds[msg.sender] = refund;
+      }
 }
 ```
 
@@ -191,24 +193,25 @@ Even if it is known that the likelihood of failure in a sub-execution is possibl
 For example, looking at the auction code from previously:
 
 ```
-//DO NOT USE. THIS IS VULNERABLE.
+// DO NOT USE. THIS IS VULNERABLE.
 contract auction {
-  address highestBidder;
-  uint highestBid;
-  mapping(address => uint) refunds;
-  function bid() {
-    if (msg.value < highestBid) throw;
-    if (highestBidder != 0)
-      refunds[highestBidder] += highestBid;
-    highestBidder = msg.sender;
-    highestBid = msg.value;
-  }
-  function withdrawRefund() {
-    uint refund = refunds[msg.sender];
-    refunds[msg.sender] = 0;
-    msg.sender.send(refund); //vulnerable line.
-    refunds[msg.sender] = refund;
-  }
+    address highestBidder;
+    uint highestBid;
+    mapping(address => uint) refunds;
+
+    function bid() {
+	if (msg.value < highestBid) throw;
+	if (highestBidder != 0)
+	  refunds[highestBidder] += highestBid;
+	highestBidder = msg.sender;
+	highestBid = msg.value;
+    }
+    function withdrawRefund() {
+	uint refund = refunds[msg.sender];
+	refunds[msg.sender] = 0;
+	msg.sender.send(refund); // vulnerable line.
+	refunds[msg.sender] = refund;
+    }
 }
 ```
 
@@ -216,22 +219,25 @@ The send() can fail if the call depth is too large, causing ether to not be sent
 
 ```
 contract auction {
-  address highestBidder;
-  uint highestBid;
-  mapping(address => uint) refunds;
-  function bid() {
-    if (msg.value < highestBid) throw;
-    if (highestBidder != 0)
-      refunds[highestBidder] += highestBid;
-    highestBidder = msg.sender;
-    highestBid = msg.value;
-  }
-  function withdrawRefund() {
-    uint refund = refunds[msg.sender];
-    refunds[msg.sender] = 0;
-    if (!msg.sender.send(refund))
-     refunds[msg.sender] = refund;
-  }
+    address highestBidder;
+    uint highestBid;
+    mapping(address => uint) refunds;
+
+    function bid() {
+      if (msg.value < highestBid) throw;
+      if (highestBidder != 0)
+	  refunds[highestBidder] += highestBid;
+
+      highestBidder = msg.sender;
+      highestBid = msg.value;
+    }
+
+    function withdrawRefund() {
+	uint refund = refunds[msg.sender];
+	refunds[msg.sender] = 0;
+	if (!msg.sender.send(refund))
+	   refunds[msg.sender] = refund;
+    }
 }
 ```
 
@@ -274,11 +280,11 @@ Functions that do not share any state, are safe from this attack (even if state 
 A non-example? ((insert here))
 ```
 contract ReentrantSafe {
-  uint fState;
-  uint gState;
+    uint fState;
+    uint gState;
 
-  f()  // only changes fState
-  g() // only changes gState
+    f()  // only changes fState
+    g() // only changes gState
 }
 ```
 
@@ -306,19 +312,19 @@ An alternative approach is to have a payout loop that can be split across multip
 
 ```
 struct Payee {
-	address addr;
-	uint256 value;
+    address addr;
+    uint256 value;
 }
 Payee payees[];
 uint256 nextPayeeIndex;
 
 function payOut() {
-	uint256 i = nextPayeeIndex;
-	while (i < payees.length && msg.gas > 200000) {
-		payees[i].addr.send(payees[i].value);
-		i++;
-	}
-	nextPayeeIndex = i;
+    uint256 i = nextPayeeIndex;
+    while (i < payees.length && msg.gas > 200000) {
+	payees[i].addr.send(payees[i].value);
+	i++;
+    }
+    nextPayeeIndex = i;
 }
 ```
 
