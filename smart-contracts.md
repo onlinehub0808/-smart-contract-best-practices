@@ -99,15 +99,18 @@ Let’s assume one wants to iterate through an array to pay users accordingly. I
 
 The recommended pattern is that each user should withdraw their payout themselves.
 
-### Design Patterns to avoid external calls:
+### Design Patterns to avoid external calls: Push vs Pull & Asynchrony
 
 The more ideal scenario is to try and avoid external calls where possible. This is particularly apparent when ether needs to be sent around, across contracts. It’s a potential cascade of calls.
 
-### Push vs Pull & Asynchrony
 
 A recommendation around this is to move to a pull vs push system. For example, let’s say a DAO needs to be paid out. The funds are sent to that address. Instead of in the same transaction, sending & splitting the funds when it reaches the DAO, the DAO simply logs that it received funds. Now, each participant who was supposed to receive must go and withdraw their funds from the DAO when they want to. So, now the call stack is reduced and attack space is reduced.
 
 Generally, although asynchrony sometimes requires multiple transactions, it is a safer pattern in general, because you reduce the potential attack space. In the future of Ethereum, with lower block times & potentially having to interact across shards, asynchrony might become a more needed pattern besides just for security concerns.
+
+### Fallback functions
+
+If one is using a fallback function to deal with ether, one has to keep in mind that send() does not forward any gas. It only has access to a stipend of 2300 gas, which is enough to usually just be able to emit an event that a contract has received some ether.  It is recommended that fallback functions only spend up to 2300 gas, to not break send() behavior. It is recommended that a proper function be used if computation consuming more than 2300 gas is desired.
 
 ### Rounding & Integer Division Error
 
@@ -122,10 +125,6 @@ We recommend that event names are not too similar to their function counterparts
 ### Visibility
 
 Explicitly label the visibility of functions and state variables. Functions can be specified as being external, public, internal or private. For state variables, external is not possible.
-
-### Fallback functions
-
-If one is using a fallback function to deal with ether, one has to keep in mind that send() does not forward any gas. It only has access to a stipend of 2300 gas, which is enough to usually just be able to emit an event that a contract has received some ether.  It is recommended that fallback functions only spend up to 2300 gas, to not break send() behavior. It is recommended that a proper function be used if computation consuming more than 2300 gas is desired.
 
 ### Naming of untrusted contracts
 
