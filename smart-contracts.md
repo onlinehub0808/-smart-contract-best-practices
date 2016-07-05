@@ -2,6 +2,20 @@
 
 [The DAO](https://github.com/slockit/DAO), a crowdfunded investment contract that had substantial security flaws, highlights the importance of security and proper software engineering of blockchain-based contracts. This document outlines collected security tips and techniques for smart contract development. This material is provided as is - and may not reflect best practice. Pull requests are welcome.
 
+**Currently, this document is an early draft - and likely has substantial omissions or errors. This message will be removed in the future once a number of community members have reviewed this document.**
+
+#### Note for contributors
+
+This document is designed to provide a starting security baseline for intermediate Solidity programmers. It includes security philosophies, code idioms, known attacks, and software engineering techniques for blockchain contract programming - and aims to cover all communities, techniques, and tools that improve smart contract security. At this stage, this document is focused primarily on Solidity, a javascript-like language for Ethereum, but other languages are welcome.
+
+#### Additional Requested Content
+
+We especially welcome content in the following areas:
+
+- Testing Solidity code (structure, frameworks, common test idioms)
+- Software engineering practices for smart contracts and/or blockchain-based programming
+
+
 ## General Philosophy
 
 Ethereum and complex blockchain programs are new and therefore you should expect an ongoing number of bugs, security risks, and changing best practice - even if you follow the security practices noted in this document. Further, blockchain programming requires a different engineering mindset as it is much closer to hardware programming or financial services programming with high cost to failure and limited release opportunities, unlike the rapid and forgiving iteration cycles of web or mobile development.
@@ -38,8 +52,6 @@ This is a list of resources that will often highlight discovered exploits in Eth
   - [Solidity](https://gitter.im/ethereum/solidity)
   - [Go-Ethereum](https://gitter.im/ethereum/go-ethereum)
   - [CPP-Ethereum](https://gitter.im/ethereum/cpp-ethereum)
-  - [web3.js](https://gitter.im/ethereum/web3.js)
-  - [Mix IDE](https://gitter.im/ethereum/mix)
   - [Research](https://gitter.im/ethereum/research)
 - [Ethereum Blog](https://blog.ethereum.org/): The official Ethereum blog
 - [Hacking Distributed](http://hackingdistributed.com/): Professor Sirer's blog with regular posts on cryptocurrencies and security
@@ -285,8 +297,41 @@ One of the best lessons from the DAO is that slowing down processes arbitrarily 
 
 Akin to watching for unknown activities, an assert guard performs like a circuit breaker, but instead focuses on scenarios where an attacker can force a set of tests to fail. This however, does mean that the tests have to be written in Solidity as well, and assumes that tests are bug free as well. If an assert failure is triggers, the developers are allowed back in to upgrade the code, and only in those scenarios.
 
-## Future improvements
+## Security-related Documentation and Procedures
+When launching a contract that will have substantial funds or is required to be mission critical, it is important to include proper documentation. Some documentation related to security includes:
 
+**Status**
+
+- Where current code is deployed
+- Current status of deployed code (including outstanding issues, performance stats, etc.)
+
+**Known Issues**
+
+- Key risks with contract
+- e.g., You can lose all your money, hacker can vote for certain outcomes
+- All known bugs/limitations
+- Potential attacks and mitigants
+- Potential conflicts of interest (e.g., will be using yourself, like Slock.it did with the DAO)
+
+**History**
+
+- Testing (including usage stats, discovered bugs, length of testing)
+- People who have reviewed code (and their key feedback)
+
+**Procedures**
+
+- Notification process if bug is discovered
+- Wind down process if something goes wrong (e.g., funders will get percentage of your balance before attack, from remaining funds)
+- If hacker bounty*provided for discovered bugs, responsible disclosure policy, where to report, etc
+- Recourse in case of failure (e.g., insurance, penalty fund, no recourse)
+
+**Contact Information**
+
+- Who to contact with issues
+- Names of programmers and/or other important parties
+- Chat room where questions can be asked
+
+## Future improvements
 - **Editor Security Warnings**: Editors will soon alert for common security errors, not just compilation errors. Browser Solidity is getting these features soon.
 
 - **New functional languages that compile to EVM bytecode**: Functional languages gives certain guarantees over procedural languages like Solidity, namely immutability within a function and strong compile time checking. This can reduce the risk of errors by providing deterministic behavior. (for more see [this](https://plus.google.com/u/0/events/cmqejp6d43n5cqkdl3iu0582f4k), Curry-Howard correspondence, and linear logic)
@@ -319,10 +364,17 @@ Akin to watching for unknown activities, an assert guard performs like a circuit
 - [DAO Call for Moratorium](http://hackingdistributed.com/2016/05/27/dao-call-for-moratorium/) (Dino Mark, Vlad Zamfir, and Emin Gün Sirer)
 - [Analysis of the DAO Exploit](http://hackingdistributed.com/2016/06/18/analysis-of-the-dao-exploit/) (Phil Daian/Hacking Distributed)
 - [Deconstructing the DAO Attack](http://vessenes.com/deconstructing-thedao-attack-a-brief-code-tour/) (Peter Vessenes)
+- [Chasing the DAO Attacker's Wake](https://pdaian.com/blog/chasing-the-dao-attackers-wake/) (Phil Daian)
 
 ##### Other
 
 [Least Authority Security Audit](https://github.com/LeastAuthority/ethereum-analyses)
+
+## Reviewers
+
+The following people have reviewed this document (date and commit they reviewed in parentheses):
+
+-
 
 ## License
 
