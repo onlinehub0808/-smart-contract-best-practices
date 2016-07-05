@@ -362,13 +362,40 @@ In order to be able to change code, once it is deployed, someone needs to have p
 
 A simple switch can also employed that allows the contracts to lock themselves, instead of having to worry about a fix. Ie, lock first, then upgrade.
 
-### Circuit Breakers
+### Circuit Breakers (Pause contract functionality)
 
-Upgrading functionality is useful, especially in terms of fixing potential bugs. However, attacks can occur before the participants have any time of fixing it.
+Circuit breakers stop contract code from being executed if certain conditions are met, and can be useful when new errors are discovered. They sometimes come at the cost of injecting some level of trust, though smart design can minimize the trust required. Pausing can protect ether and many other items (e.g., votes). A circuit breaker can also be combined with assert guards, automatically pausing the contract if certain assertions fail (e.g., sum of balances drops below contract ether amount).
 
-Circuit breakers are automated stop-gaps that stops any contract code automatically from being executed if certain conditions are met.
+Example:
 
-Under certain circumstances it can force the whole contract to be locked down if unexpected behaviour starts to occur. If not resolved, it will remain in stasis. Circuit breakers are not just useful for things like protecting ether. Any rate limit can be picked up. A generic can be done by sending requests through a proxy and logging function signatures and ether transfer and then locking requests if anything out of the ordinary is happening.
+```
+bool private paused = false;
+
+function public toggleContractActive()
+isAdmin() {
+    // You can add an additional modifier that restricts pausing a contract to be based on another action, such as a vote of users
+    paused = !paused;
+}
+
+modifier isAdmin() {
+  if(msg.sender != owner) {
+    throw;
+  }
+  _
+}
+
+modifier isActive() {
+  if(paused) {
+    throw;
+  }
+  _
+}
+
+function transfer()
+isActive() {
+  // some code
+}
+```
 
 ### Speed Bumps/Rate Limiting
 
