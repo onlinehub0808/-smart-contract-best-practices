@@ -79,25 +79,38 @@ The most important point is the same for both, whether using ExternalContract.do
 
 The return value of all raw external calls should be checked to see if it failed or not.
 
+Explicit comments should be made as to why the return value isn’t checked, if that is desired. Checking this is primarily due to the call depth attack.
+
+Here is an example of checking the return value:
+
 ```
 function doSomething() {
     if(!address.call.value(100000)()) { throw; }
 }
 ```
 
-NOTE: beware of this pattern for potentially deadlocking a contract. See that section.
+NOTE: beware of this pattern for potentially deadlocking a contract...
 
-Explicit comments should be made as to why the return value isn’t checked, if that is desired. Checking this is primarily due to the call depth attack.
+### Deadlocking Through Forcing Unexpected Throws
 
-### Design Patterns to avoid external calls:
+Let’s assume one wants to iterate through an array to pay users accordingly. In some circumstances, one wants to make sure that a contract call succeeding (like having paid the address). If not, one should throw. The issue in this scenario is that if one call fails, you are reverting the whole payout system, essentially forcing a deadlock. No one gets paid, because one address is forcing an error.
+
+((code snippet)) ((insert from https://blog.ethereum.org/2016/06/19/thinking-smart-contract-security/))
+
+The recommended pattern is that each user should withdraw their payout themselves.
+
+### Design Patterns to avoid external calls: Push vs Pull & Asynchrony
 
 The more ideal scenario is to try and avoid external calls where possible. This is particularly apparent when ether needs to be sent around, across contracts. It’s a potential cascade of calls.
 
-### Push vs Pull & Asynchrony
 
 A recommendation around this is to move to a pull vs push system. For example, let’s say a DAO needs to be paid out. The funds are sent to that address. Instead of in the same transaction, sending & splitting the funds when it reaches the DAO, the DAO simply logs that it received funds. Now, each participant who was supposed to receive must go and withdraw their funds from the DAO when they want to. So, now the call stack is reduced and attack space is reduced.
 
 Generally, although asynchrony sometimes requires multiple transactions, it is a safer pattern in general, because you reduce the potential attack space. In the future of Ethereum, with lower block times & potentially having to interact across shards, asynchrony might become a more needed pattern besides just for security concerns.
+
+### Fallback functions
+
+If one is using a fallback function to deal with ether, one has to keep in mind that send() does not forward any gas. It only has access to a stipend of 2300 gas, which is enough to usually just be able to emit an event that a contract has received some ether.  It is recommended that fallback functions only spend up to 2300 gas, to not break send() behavior. It is recommended that a proper function be used if computation consuming more than 2300 gas is desired.
 
 ### Rounding & Integer Division Error
 
@@ -112,10 +125,6 @@ We recommend that event names are not too similar to their function counterparts
 ### Visibility
 
 Explicitly label the visibility of functions and state variables. Functions can be specified as being external, public, internal or private. For state variables, external is not possible.
-
-### Fallback functions
-
-If one is using a fallback function to deal with ether, one has to keep in mind that send() does not forward any gas. It only has access to a stipend of 2300 gas, which is enough to usually just be able to emit an event that a contract has received some ether.  It is recommended that fallback functions only spend up to 2300 gas, to not break send() behavior. It is recommended that a proper function be used if computation consuming more than 2300 gas is desired.
 
 ### Naming of untrusted contracts
 
@@ -138,14 +147,6 @@ Thus:
 All raw external calls should be examined and handled carefully for errors.  In most cases, the return values should be checked and handled carefully.  We recommend explicit comments in the code when such a return value is deliberately not checked.
 
 As you can see, the call depth attack can be a malicious attack on a contract for the purpose of failing a subsequent call. Thus even if you know what code will be executed, it could still be forced to fail.
-
-### Deadlocking Through Forcing Unexpected Throws
-
-Let’s assume one wants to iterate through an array to pay users accordingly. In some circumstances, one wants to make sure that a contract call succeeding (like having paid the address). If not, one should throw. The issue in this scenario is that if one call fails, you are reverting the whole payout system, essentially forcing a deadlock. No one gets paid, because one address is forcing an error.
-
-((code snippet)) ((insert from https://blog.ethereum.org/2016/06/19/thinking-smart-contract-security/))
-
-The recommended pattern is that each user should withdraw their payout themselves.
 
 ### Reentrant Attacks
 
