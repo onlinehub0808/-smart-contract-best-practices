@@ -379,10 +379,10 @@ contract SomeRegister {
     }
 
     modifier onlyOwner() {
-      if (msg.sender != owner) {
-	  throw;
-      }
-      _
+	if (msg.sender != owner) {
+	    throw;
+	}
+	_
     }
 
     function changeBackend(address newBackend)
@@ -398,7 +398,6 @@ contract SomeRegister {
 	return false;
     }
 }
-
 ```
 
 **Example 2: Use a `DELEGATECALL` to forward data and calls**
