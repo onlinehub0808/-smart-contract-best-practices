@@ -382,11 +382,11 @@ struct RequestedWithdrawal {
     uint time;
 }
 
-mapping (address => uint) balances;
-mapping (address => RequestedWithdrawal) requestedWithdrawals;
+mapping (address => uint) private balances;
+mapping (address => RequestedWithdrawal) private requestedWithdrawals;
 uint constant withdrawalWaitPeriod = 28 days; // 4 weeks
 
-function requestWithdrawal() {
+function requestWithdrawal() public {
     if (balances[msg.sender] > 0) {
 	uint amountToWithdraw = balances[msg.sender];
 	balances[msg.sender] = 0; // for simplicity, we withdraw everything;
@@ -395,17 +395,12 @@ function requestWithdrawal() {
 	requestedWithdrawals[msg.sender] = RequestedWithdrawal({
 	    amount: amountToWithdraw,
 	    time: now
-	  };
+	  });
     }
 }
 
-function withdraw() {
-    bool withdrawalAllowed = requestedWithdrawals[msg.sender] &&
-	requestedWithdrawals[msg.sender].amount > 0;
-    withdrawalAllowed = withdrawalAllowed &&
-	now > requestWithdrawals[msg.sender].time + withdrawalWaitPeriod;
-
-    if(withdrawalAllowed) {
+function withdraw() public {
+    if(requestedWithdrawals[msg.sender].amount > 0 && now > requestedWithdrawals[msg.sender].time + withdrawalWaitPeriod) {
 	uint amountToWithdraw = requestedWithdrawals[msg.sender].amount;
 	requestedWithdrawals[msg.sender].amount = 0;
 
