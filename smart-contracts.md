@@ -75,11 +75,11 @@ Additionally, this is a list of community members who may write about security:
 
 ## Recommendations for Smart Contract Security in Solidity
 
-### Proper Handling of External Calls
+### Avoid external calls, when possible
 
-External calls can introduce several unexpected errors, even if one calls to a contract that one knows aren’t malicious (one you set up yourself). One can force what seems like a safe call to fail by manipulating the depth of the call stack & can have unexpected behaviour occur when a malicious contract calls back into the contract.
+External calls (including `.send`, which triggers the fallback function) can introduce several unexpected risks or errors. For calls to untrusted contracts, you may be executing malicious code in that contract _or_ any other contract that it depends upon. As such, it is strongly encouraged to minimize external calls. Over time, it is likely that a paradigm will develop that leads to safer external calls - but the risk currently is high.
 
-When calling unknown contracts you are potentially executing code that can be entirely malicious. Thus one should assume that in the default case, they are malicious. If you can avoid doing external calls, it should be avoided. If not, it should be the last action one does in a function, AFTER any state changes have been done. Examples of best practices will be given in the following sections.
+If you must make an external call, ensure that external calls are the last call in a function - and that you've finalized your contract state before the call is made. You should also remember to check the result of all external calls (`.send()` and other raw calls will provide a boolean value, while other external function calls will throw on failure). The throw on failure of external function calls is a feature of Solidity (i.e., `Contract.doFunctionThatWillThrow()` will rethrow).
 
 ### Safely using external calls
 
