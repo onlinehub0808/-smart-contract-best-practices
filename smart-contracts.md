@@ -182,11 +182,11 @@ Mark which contracts are untrusted.  For example, some abstract contracts are im
 
 ```
 // bad
-Bank.withdraw(100);
+Bank.withdraw(100); // Unclear whether trusted or untrusted
 
 // good
-ExternalBank.withdraw(100);
-Bank.withdraw(100); // external bank maintained by XYZ Corp
+ExternalBank.withdraw(100); // untrusted external call
+Bank.withdraw(100); // external but trusted bank contract maintained by XYZ Corp
 ```
 
 ## Known Attacks
