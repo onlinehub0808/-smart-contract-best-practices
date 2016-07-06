@@ -91,7 +91,9 @@ The most important point is the same for both, whether using ExternalContract.do
 
 ### Always test if `.send` succeeded
 
-Sends (and raw calls) can fail (e.g., when the call stack depth of 1024 is breached), so you should always test if it succeeded. Remember also if you throw on a `send` failure in an iterator that your loop may never be able to complete.
+Sends (and raw calls) can fail (e.g., when the call stack depth of 1024 is breached), so you should always test if it succeeded. If you don't test the result, it's recommended to note in a comment.
+
+Also, if you throw on a `send` failure in an iterator then your loop may never be able to complete.
 
 ```
 // bad
