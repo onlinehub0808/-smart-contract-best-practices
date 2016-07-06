@@ -360,11 +360,82 @@ When deploying on the main chain, one might want to the use the optimizer. This 
 
 There should be the assumption that even if you used all the tools at hand, bugs could still slip in. Thus, one should be prepared for this, by using various on-chain mechanisms to either revert or replace faulty code.
 
-### Permissioned Guard
+### Permissioned Guard (changing code once deployed)
 
-In order to be able to change code, once it is deployed, someone needs to have permission to do so. The simplest version is that you have a multi-signature control of code. It is a tradeoff since this opens up the system to potential manipulation and one has to trust the multi-signature stakeholders to not be malicious. One can extend this to as broad a set of stakeholders as one wants. For example, a set of token holders can all vote to upgrade a contract if some quorum is met.
+Code will need to be changed if errors are discovered or if improvements need to be made - and there are various techniques to do this. The simplest is to have a registry contract that holds the address of the latest contract. A more seamless approach for contract users is to have a contract that forwards calls and data onto the latest version of the contract.
 
-A simple switch can also employed that allows the contracts to lock themselves, instead of having to worry about a fix. Ie, lock first, then upgrade.
+Whatever the technique, it's important to have modularization and good separation between components (data, logic) - so that code changes do not break functionality, orphan data, or require substantial costs to port.
+
+It's also critical to have a secure way for parties to upgrade the code - and code changes may be approved by a single trusted party, a group of members, or a vote of the full set of stakeholders. You may often combine a permissioned guard with a contract pause or lock, ensuring that activity does not occur while changes are being made - or after a contract is upgraded.
+
+**Example 1: Use a registry contract to store latest version of a contract**
+
+In this example, the calls aren't forwarded, so users should fetch the current address each time before interacting with it.
+
+```
+contract SomeRegister {
+    address backendContract;
+    address[] previousBackends;
+    address owner;
+
+    function SomeRegister() {
+        owner = msg.sender;
+    }
+
+    modifier onlyOwner() {
+        if (msg.sender != owner) {
+            throw;
+        }
+        _
+    }
+
+    function changeBackend(address newBackend)
+    onlyOwner()
+    returns (bool)
+    {
+        if(newBackend != backendContract) {
+            previousBackends.push(backendContract);
+            backendContract = newBackend;
+            return true;
+        }
+
+        return false;
+    }
+}
+```
+
+**Example 2: Use a `DELEGATECALL` to forward data and calls**
+
+```
+contract Relay {
+    address public currentVersion;
+    address public owner;
+
+    modifier onlyOwner() {
+        if (msg.sender != owner) {
+            throw;
+        }
+        _
+    }
+
+    function Relay(address initAddr) {
+        currentVersion = initAddr;
+        owner = msg.sender; // this owner may be another contract with multisig, not a single contract owner
+    }
+
+    function changeContract(address newVersion)
+    onlyOwner()
+    {
+        currentVersion = newVersion;
+    }
+
+    function() {
+        if(!currentVersion.delegatecall(msg.data)) throw;
+    }
+}
+```
+
+Source: [Stack Overflow](http://ethereum.stackexchange.com/questions/2404/upgradeable-contracts)
 
 ### Circuit Breakers (Pause contract functionality)
 
