@@ -174,22 +174,22 @@ We recommend that event names are not too similar to their function counterparts
 
 #### Explicitly mark visibility in functions and state variables
 
-Explicitly label the visibility of functions and state variables. Functions can be specified as being external, public, internal or private. For state variables, external is not possible.
+Explicitly label the visibility of functions and state variables. Functions can be specified as being `external`, `public`, `internal` or `private`. For state variables, `external` is not possible.
 
 ```
 // bad
-uint x; // the default is public protected, but it should be made explicit
+uint x; // the default is public for state variables, but it should be made explicit
 function transfer() {
 
 }
 
 // good
-uint public protected y;
-function transfer public () {
+uint public y;
+function transfer() public {
 
 }
 
-function internalAction private () {
+function internalAction() private {
 
 }
 ```
