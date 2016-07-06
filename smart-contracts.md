@@ -177,9 +177,9 @@ We recommend that event names are not too similar to their function counterparts
 Explicitly label the visibility of functions and state variables. Functions can be specified as being `external`, `public`, `internal` or `private`. For state variables, `external` is not possible.
 
 ```
-// bad
+// not great
 uint x; // the default is public for state variables, but it should be made explicit
-function transfer() {
+function transfer() { // the default is public
 
 }
 
