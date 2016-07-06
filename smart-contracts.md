@@ -178,18 +178,18 @@ Explicitly label the visibility of functions and state variables. Functions can 
 
 ```
 // not great
-uint x; // the default is public for state variables, but it should be made explicit
+uint x; // the default is private for state variables, but it should be made explicit
 function transfer() { // the default is public
 
 }
 
 // good
-uint public y;
+uint private y;
 function transfer() public {
 
 }
 
-function internalAction() private {
+function internalAction() internal {
 
 }
 ```
