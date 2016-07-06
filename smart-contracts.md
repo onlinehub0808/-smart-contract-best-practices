@@ -375,27 +375,27 @@ contract SomeRegister {
     address owner;
 
     function SomeRegister() {
-	owner = msg.sender;
+	    owner = msg.sender;
     }
 
     modifier onlyOwner() {
-	if (msg.sender != owner) {
-	    throw;
-	}
-	_
+    	if (msg.sender != owner) {
+	        throw;
+	    }
+	    _
     }
 
     function changeBackend(address newBackend)
     onlyOwner()
     returns (bool)
     {
-	if(newBackend != backendContract) {
-	    previousBackends.push(backendContract);
-	    backendContract = newBackend;
-	    return true;
-	}
+	    if(newBackend != backendContract) {
+	        previousBackends.push(backendContract);
+	        backendContract = newBackend;
+	        return true;
+	    }
 
-	return false;
+    	return false;
     }
 }
 ```
@@ -408,25 +408,25 @@ contract Relay {
     address public owner;
 
     modifier onlyOwner() {
-	if (msg.sender != owner) {
-	    throw;
-	}
-	_
+	     if (msg.sender != owner) {
+	          throw;
+	     }
+	     _
     }
 
     function Relay(address initAddr) {
-        currentVersion = initAddr;
-        owner = msg.sender; // this owner may be another contract with multisig, not a single contract owner
+	     currentVersion = initAddr;
+	     owner = msg.sender; // this owner may be another contract with multisig, not a single contract owner
     }
 
     function changeContract(address newVersion)
     onlyOwner()
     {
-	currentVersion = newVersion;
+	     currentVersion = newVersion;
     }
 
     function() {
-        if(!currentVersion.delegatecall(msg.data)) throw;
+	     if(!currentVersion.delegatecall(msg.data)) throw;
     }
 }
 ```
