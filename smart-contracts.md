@@ -170,18 +170,15 @@ Fixed point types are currently being implemented in Solidity (ie fixed, ufixed,
 
 ### Differentiate functions and events
 
-Favor capitalization and a *Log* prefix in front of events, to prevent the risk of confusion between functions and events (this was a mistake made in [The DAO](https://github.com/slockit/DAO/) ). For functions, always start with a lowercase letter.
+Favor capitalization and a prefix in front of events (we suggest *Log*), to prevent the risk of confusion between functions and events. For functions, always start with a lowercase letter, except for the constructor.
 
 ```
 // bad
 event transferHappened() {}
 function Transfer() {}
 
-// slightly better
-event TransferHappened() {}
-
 // good
-event LogTransferHappened() {}
+event LogTransfer() {}
 function transfer() {}
 ```
 
