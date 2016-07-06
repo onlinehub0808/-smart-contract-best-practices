@@ -145,23 +145,18 @@ contract auction {
 }
 ```
 
-### Fallback functions
+### Keep fallback functions simple
 
-If one is using a fallback function to deal with ether, one has to keep in mind that send() does not forward any gas. It only has access to a stipend of 2300 gas, which is enough to usually just be able to emit an event that a contract has received some ether.  It is recommended that fallback functions only spend up to 2300 gas, to not break send() behavior. It is recommended that a proper function be used if computation consuming more than 2300 gas is desired.
-
-Example:
+Fallback functions are the default functions called when a contract is sent a message with no arguments, and only has access to 2,300 gas when called from a `.send()` call. As such, the most you should do in most fallback functions is call an event. Use a proper function if a computation or more gas is required.
 
 ```
-contract Receiver {
+// bad
+function () { balances[msg.sender] += msg.value; }
 
-    event ReceivedEther(address _from, uint256 _eth);
-
-    function() {
-        if(msg.value > 0) {
-            ReceivedEther(msg.sender, msg.value);
-        }
-    }
-}
+// good
+function() { throw; }
+function() { LogSomeEvent(); }
+function deposit() { balances[msg.sender] += msg.value; }
 ```
 
 ### Rounding & Integer Division Error
