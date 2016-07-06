@@ -401,12 +401,12 @@ function requestWithdrawal() public {
 
 function withdraw() public {
     if(requestedWithdrawals[msg.sender].amount > 0 && now > requestedWithdrawals[msg.sender].time + withdrawalWaitPeriod) {
-	uint amountToWithdraw = requestedWithdrawals[msg.sender].amount;
-	requestedWithdrawals[msg.sender].amount = 0;
+        uint amountToWithdraw = requestedWithdrawals[msg.sender].amount;
+        requestedWithdrawals[msg.sender].amount = 0;
 
-	if(!msg.sender.send(amountToWithdraw)) {
-	    throw;
-	}
+        if(!msg.sender.send(amountToWithdraw)) {
+            throw;
+        }
     }
 }
 ```
