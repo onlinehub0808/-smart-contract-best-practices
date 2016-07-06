@@ -181,9 +181,27 @@ function transfer() {}
 
 Source: [Deconstructing the DAO Attack: A Brief Code Tour](http://vessenes.com/deconstructing-thedao-attack-a-brief-code-tour/) (Peter Vessenes)
 
-### Visibility
+#### Explicitly mark visibility in functions and state variables
 
-Explicitly label the visibility of functions and state variables. Functions can be specified as being external, public, internal or private. For state variables, external is not possible.
+Explicitly label the visibility of functions and state variables. Functions can be specified as being `external`, `public`, `internal` or `private`. For state variables, `external` is not possible.
+
+```
+// not great
+uint x; // the default is private for state variables, but it should be made explicit
+function transfer() { // the default is public
+
+}
+
+// good
+uint private y;
+function transfer() public {
+
+}
+
+function internalAction() internal {
+
+}
+```
 
 ### Mark untrusted contracts
 
