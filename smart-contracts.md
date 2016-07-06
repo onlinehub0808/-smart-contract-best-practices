@@ -366,16 +366,33 @@ It's also critical to have a secure way for parties to upgrade the code - and co
 
 **Example 1: Use a registry contract to store latest version of a contract**
 
+In this example, the calls aren't forwarded, so users should fetch the current address each time before interacting with it.
+
 ```
 contract SomeRegister {
     address backendContract;
     address[] previousBackends;
+    address owner;
 
-    function changeBackend(address newBackend) {
+    function SomeRegister() {
+      owner = msg.sender;
+    }
+
+    modifier onlyOwner() {
+      if (msg.sender != owner) {
+	throw;
+      }
+      _
+    }
+
+    function changeBackend(address newBackend)
+    onlyOwner()
+    returns (bool)
+    {
 	if(newBackend != backendContract) {
-	  previousBackends.push(backendContract);
-	  backendContract = newBackend;
-	  return true;
+	    previousBackends.push(backendContract);
+	    backendContract = newBackend;
+	    return true;
 	}
 
 	return false;
@@ -403,7 +420,7 @@ contract Relay {
         owner = msg.sender; // this owner may be another contract with multisig, not a single contract owner
     }
 
-    function changeContract(newVersion)
+    function changeContract(address newVersion)
     onlyOwner()
     {
 	currentVersion = newVersion;
