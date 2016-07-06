@@ -168,11 +168,22 @@ function() { LogSomeEvent(); }
 function deposit() { balances[msg.sender] += msg.value; }
 ```
 
-### Rounding & Integer Division Error
+### Beware rounding with integer division
 
-Currently in Solidity, when dividing integers (uint) it rounds down to the nearest integer. If not properly checked it can eventually lead to potential leakage over time.
+All integer divison rounds down to the nearest integer - use a multiplier to keep track, or use the future fixed point data types.
 
-Fixed point types are currently being implemented in Solidity (ie fixed, ufixed, etc). Until it becomes available, the best bet is make sure that the rounding down is taken into account, or that one increases the granularity of the division moving the decimal places.
+```
+// bad
+uint x = 5 / 2; // Result is 2, all integer divison rounds DOWN to the nearest integer
+
+// good
+uint multiplier = 10;
+uint x = (5 * multiplier) / 2;
+
+// in the near future, Solidity will have fixed point data types like fixed, ufixed
+```
+
+Source:
 
 ### Differentiate functions and events
 
