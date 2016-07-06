@@ -89,23 +89,23 @@ There is a slight difference in Solidity as to what happens with Contract calls 
 
 The most important point is the same for both, whether using ExternalContract.doSomething() or address.call(), if ExternalContract is untrusted, assume that malicious code will execute.  Note that if you trust an ExternalContract, you also trust any external contracts it calls, and that those call, are all non-malicious.  If any malicious contract exists in the call chain, the malicious contract can attack you (next section on Reentrant Attacks).
 
-### Always test if `.send` succeeded
+### Always test if `.send` and other raw calls have succeeded
 
-Sends (and raw calls) can fail (e.g., when the call stack depth of 1024 is breached), so you should always test if it succeeded. If you don't test the result, it's recommended to note in a comment.
+Sends and raw external calls can fail (e.g., when the call stack depth of 1024 is breached), so you should always test if it succeeded. If you don't test the result, it's recommended to note in a comment.
 
 Also, if you throw on a `send` failure in an iterator then your loop may never be able to complete.
 
 ```
 // bad
 someAddress.send();
-someAddress.call.value(100000)();
+someAddress.call.value()(); // this is doubly dangerous, as it will forward all remaining gas and doesn't check for result
 
 // good
 if(!someAddress.send()) {
     // Some failure code
 }
 
-if(!someAddress.call.value(100000)()) {
+if(!someAddress.call.value(100000)()) { // forwards fixed amount of gas
     // Some failure code
 }
 ```
