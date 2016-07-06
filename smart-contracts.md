@@ -165,9 +165,21 @@ Currently in Solidity, when dividing integers (uint) it rounds down to the neare
 
 Fixed point types are currently being implemented in Solidity (ie fixed, ufixed, etc). Until it becomes available, the best bet is make sure that the rounding down is taken into account, or that one increases the granularity of the division moving the decimal places.
 
-### Function & Event Labels
+### Differentiate functions and events
 
-We recommend that event names are not too similar to their function counterparts as other authors have suggested, to avoid confusion with functions that have a very similar name. In some smart contracts, they are simply differentiated with capitalising one, over the other. Perhaps a standard such as “Log” in front events would help mitigate this potential issue.
+Favor capitalization and a prefix in front of events (we suggest *Log*), to prevent the risk of confusion between functions and events. For functions, always start with a lowercase letter, except for the constructor.
+
+```
+// bad
+event transferHappened() {}
+function Transfer() {}
+
+// good
+event LogTransfer() {}
+function transfer() {}
+```
+
+Source: [Deconstructing the DAO Attack: A Brief Code Tour](http://vessenes.com/deconstructing-thedao-attack-a-brief-code-tour/) (Peter Vessenes)
 
 ### Visibility
 
