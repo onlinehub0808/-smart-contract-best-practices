@@ -149,12 +149,12 @@ Fallback functions are the default functions called when a contract is sent a me
 
 ```
 // bad
-function () { balances[msg.sender] += msg.balance; }
+function () { balances[msg.sender] += msg.value; }
 
 // good
 function() { throw; }
 function() { LogSomeEvent(); }
-function deposit() { balances[msg.sender] += msg.balance; }
+function deposit() { balances[msg.sender] += msg.value; }
 ```
 
 ### Rounding & Integer Division Error
