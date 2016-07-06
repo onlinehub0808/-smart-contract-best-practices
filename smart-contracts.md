@@ -375,12 +375,12 @@ contract SomeRegister {
     address owner;
 
     function SomeRegister() {
-      owner = msg.sender;
+	owner = msg.sender;
     }
 
     modifier onlyOwner() {
       if (msg.sender != owner) {
-	throw;
+	  throw;
       }
       _
     }
@@ -410,7 +410,7 @@ contract Relay {
 
     modifier onlyOwner() {
 	if (msg.sender != owner) {
-	  throw;
+	    throw;
 	}
 	_
     }
