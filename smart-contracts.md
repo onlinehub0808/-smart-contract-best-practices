@@ -396,25 +396,25 @@ During testing, you can force an automatic deprecation by preventing any actions
 
 ```
 modifier isActive() {
-  if (now > SOME_BLOCK_NUMBER) {
-    throw;
-  }
-  _
+    if (now > SOME_BLOCK_NUMBER) {
+        throw;
+    }
+    _
 }
 
-function deposit()
-  isActive() {
+function deposit() public
+isActive() {
     // some code
-  }
+}
 
-function withdraw() {
-  // some code
+function withdraw() public {
+    // some code
 }
 
 ```
-##### Use fake Ether or restrict amount of Ether per user/contract
+##### Restrict amount of Ether per user/contract
 
-In the early stages, you can use tokens to represent large amounts of Ether, or restrict the amount of Ether for any user (or for the entire contract) - reducing the risk.
+In the early stages, you can restrict the amount of Ether for any user (or for the entire contract) - reducing the risk.
 
 ## Security-related Documentation and Procedures
 When launching a contract that will have substantial funds or is required to be mission critical, it is important to include proper documentation. Some documentation related to security includes:
