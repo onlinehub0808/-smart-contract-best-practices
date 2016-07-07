@@ -667,6 +667,8 @@ function withdraw() public {
 
 An assert guard triggers when an assertion fails - such as an invariant property changing. For example, the token to ether issuance ratio in a token issuance contract may be fixed, and so you can verify that this is the case at all times with an assertion. Assert guards should often be combined with other techniques, such as pausing the contract and allowing upgrades.
 
+Assert guards can also be combined with automated bug bounties that payout if the ratio changes in a test contract.
+
 
 The following example reverts transactions if the ratio of ether to total number of tokens changes:
 
