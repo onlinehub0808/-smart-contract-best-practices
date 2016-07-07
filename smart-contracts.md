@@ -77,9 +77,11 @@ Additionally, this is a list of community members who may write about security:
 
 ### Avoid external calls, when possible
 
-External calls (including `.send`, which triggers the fallback function) can introduce several unexpected risks or errors. For calls to untrusted contracts, you may be executing malicious code in that contract _or_ any other contract that it depends upon. As such, it is strongly encouraged to minimize external calls. Over time, it is likely that a paradigm will develop that leads to safer external calls - but the risk currently is high.
+External calls (including raw `call()`, `callcode()`, `delegatecall()`) can introduce several unexpected risks or errors. For calls to untrusted contracts, you may be executing malicious code in that contract _or_ any other contract that it depends upon. As such, it is strongly encouraged to minimize external calls. Over time, it is likely that a paradigm will develop that leads to safer external calls - but the risk currently is high.
 
-If you must make an external call, ensure that external calls are the last call in a function - and that you've finalized your contract state before the call is made. You should also remember to check the result of all external calls (`.send()` and other raw calls will provide a boolean value, while other external function calls will throw on failure). The throw on failure of external function calls is a feature of Solidity (i.e., `Contract.doFunctionThatWillThrow()` will rethrow).
+If you must make an external call, ensure that external calls are the last call in a function - and that you've finalized your contract state before the call is made. 
+
+When possible, avoid external Contract calls (eg `ExternalContract.doSomething()`), including raw `call()`, `callcode()`, `delegatecall()`.
 
 ### Safely using external calls
 
