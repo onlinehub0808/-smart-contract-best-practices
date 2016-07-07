@@ -489,16 +489,6 @@ Part of the solution is to carefully review the visibilities of all function and
 
 Designing your contract for unknown, often unknowable, failure scenarios is a key aspect of defensive programming, which aims to reduce the risk from newly discovered bugs. We list potential techniques you can use to mitigate many unknown failure scenarios.
 
-### Deployment
-
-Before moving the mainnet, it can be prudent to first deploy the code to the testnet. Here, the code can be tested. In order to incentivize attackers, one can offer bug bounties for finding exploits in the testnet code.
-
-When deploying on the main chain, one might want to the use the optimizer. This reduces the bytecode required and can sometimes be useful to fit large contracts into
-
-### On-Chain
-
-There should be the assumption that even if you used all the tools at hand, bugs could still slip in. Thus, one should be prepared for this, by using various on-chain mechanisms to either revert or replace faulty code.
-
 ### Permissioned Guard (changing code once deployed)
 
 Code will need to be changed if errors are discovered or if improvements need to be made - and there are various techniques to do this. The simplest is to have a registry contract that holds the address of the latest contract. A more seamless approach for contract users is to have a contract that forwards calls and data onto the latest version of the contract.
