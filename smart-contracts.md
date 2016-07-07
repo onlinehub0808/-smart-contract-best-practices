@@ -143,7 +143,33 @@ This is an example where it should be the responsibility of the recipient to acc
 
 Example 2: Let’s assume one wants to iterate through an array to pay users accordingly. In some circumstances, one wants to make sure that a contract call succeeding (like having paid the address). If not, one should throw. The issue in this scenario is that if one call fails, you are reverting the whole payout system, essentially forcing a deadlock. No one gets paid, because one address is forcing an error.
 
-((code snippet)) ((insert from https://blog.ethereum.org/2016/06/19/thinking-smart-contract-security/))
+```
+address[] private refundAddresses;
+mapping (address => uint) public refunds;
+
+// bad
+function refundAll() public {
+    for(uint x; x < refundAddresses.length; x++) { // arbitrary length iteration based on how many addresses participated
+        if(refundAddresses[x].send(refunds[refundAddresses[x]])) {
+            throw; // doubly bad, now a single failure on send will hold up all funds
+        }
+    }
+}
+
+// good
+mapping (address => uint) private refunds;
+
+function getRefund() public {
+    if(refunds[msg.sender] > 0) {
+        uint amountToSend = refunds[msg.sender];
+        refunds[msg.sender] = 0;
+
+        if(!msg.sender.send(refunds[msg.sender])) {
+            refunds[msg.sender] = amountToSend;
+        }
+    }
+}
+```
 
 The recommended pattern is that each user should withdraw their payout themselves.
 
