@@ -89,11 +89,11 @@ There is an important difference in Solidity as to what happens with Contract ca
 
 The most important point is the same for both, whether using `ExternalContract.doSomething()` or `address.call()`, if `ExternalContract` is untrusted, assume that malicious code will execute.  Note that if you trust an `ExternalContract`, you also trust any contracts it calls, and that those call, are all non-malicious.  If any malicious contract exists in the call chain, the malicious contract can attack you (see [Reentrant Attacks](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#reentrant-attacks)).
 
-### Use send(), avoid call.value()
+### Use `send()`, avoid call.value()
 
 When sending Ether, use `someAddress.send()`.  Avoid `someAddress.call.value()()`.
 
-As noted above, external calls, such as `someAddress.call.value()()` are potentially dangerous because they always trigger code.  send() also triggers code, specifically the [fallback function](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#keep-fallback-functions-simple). send() is safe because it only has access to gas stipend of 2300 gas, which is insufficient for the send recipient to trigger any state changes (the intention of the 2300 gas stipend was to allow the recipient to log an event).
+As noted above, external calls, such as `someAddress.call.value()()` are potentially dangerous because they always trigger code.  `send()` also triggers code, specifically the [fallback function](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#keep-fallback-functions-simple). `send()` is safe because it only has access to gas stipend of 2300 gas, which is insufficient for the send recipient to trigger any state changes (the intention of the 2300 gas stipend was to allow the recipient to log an event).
 
 ```
 // bad
@@ -112,28 +112,28 @@ if(!someAddress.deposit.value(100)) {
 ```
 
 
-### Always test if `.send` and other raw calls have succeeded
+### Always test if `send()` and other raw calls have succeeded
 
-Sends and raw external calls can fail (e.g., when the call stack depth of 1024 is breached), so you should always test if it succeeded. If you don't test the result, it's recommended to note in a comment.
+`send()` and raw external calls can fail (e.g., when the call depth of 1024 is breached), so you should always test if it succeeded. If you don't test the result, it's recommended to note in a comment.
 
-Also, if you throw on a `send` failure in an iterator then your loop may never be able to complete.
+If you throw on a `send()` failure, be careful as you may create a [denial-of-service](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#dos-with-unexpected-throw) vulnerability.
 
 ```
 // bad
-someAddress.send();
-someAddress.call.value()(); // this is doubly dangerous, as it will forward all remaining gas and doesn't check for result
+someAddress.send(55);
+someAddress.call.value(55)(); // this is doubly dangerous, as it will forward all remaining gas and doesn't check for result
+
+if(!someAddress.call.value(55)(calldata)) { // checks the return value of call() but is not recommended since call() should be avoided
+    // Some failure code
+}
 
 // good
-if(!someAddress.send()) {
+if(!someAddress.send(55)) {
     // Some failure code
 }
 
-if(!someAddress.call.value(100000)()) { // forwards fixed amount of gas
-    // Some failure code
-}
 ```
 
-Source: [Smart Contract Security](https://blog.ethereum.org/2016/06/10/smart-contract-security/)
 
 ### DoS with (Unexpected) Throw
 
