@@ -79,7 +79,7 @@ Additionally, this is a list of community members who may write about security:
 
 External calls (including raw `call()`, `callcode()`, `delegatecall()`) can introduce several unexpected risks or errors. For calls to untrusted contracts, you may be executing malicious code in that contract _or_ any other contract that it depends upon. As such, it is strongly encouraged to minimize external calls. Over time, it is likely that a paradigm will develop that leads to safer external calls - but the risk currently is high.
 
-If you must make an external call, ensure that external calls are the last call in a function - and that you've finalized your contract state before the call is made. 
+If you must make an external call, ensure that external calls are the last call in a function - and that you've finalized your contract state before the call is made.
 
 When possible, avoid external Contract calls (eg `ExternalContract.doSomething()`), including raw `call()`, `callcode()`, `delegatecall()`.
 
@@ -496,7 +496,8 @@ Part of the solution is to carefully review the visibilities of all function and
 
 ## Software Engineering Techniques
 
-Designing your contract for unknown, often unknowable, failure scenarios is a key aspect of defensive programming, which aims to reduce the risk from newly discovered bugs. We list potential techniques you can use to mitigate many unknown failure scenarios.
+Designing your contract for unknown, often unknowable, failure scenarios is a key aspect of defensive programming, which aims to reduce the risk from newly discovered bugs. We list potential techniques you can use to mitigate many unknown failure scenarios - and many of these can be used together.
+
 
 ### Deployment
 
@@ -510,11 +511,11 @@ There should be the assumption that even if you used all the tools at hand, bugs
 
 ### Permissioned Guard (changing code once deployed)
 
-Code will need to be changed if errors are discovered or if improvements need to be made - and there are various techniques to do this. The simplest is to have a registry contract that holds the address of the latest contract. A more seamless approach for contract users is to have a contract that forwards calls and data onto the latest version of the contract.
+Code will need to be changed if errors are discovered or if improvements need to be made. The simplest technique is to have a registry contract that holds the address of the latest contract. A more seamless approach for contract users is to have a contract that forwards calls and data onto the latest version of the contract.
 
 Whatever the technique, it's important to have modularization and good separation between components (data, logic) - so that code changes do not break functionality, orphan data, or require substantial costs to port.
 
-It's also critical to have a secure way for parties to upgrade the code - and code changes may be approved by a single trusted party, a group of members, or a vote of the full set of stakeholders. You may often combine a permissioned guard with a contract pause or lock, ensuring that activity does not occur while changes are being made - or after a contract is upgraded.
+It's also critical to have a secure way for parties to decide to upgrade the code - and code changes may be approved by a single trusted party, a group of members, or a vote of the full set of stakeholders. You may often combine a permissioned guard with a contract pause or lock, ensuring that activity does not occur while changes are being made - or after a contract is upgraded.
 
 **Example 1: Use a registry contract to store latest version of a contract**
 
@@ -537,7 +538,7 @@ contract SomeRegister {
         _
     }
 
-    function changeBackend(address newBackend)
+    function changeBackend(address newBackend) public
     onlyOwner()
     returns (bool)
     {
@@ -571,7 +572,7 @@ contract Relay {
         owner = msg.sender; // this owner may be another contract with multisig, not a single contract owner
     }
 
-    function changeContract(address newVersion)
+    function changeContract(address newVersion) public
     onlyOwner()
     {
         currentVersion = newVersion;
@@ -587,36 +588,37 @@ Source: [Stack Overflow](http://ethereum.stackexchange.com/questions/2404/upgrad
 
 ### Circuit Breakers (Pause contract functionality)
 
-Circuit breakers stop contract code from being executed if certain conditions are met, and can be useful when new errors are discovered. They sometimes come at the cost of injecting some level of trust, though smart design can minimize the trust required. Pausing can protect ether and many other items (e.g., votes). A circuit breaker can also be combined with assert guards, automatically pausing the contract if certain assertions fail (e.g., sum of balances drops below contract ether amount).
+Circuit breakers stop execution if certain conditions are met, and can be useful when new errors are discovered. They sometimes come at the cost of injecting some level of trust on whoever triggers the circuit breaker, though smart design can minimize the trust required. Pausing can protect ether and many other items (e.g., votes). A circuit breaker can also be combined with assert guards, automatically pausing the contract if certain assertions fail (e.g., sum of balances drops below contract ether amount), rather than a user.
 
 Example:
 
 ```
 bool private paused = false;
+address private owner;
 
-function public toggleContractActive()
+function toggleContractActive() public
 isAdmin() {
     // You can add an additional modifier that restricts pausing a contract to be based on another action, such as a vote of users
     paused = !paused;
 }
 
 modifier isAdmin() {
-  if(msg.sender != owner) {
-    throw;
-  }
-  _
+    if(msg.sender != owner) {
+        throw;
+    }
+    _
 }
 
 modifier isActive() {
-  if(paused) {
-    throw;
-  }
-  _
+    if(paused) {
+        throw;
+    }
+    _
 }
 
-function transfer()
+function transfer() public
 isActive() {
-  // some code
+    // some code
 }
 ```
 
