@@ -98,17 +98,14 @@ As noted above, external calls, such as `someAddress.call.value()()` are potenti
 ```
 // bad
 someAddress.call.value(100)(); // this is doubly dangerous, as it will forward all remaining gas and doesn't check for result
-someAddress.call.value(100)(bytes4(sha3("deposit()")));
+someAddress.call.value(100)(bytes4(sha3("deposit()"))); // if deposit throws an exception, the raw call() will only return false and transaction will NOT be reverted
 
 // good
 if(!someAddress.send(100)) {
     // Some failure code
 }
 
-if(!someAddress.deposit.value(100)) {
-    // Some failure code
-}
-
+ExternalContract(someAddress).deposit.value(100); // raw call() is avoided, so if deposit throws an exception, the whole transaction IS reverted
 ```
 
 
