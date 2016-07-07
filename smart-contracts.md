@@ -594,30 +594,30 @@ A circuit breaker can also be combined with assert guards, automatically pausing
 Example:
 
 ```
-bool private paused = false;
+bool private stopped = false;
 
-function public toggleContractActive()
+function toggleContractStopped() public
 isAdmin() {
-    // You can add an additional modifier that restricts pausing a contract to be based on another action, such as a vote of users
-    paused = !paused;
+    // You can add an additional modifier that restricts stopping a contract to be based on another action, such as a vote of users
+    stopped = !stopped;
 }
 
 modifier isAdmin() {
-  if(msg.sender != owner) {
-    throw;
-  }
-  _
+    if(msg.sender != owner) {
+        throw;
+    }
+    _
 }
 
-modifier pauseInEmergency { if (!paused) _ }
-modifier onlyInEmergency { if (paused) _ }
+modifier stopInEmergency { if (!stopped) _ }
+modifier onlyInEmergency { if (stopped) _ }
 
-function deposit()
-pauseInEmergency() {
-  // some code
+function deposit() public
+stopInEmergency() {
+    // some code
 }
 
-function withdraw()
+function withdraw() public
 onlyInEmergency() {
     // some code
 }
