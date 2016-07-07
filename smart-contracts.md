@@ -552,40 +552,45 @@ Source: [Stack Overflow](http://ethereum.stackexchange.com/questions/2404/upgrad
 
 ### Circuit Breakers (Pause contract functionality)
 
-Circuit breakers stop contract code from being executed if certain conditions are met, and can be useful when new errors are discovered. They sometimes come at the cost of injecting some level of trust, though smart design can minimize the trust required. Pausing can protect ether and many other items (e.g., votes). A circuit breaker can also be combined with assert guards, automatically pausing the contract if certain assertions fail (e.g., sum of balances drops below contract ether amount).
+Circuit breakers can change which actions can be executed if certain conditions are met, and can be useful when new errors are discovered. For example, most actions may be suspended in a contract if a bug is discovered, and the only action now active is a withdrawal. They can come at the cost of injecting some level of trust, though smart design can minimize the trust required.
+
+A circuit breaker can also be combined with assert guards, automatically pausing the contract if certain assertions fail (e.g., sum of balances drops below contract ether amount).
 
 Example:
 
 ```
-bool private paused = false;
+bool private stopped = false;
 
-function public toggleContractActive()
+function toggleContractStopped() public
 isAdmin() {
-    // You can add an additional modifier that restricts pausing a contract to be based on another action, such as a vote of users
-    paused = !paused;
+    // You can add an additional modifier that restricts stopping a contract to be based on another action, such as a vote of users
+    stopped = !stopped;
 }
 
 modifier isAdmin() {
-  if(msg.sender != owner) {
-    throw;
-  }
-  _
+    if(msg.sender != owner) {
+        throw;
+    }
+    _
 }
 
-modifier isActive() {
-  if(paused) {
-    throw;
-  }
-  _
+modifier stopInEmergency { if (!stopped) _ }
+modifier onlyInEmergency { if (stopped) _ }
+
+function deposit() public
+stopInEmergency() {
+    // some code
 }
 
-function transfer()
-isActive() {
-  // some code
+function withdraw() public
+onlyInEmergency() {
+    // some code
 }
 ```
 
-### Speed Bumps/Rate Limiting (Delay contract actions)
+Source: [We Need Fault Tolerant Smart Contracts](https://medium.com/@peterborah/we-need-fault-tolerant-smart-contracts-ec1b56596dbc#.ju7t49u82) (Peter Borah)
+
+### Speed Bumps(Delay contract actions)
 
 Speed bumps slow down actions, so that if malicious actions occur, there is time to recover. For example, [The DAO](https://github.com/slockit/DAO/) required 27 days between a successful request to split the DAO and the ability to do so. This ensured the funds were kept within the contract, allowing a greater likelihood of recovery (other fundamental flaws made this functionality useless without a fork in Ethereum). Speed bumps can be combined with other techniques (like circuit breakers or root access) for maximal effectiveness.
 
