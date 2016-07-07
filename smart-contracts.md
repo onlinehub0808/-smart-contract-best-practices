@@ -79,7 +79,7 @@ Additionally, this is a list of community members who may write about security:
 
 External calls (including raw `call()`, `callcode()`, `delegatecall()`) can introduce several unexpected risks or errors. For calls to untrusted contracts, you may be executing malicious code in that contract _or_ any other contract that it depends upon. As such, it is strongly encouraged to minimize external calls. Over time, it is likely that a paradigm will develop that leads to safer external calls - but the risk currently is high.
 
-If you must make an external call, ensure that external calls are the last call in a function - and that you've finalized your contract state before the call is made. 
+If you must make an external call, ensure that external calls are the last call in a function - and that you've finalized your contract state before the call is made.
 
 When possible, avoid external Contract calls (eg `ExternalContract.doSomething()`), including raw `call()`, `callcode()`, `delegatecall()`.
 
@@ -498,6 +498,8 @@ Part of the solution is to carefully review the visibilities of all function and
 
 Designing your contract for unknown, often unknowable, failure scenarios is a key aspect of defensive programming, which aims to reduce the risk from newly discovered bugs. We list potential techniques you can use to mitigate many unknown failure scenarios.
 
+Be thoughtful about what techniques you incorporate, as certain techniques require more Solidity code, leading to a greater risk of bugs.
+
 ### Deployment
 
 Before moving the mainnet, it can be prudent to first deploy the code to the testnet. Here, the code can be tested. In order to incentivize attackers, one can offer bug bounties for finding exploits in the testnet code.
@@ -663,7 +665,46 @@ function withdraw() public {
 
 ### Assert Guards
 
-Akin to watching for unknown activities, an assert guard performs like a circuit breaker, but instead focuses on scenarios where an attacker can force a set of tests to fail. This however, does mean that the tests have to be written in Solidity as well, and assumes that tests are bug free as well. If an assert failure is triggers, the developers are allowed back in to upgrade the code, and only in those scenarios.
+An assert guard triggers when certain warning signals are detected - such as an invariant property changing. For example, the token to ether issuance ratio may be fixed, and so you can trigger a warning if this ratio ever changes. Assert guards can be combined with other techniques, to pause the contract and allow upgrades when it triggered.
+
+
+The following example reverts transactions if the ratio of ether to total number of tokens changes:
+
+```
+contract TokenWithInvariants {
+    mapping(address => uint) public balanceOf;
+    uint public totalSupply;
+
+    modifier checkInvariants {
+        _
+        if (this.balance < totalSupply) throw;
+    }
+
+    function deposit(uint amount) public checkInvariants {
+        // intentionally vulnerable
+        balanceOf[msg.sender] += amount;
+        totalSupply += amount;
+    }
+
+    function transfer(address to, uint value) public checkInvariants {
+        if (balanceOf[msg.sender] >= value) {
+            balanceOf[to] += value;
+            balanceOf[msg.sender] -= value;
+        }
+    }
+
+    function withdraw() public checkInvariants {
+        // intentionally vulnerable
+        uint balance = balanceOf[msg.sender];
+        if (msg.sender.call.value(balance)()) {
+            totalSupply -= balance;
+            balanceOf[msg.sender] = 0;
+        }
+    }
+}
+```
+
+Source: [We Need Fault Tolerant Smart Contracts](https://medium.com/@peterborah/we-need-fault-tolerant-smart-contracts-ec1b56596dbc#.ju7t49u82) (Peter Borah)
 
 ### Contract Rollout
 
