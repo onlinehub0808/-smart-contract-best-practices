@@ -293,56 +293,104 @@ As you can see, the call depth attack can be a malicious attack on a contract fo
 
 ### Reentrant Attacks
 
-Allowing contracts to call other contracts is one of the amazing benefits of Ethereum. It allows for emergent behaviour to occur across code. It is a powerful tool to easily attach additional functionality to existing smart contract ecosystems, but could open up malicious attacks. One of these are reentrant attacks: allowing a contract that is called to reenter the contract.
+A key benefit of Ethereum is the ability for one contract to call another - but this also can introduce risks, especially when you don't know exactly what the external call will do. Reentrant attacks, which allow a function to be called in a contract when a function in that contract is running, are one example of ths. This can occur when the same function s called again, or when another function that shares state with the previously called function is called.
 
-The more complicated issues with external calls (Contract OR raw calls) comes in when one does not know what the other contract might do when it is triggered. This can cause reentrant attacks, which can be separated into a recursive & unexpected state manipulation attack. These can be combined, which is what happened in the DAO hack.
+(The DAO hack combined both these attacks)
 
-### Recursive Reentrant Attack
+#### Recursive Reentrant Attack
 
-This attack occurs when the state has not been properly set before the external call occurs in a function. The attacker can reenter and call the function again, being to recursively call a piece of code, whilst it was expected that they could only do it once. They can only recursively call until the gas limit has been reached or before the call depth is reached.
+This attack occurs when the state has not been properly set before the external call in a function. The attacker can reenter and call the function again, even though the programmer never intended for this to happen. For example, you can withdraw money and recursively call the withdraw again, as the balance may only be updated at the end of the `withdraw` function. The attacker can recursively call until the gas limit has been reached or before the call depth is reached.
 
-This is particularly problematic in the case where it is not known that something like address.call.value()() to send ether, can trigger a fallback function. However, this is not just limited to a fallback function. It can happen with any external (Contract or raw).
 
-((code snippet))
 
-To protect against recursive reentry, the function needs to set the state such that if the function is called again in the same transaction, it wouldn’t continue to execute.
+Example:
 
-### Unexpected State Manipulation Reentrant Attack
-
-Unexpected state manipulation reentrant attack can occur when another function G in the contract shares the state of the current calling function F.
-
-So, let’s imagine an attacker starts off by calling function F. It has an external call in it, which the attacker then uses to call function G. Since F & G share state, calling G, can manipulate the behaviour in F. By the time F is finished, the attacker might have manipulated state by calling G without function F being aware of it. This is one of the attacks that was done on the DAO. When splitting function was called, right at the end (after the external call), the token balances were zeroed out. However, before that was done, the attacker reentered and transfer out his balance to another address, basically then letting the split function zero out an account that already has zero funds in it. This allowed the attacker to again call the splitting function in multiple transactions, as long as he kept transferring the tokens around before the final split.
-
-((code snippet))
-
-To protect against this, the recommendation is again to make sure that any state changes that are to be applied needs to happen BEFORE the attacker can come in and manipulate the state.
-
-If there are more than 2 functions that share the state, it can be seen that an attacker can potentially wreak massive havoc.  Whether an attacker is actually able to gain financially from an attack, is a separate question from an attacker rendering a contract unusable by abusing its state.
-
-Functions that do not share any state, are safe from this attack (even if state changes happen after the external call). It is not generally a safe pattern, so it is still recommended to do state changes before doing any external calls even if no functions share states in your contract.
-
-A non-example? ((insert here))
 ```
-contract ReentrantSafe {
-    uint fState;
-    uint gState;
+function getBalance(address user) constant returns(uint) {
+    return userBalances[user];
+}
 
-    f()  // only changes fState
-    g() // only changes gState
+function addToBalance() {
+    userBalances[msg.sender] += msg.amount;
+}
+
+function withdrawBalance() {
+    amountToWithdraw = userBalances[msg.sender];
+    if (!(msg.sender.call.value(amountToWithdraw)())) { throw; } // the ether is sent without zeroing out the user's balance
+    userBalances[msg.sender] = 0;
+}
+```
+In the DAO hack, this occurred when the fallback function was called by `address.call.value()()`, but can occur for any external call.
+
+To protect against recursive reentry, the function needs to set the state such that if the function is called again in the same transaction, it won’t continue to execute.
+
+Source: [Race to Empty is the Real Deal](http://vessenes.com/more-ethereum-attacks-race-to-empty-is-the-real-deal/) (Peter Vessenes)
+
+#### Unexpected State Manipulation Reentrant Attack
+
+This attack occurs when a function expects a certain state, but another contract function alters this state, while the original function is still running. A malicious party starts the first function, then calls the second function before the first function completes.
+
+In [The DAO](https://github.com/slockit/DAO), the splitting function zeroed out token balances. However, before that was complete, the attacker reentered and transfered out his/her balance to another address, meaning the split function zeroed out an account that already had zero funds. The attacker could then call the splitting function in multiple transactions, as long as s/he kept transferring the tokens around before the final split.
+
+```
+TODO: Add snippet
+```
+
+If external functions (and the functions they call) share the same state, an attacker can cause substantial damage. Functions that do not share any state, are safe from this attack (even if state changes happen after the external call). This is not generally a safe pattern, so it is still recommended to make state changes before any external calls, even if no functions share state in your contract.
+
+To mitigate this attack, you should:
+
+- Always check the result of a contract call, even when using `send()` (don't ever assume things went well)
+- Only make external calls at the end of functions, once state has been set
+
+You can alternatively ensure that functions do not modify the same state variables:
+
+```
+contract StateManipulationReentrantSafe {
+  uint fState;
+  uint gState;
+
+  f()  // only changes fState
+  g() // only changes gState
 }
 ```
 
-In general, to protect against reentry attacks:
+Also, you can use a [mutex](https://en.wikipedia.org/wiki/Mutual_exclusion) (often used in concurrent programming) where you lock certain variables:
 
-We recommend that external calls (of any sort) should be made at the end of function calls. If it can’t be done, extreme care needs to be taken to make sure that the functions do not share state that can be manipulated by the attacker before proceeding onwards.
-In general, for both reentry attacks, the easiest fix is to make sure that you only do external calls as the last action in a function.
+```
+// Note: This is a rudimentary example, and mutexes are particularly useful where there is substantial logic and/or shared state
+mapping (address => uint) private balances;
+bool private lockBalances;
 
-If one has an expectation of what type of computations will be done in an external call, to limit the gas appropriately (and not forwarding all the gas by default). This however limits the potential for any emergent useful use cases, so use wisely.
+function deposit() public returns (bool) {
+    if (!lockBalances) {
+	lockBalances = true;
+	balances[msg.sender] += msg.value;
+	lockBalances = false;
+        return true;
+    }
+    throw;
+}
 
-To summarise the protection against external call attacks:
-- Always make sure to check the result of the call, even when using send(), or even Contract calls. Under no assumption should it be expected that everything went exactly as planned.
-- Move external calls to the end of functions.
-If this can’t be done, make extremely sure that state manipulation across functions won’t be possible.
+function withdraw(uint amount) public returns (bool) {
+    if (!lockBalances && amount > 0 && balances[msg.sender] >= amount) {
+        lockBalances = true;
+        balances[msg.sender] -= amount;
+
+        if (!msg.sender.send(amount)) {
+            throw;
+        }
+        lockBalances = false;
+        return true;
+    }
+
+    throw;
+}
+```
+
+Mutexes have their own disadvantages with the potential for deadlocks and reduced throughput - so choose the approach that works best for your use case and text extensively.
+
+<a name="timestamp-dependence"></a>
 
 ### DoS with Block Gas Limit
 
