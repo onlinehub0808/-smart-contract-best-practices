@@ -139,42 +139,7 @@ In this auction, an attacker can [reject payments](https://solidity.readthedocs.
 the highest bidder. Any resource that is owned by the highest bidder, will permanently be owned by the attacker.
 This is an example where it should be the responsibility of the recipient to accept payment.
 
-```
-// bad
-contract auction {
-    address highestBidder;
-    uint highestBid;
-
-    function bid() {
-        if (msg.value < highestBid) throw;
-
-        if (highestBidder != 0) {
-            if (!highestBidder.send(highestBid)) {  // a malicious highestBidder can always cause this to fail
-                throw;
-            }
-        }
-
-       highestBidder = msg.sender;
-       highestBid = msg.value;
-    }
-}
-
-// good
-contract auction {
-    address highestBidder;
-    uint highestBid;
-
-    function bid() {
-        if (msg.value < highestBid) throw;
-
-        if (highestBidder != 0) {
-            highestBidder.send(highestBid); // responsibility of the highestBidder to accept payment
-            highestBidder = msg.sender;
-            highestBid = msg.value;
-        }
-    }
-}
-```
+((code snippet))
 
 Example 2: Let’s assume one wants to iterate through an array to pay users accordingly. In some circumstances, one wants to make sure that a contract call succeeding (like having paid the address). If not, one should throw. The issue in this scenario is that if one call fails, you are reverting the whole payout system, essentially forcing a deadlock. No one gets paid, because one address is forcing an error.
 
