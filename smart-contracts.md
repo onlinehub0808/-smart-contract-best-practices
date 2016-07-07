@@ -139,46 +139,37 @@ In this auction, an attacker can [reject payments](https://solidity.readthedocs.
 the highest bidder. Any resource that is owned by the highest bidder, will permanently be owned by the attacker.
 This is an example where it should be the responsibility of the recipient to accept payment.
 
+((code snippet))
+
+Example 2: Let’s assume one wants to iterate through an array to pay users accordingly. In some circumstances, one wants to make sure that a contract call succeeding (like having paid the address). If not, one should throw. The issue in this scenario is that if one call fails, you are reverting the whole payout system, essentially forcing a deadlock. No one gets paid, because one address is forcing an error.
+
 ```
+address[] private refundAddresses;
+mapping (address => uint) public refunds;
+
 // bad
-contract auction {
-    address highestBidder;
-    uint highestBid;
-
-    function bid() {
-        if (msg.value < highestBid) throw;
-
-        if (highestBidder != 0) {
-            if (!highestBidder.send(highestBid)) {  // a malicious highestBidder can always cause this to fail
-                throw;
-            }
+function refundAll() public {
+    for(uint x; x < refundAddresses.length; x++) { // arbitrary length iteration based on how many addresses participated
+        if(refundAddresses[x].send(refunds[refundAddresses[x]])) {
+            throw; // doubly bad, now a single failure on send will hold up all funds
         }
-
-       highestBidder = msg.sender;
-       highestBid = msg.value;
     }
 }
 
 // good
-contract auction {
-    address highestBidder;
-    uint highestBid;
+mapping (address => uint) private refunds;
 
-    function bid() {
-        if (msg.value < highestBid) throw;
+function getRefund() public {
+    if(refunds[msg.sender] > 0) {
+        uint amountToSend = refunds[msg.sender];
+        refunds[msg.sender] = 0;
 
-        if (highestBidder != 0) {
-            highestBidder.send(highestBid); // responsibility of the highestBidder to accept payment
-            highestBidder = msg.sender;
-            highestBid = msg.value;
+        if(!msg.sender.send(refunds[msg.sender])) {
+            refunds[msg.sender] = amountToSend;
         }
     }
 }
 ```
-
-Example 2: Let’s assume one wants to iterate through an array to pay users accordingly. In some circumstances, one wants to make sure that a contract call succeeding (like having paid the address). If not, one should throw. The issue in this scenario is that if one call fails, you are reverting the whole payout system, essentially forcing a deadlock. No one gets paid, because one address is forcing an error.
-
-((code snippet)) ((insert from https://blog.ethereum.org/2016/06/19/thinking-smart-contract-security/))
 
 The recommended pattern is that each user should withdraw their payout themselves.
 
@@ -588,18 +579,20 @@ Source: [Stack Overflow](http://ethereum.stackexchange.com/questions/2404/upgrad
 
 ### Circuit Breakers (Pause contract functionality)
 
-Circuit breakers stop execution if certain conditions are met, and can be useful when new errors are discovered. They sometimes come at the cost of injecting some level of trust on whoever triggers the circuit breaker, though smart design can minimize the trust required. Pausing can protect ether and many other items (e.g., votes). A circuit breaker can also be combined with assert guards, automatically pausing the contract if certain assertions fail (e.g., sum of balances drops below contract ether amount), rather than a user.
+Circuit breakers stop execution if certain conditions are met, and can be useful when new errors are discovered. For example, most actions may be suspended in a contract if a bug is discovered, and the only action now active is a withdrawal. They can come at the cost of injecting some level of trust, though smart design can minimize the trust required.
+
+A circuit breaker can also be combined with assert guards, automatically pausing the contract if certain assertions fail (e.g., sum of balances drops below contract ether amount).
 
 Example:
 
 ```
-bool private paused = false;
+bool private stopped = false;
 address private owner;
 
 function toggleContractActive() public
 isAdmin() {
-    // You can add an additional modifier that restricts pausing a contract to be based on another action, such as a vote of users
-    paused = !paused;
+    // You can add an additional modifier that restricts stopping a contract to be based on another action, such as a vote of users
+    stopped = !stopped;
 }
 
 modifier isAdmin() {
@@ -609,20 +602,23 @@ modifier isAdmin() {
     _
 }
 
-modifier isActive() {
-    if(paused) {
-        throw;
-    }
-    _
+modifier stopInEmergency { if (!stopped) _ }
+modifier onlyInEmergency { if (stopped) _ }
+
+function deposit() public
+stopInEmergency() {
+    // some code
 }
 
-function transfer() public
-isActive() {
+function withdraw() public
+onlyInEmergency() {
     // some code
 }
 ```
 
-### Speed Bumps/Rate Limiting (Delay contract actions)
+Source: [We Need Fault Tolerant Smart Contracts](https://medium.com/@peterborah/we-need-fault-tolerant-smart-contracts-ec1b56596dbc#.ju7t49u82) (Peter Borah)
+
+### Speed Bumps(Delay contract actions)
 
 Speed bumps slow down actions, so that if malicious actions occur, there is time to recover. For example, [The DAO](https://github.com/slockit/DAO/) required 27 days between a successful request to split the DAO and the ability to do so. This ensured the funds were kept within the contract, allowing a greater likelihood of recovery (other fundamental flaws made this functionality useless without a fork in Ethereum). Speed bumps can be combined with other techniques (like circuit breakers or root access) for maximal effectiveness.
 
@@ -662,6 +658,14 @@ function withdraw() public {
     }
 }
 ```
+
+### Rate Limiting
+
+Rate limiting halts or requires approval for substantial changes. For example, a depositor may only be allowed to withdraw a certain amount or percentage of total deposits over a certain time period (e.g., max 100 ether over 1 day) - additional withdrawals in that time period may fail or require approval of an administrator. Or the rate limit could be at the contract level, with only a certain amount of tokens issued by the contract over a time period.
+
+[Example](https://gist.github.com/PeterBorah/110c331dca7d23236f80e69c83a9d58c#file-circuitbreaker-sol)
+
+Source: [We Need Fault Tolerant Smart Contracts](https://medium.com/@peterborah/we-need-fault-tolerant-smart-contracts-ec1b56596dbc)
 
 ### Assert Guards
 
