@@ -85,11 +85,32 @@ When possible, avoid external Contract calls (eg `ExternalContract.doSomething()
 
 ### Safely using external calls
 
-It should be noted that external calls are potentially dangerous because they can always trigger code, even when using send(). send() can trigger the fallback function, for example. send() is usually more safe as it only has access to gas stipend of 2300 gas, which is insufficient for the send recipient to trigger any state changes (the intention of the 2300 gas stipend was to allow the recipient to register a log). Any external call is potentially vulnerable: especially call(), callcode() & delegatecall().
+There is an important difference in Solidity as to what happens with Contract calls (eg `ExternalContract.doSomething()`) vs raw calls (`address.call()`, `address.callcode()`, `address.delegatecall()`).  A raw call never throws an exception: it returns `false` if the call encounters an exception. Contract calls will automatically propagate a `throw` (vs a raw call). For example `ExternalContract.doSomething()` will also `throw` if `doSomething()` throws.
 
-There is a slight difference in Solidity as to what happens with Contract calls (ie ExternalContract.doSomething()) vs raw calls (address.send() or address.call()).  A raw call never throws an exception: it returns false if the call encounters an exception. Contract calls will automatically propagate a throw (vs a raw call). For example ExternalContract.doSomething() will also throw if doSomething() throws.
+The most important point is the same for both, whether using `ExternalContract.doSomething()` or `address.call()`, if `ExternalContract` is untrusted, assume that malicious code will execute.  Note that if you trust an `ExternalContract`, you also trust any contracts it calls, and that those call, are all non-malicious.  If any malicious contract exists in the call chain, the malicious contract can attack you (see [Reentrant Attacks](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#reentrant-attacks)).
 
-The most important point is the same for both, whether using ExternalContract.doSomething() or address.call(), if ExternalContract is untrusted, assume that malicious code will execute.  Note that if you trust an ExternalContract, you also trust any external contracts it calls, and that those call, are all non-malicious.  If any malicious contract exists in the call chain, the malicious contract can attack you (next section on Reentrant Attacks).
+### Use send(), avoid call.value()
+
+When sending Ether, use `someAddress.send()`.  Avoid `someAddress.call.value()()`.
+
+As noted above, external calls, such as `someAddress.call.value()()` are potentially dangerous because they always trigger code.  send() also triggers code, specifically the [fallback function](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#keep-fallback-functions-simple). send() is safe because it only has access to gas stipend of 2300 gas, which is insufficient for the send recipient to trigger any state changes (the intention of the 2300 gas stipend was to allow the recipient to log an event).
+
+```
+// bad
+someAddress.call.value(100)(); // this is doubly dangerous, as it will forward all remaining gas and doesn't check for result
+someAddress.call.value(100)(bytes4(sha3("deposit()")));
+
+// good
+if(!someAddress.send(100)) {
+    // Some failure code
+}
+
+if(!someAddress.deposit.value(100)) {
+    // Some failure code
+}
+
+```
+
 
 ### Always test if `.send` and other raw calls have succeeded
 
