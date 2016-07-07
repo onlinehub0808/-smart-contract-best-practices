@@ -487,27 +487,17 @@ Part of the solution is to carefully review the visibilities of all function and
 
 ## Software Engineering Techniques
 
-Designing your contract for unknown, often unknowable, failure scenarios is a key aspect of defensive programming, which aims to reduce the risk from newly discovered bugs. We list potential techniques you can use to mitigate many unknown failure scenarios.
+Designing your contract for unknown, often unknowable, failure scenarios is a key aspect of defensive programming, which aims to reduce the risk from newly discovered bugs. We list potential techniques you can use to mitigate many unknown failure scenarios - and many of these can be used together.
 
 Be thoughtful about what techniques you incorporate, as certain techniques require more Solidity code, leading to a greater risk of bugs.
 
-### Deployment
-
-Before moving the mainnet, it can be prudent to first deploy the code to the testnet. Here, the code can be tested. In order to incentivize attackers, one can offer bug bounties for finding exploits in the testnet code.
-
-When deploying on the main chain, one might want to the use the optimizer. This reduces the bytecode required and can sometimes be useful to fit large contracts into
-
-### On-Chain
-
-There should be the assumption that even if you used all the tools at hand, bugs could still slip in. Thus, one should be prepared for this, by using various on-chain mechanisms to either revert or replace faulty code.
-
 ### Permissioned Guard (changing code once deployed)
 
-Code will need to be changed if errors are discovered or if improvements need to be made - and there are various techniques to do this. The simplest is to have a registry contract that holds the address of the latest contract. A more seamless approach for contract users is to have a contract that forwards calls and data onto the latest version of the contract.
+Code will need to be changed if errors are discovered or if improvements need to be made. The simplest technique is to have a registry contract that holds the address of the latest contract. A more seamless approach for contract users is to have a contract that forwards calls and data onto the latest version of the contract.
 
 Whatever the technique, it's important to have modularization and good separation between components (data, logic) - so that code changes do not break functionality, orphan data, or require substantial costs to port.
 
-It's also critical to have a secure way for parties to upgrade the code - and code changes may be approved by a single trusted party, a group of members, or a vote of the full set of stakeholders. You may often combine a permissioned guard with a contract pause or lock, ensuring that activity does not occur while changes are being made - or after a contract is upgraded.
+It's also critical to have a secure way for parties to decide to upgrade the code - and code changes may be approved by a single trusted party, a group of members, or a vote of the full set of stakeholders. You may often combine a permissioned guard with a contract pause or lock, ensuring that activity does not occur while changes are being made - or after a contract is upgraded.
 
 **Example 1: Use a registry contract to store latest version of a contract**
 
@@ -530,7 +520,7 @@ contract SomeRegister {
         _
     }
 
-    function changeBackend(address newBackend)
+    function changeBackend(address newBackend) public
     onlyOwner()
     returns (bool)
     {
@@ -564,7 +554,7 @@ contract Relay {
         owner = msg.sender; // this owner may be another contract with multisig, not a single contract owner
     }
 
-    function changeContract(address newVersion)
+    function changeContract(address newVersion) public
     onlyOwner()
     {
         currentVersion = newVersion;
@@ -580,7 +570,7 @@ Source: [Stack Overflow](http://ethereum.stackexchange.com/questions/2404/upgrad
 
 ### Circuit Breakers (Pause contract functionality)
 
-Circuit breakers can change which actions can be executed if certain conditions are met, and can be useful when new errors are discovered. For example, most actions may be suspended in a contract if a bug is discovered, and the only action now active is a withdrawal. They can come at the cost of injecting some level of trust, though smart design can minimize the trust required.
+Circuit breakers stop execution if certain conditions are met, and can be useful when new errors are discovered. For example, most actions may be suspended in a contract if a bug is discovered, and the only action now active is a withdrawal. They can come at the cost of injecting some level of trust, though smart design can minimize the trust required.
 
 A circuit breaker can also be combined with assert guards, automatically pausing the contract if certain assertions fail (e.g., sum of balances drops below contract ether amount).
 
@@ -588,8 +578,9 @@ Example:
 
 ```
 bool private stopped = false;
+address private owner;
 
-function toggleContractStopped() public
+function toggleContractActive() public
 isAdmin() {
     // You can add an additional modifier that restricts stopping a contract to be based on another action, such as a vote of users
     stopped = !stopped;
