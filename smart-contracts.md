@@ -271,6 +271,12 @@ uint x = (5 * multiplier) / 2;
 
 Source:
 
+### Beware division by zero
+
+Currently, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not
+`throw` an exception when a number is divided by zero.
+
+
 ### Differentiate functions and events
 
 Favor capitalization and a prefix in front of events (we suggest *Log*), to prevent the risk of confusion between functions and events. For functions, always start with a lowercase letter, except for the constructor.
