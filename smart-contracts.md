@@ -301,25 +301,26 @@ A key benefit of Ethereum is the ability for one contract to call another - but 
 
 This attack occurs when the state has not been properly set before the external call in a function. The attacker can reenter and call the function again, even though the programmer never intended for this to happen. For example, you can withdraw money and recursively call the withdraw again, as the balance may only be updated at the end of the `withdraw` function. The attacker can recursively call until the gas limit has been reached or before the call depth is reached.
 
-
-
 Example:
 
 ```
+mapping (address => uint) private userBalances;
+
 function getBalance(address user) constant returns(uint) {
     return userBalances[user];
 }
 
-function addToBalance() {
-    userBalances[msg.sender] += msg.amount;
+function addToBalance() public {
+    userBalances[msg.sender] += msg.value;
 }
 
-function withdrawBalance() {
-    amountToWithdraw = userBalances[msg.sender];
+function withdrawBalance() public {
+    uint amountToWithdraw = userBalances[msg.sender];
     if (!(msg.sender.call.value(amountToWithdraw)())) { throw; } // the ether is sent without zeroing out the user's balance
     userBalances[msg.sender] = 0;
 }
 ```
+
 In the DAO hack, this occurred when the fallback function was called by `address.call.value()()`, but can occur for any external call.
 
 To protect against recursive reentry, the function needs to set the state such that if the function is called again in the same transaction, it won’t continue to execute.
@@ -347,11 +348,11 @@ You can alternatively ensure that functions do not modify the same state variabl
 
 ```
 contract StateManipulationReentrantSafe {
-  uint fState;
-  uint gState;
+    uint fState;
+    uint gState;
 
-  f()  // only changes fState
-  g() // only changes gState
+    f()  // only changes fState
+    g() // only changes gState
 }
 ```
 
