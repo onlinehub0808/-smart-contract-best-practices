@@ -79,7 +79,7 @@ Additionally, this is a list of community members who may write about security:
 
 External calls (including raw `call()`, `callcode()`, `delegatecall()`) can introduce several unexpected risks or errors. For calls to untrusted contracts, you may be executing malicious code in that contract _or_ any other contract that it depends upon. As such, it is strongly encouraged to minimize external calls. Over time, it is likely that a paradigm will develop that leads to safer external calls - but the risk currently is high.
 
-If you must make an external call, ensure that external calls are the last call in a function - and that you've finalized your contract state before the call is made. 
+If you must make an external call, ensure that external calls are the last call in a function - and that you've finalized your contract state before the call is made.
 
 When possible, avoid external Contract calls (eg `ExternalContract.doSomething()`), including raw `call()`, `callcode()`, `delegatecall()`.
 
@@ -587,7 +587,9 @@ Source: [Stack Overflow](http://ethereum.stackexchange.com/questions/2404/upgrad
 
 ### Circuit Breakers (Pause contract functionality)
 
-Circuit breakers stop contract code from being executed if certain conditions are met, and can be useful when new errors are discovered. They sometimes come at the cost of injecting some level of trust, though smart design can minimize the trust required. Pausing can protect ether and many other items (e.g., votes). A circuit breaker can also be combined with assert guards, automatically pausing the contract if certain assertions fail (e.g., sum of balances drops below contract ether amount).
+Circuit breakers can change which actions can be executed if certain conditions are met, and can be useful when new errors are discovered. For example, most actions may be suspended in a contract if a bug is discovered, and the only action now active is a withdrawal. They can come at the cost of injecting some level of trust, though smart design can minimize the trust required.
+
+A circuit breaker can also be combined with assert guards, automatically pausing the contract if certain assertions fail (e.g., sum of balances drops below contract ether amount).
 
 Example:
 
@@ -607,20 +609,23 @@ modifier isAdmin() {
   _
 }
 
-modifier isActive() {
-  if(paused) {
-    throw;
-  }
-  _
+modifier pauseInEmergency { if (!paused) _ }
+modifier onlyInEmergency { if (paused) _ }
+
+function deposit()
+pauseInEmergency() {
+  // some code
 }
 
-function transfer()
-isActive() {
-  // some code
+function withdraw()
+onlyInEmergency() {
+    // some code
 }
 ```
 
-### Speed Bumps/Rate Limiting (Delay contract actions)
+Source: [We Need Fault Tolerant Smart Contracts](https://medium.com/@peterborah/we-need-fault-tolerant-smart-contracts-ec1b56596dbc#.ju7t49u82) (Peter Borah)
+
+### Speed Bumps(Delay contract actions)
 
 Speed bumps slow down actions, so that if malicious actions occur, there is time to recover. For example, [The DAO](https://github.com/slockit/DAO/) required 27 days between a successful request to split the DAO and the ability to do so. This ensured the funds were kept within the contract, allowing a greater likelihood of recovery (other fundamental flaws made this functionality useless without a fork in Ethereum). Speed bumps can be combined with other techniques (like circuit breakers or root access) for maximal effectiveness.
 
