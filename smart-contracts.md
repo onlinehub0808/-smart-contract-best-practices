@@ -120,39 +120,60 @@ Let’s assume one wants to iterate through an array to pay users accordingly. I
 
 The recommended pattern is that each user should withdraw their payout themselves.
 
-### Design Patterns to avoid external calls: Push vs Pull & Asynchrony
+### Favor *pull* payments over *push* payments
 
-The more ideal scenario is to try and avoid external calls where possible. This is particularly apparent when ether needs to be sent around, across contracts. It’s a potential cascade of calls.
+As noted, payments can fail for multiple reasons - including if the call stack exceeds 1024 or a failure on externally. To prevent payments failing, create a balance in an action that can be separately withdrawn by the external party using another action. This requires two actions on external party's part - a request to withdraw and a withdrawal - but reduces a number of potential errors.
 
-
-A recommendation around this is to move to a pull vs push system. For example, let’s say a DAO needs to be paid out. The funds are sent to that address. Instead of in the same transaction, sending & splitting the funds when it reaches the DAO, the DAO simply logs that it received funds. Now, each participant who was supposed to receive must go and withdraw their funds from the DAO when they want to. So, now the call stack is reduced and attack space is reduced.
-
-Generally, although asynchrony sometimes requires multiple transactions, it is a safer pattern in general, because you reduce the potential attack space. In the future of Ethereum, with lower block times & potentially having to interact across shards, asynchrony might become a more needed pattern besides just for security concerns.
-
-For example, here's a withdrawRefund example in an auction contract.
+In the future, with lower block times and having to interact across shards, this asynchronous payment might become a more important pattern for reasons other than security.
 
 ```
+// bad
+contract auction {
+    address highestBidder;
+    uint highestBid;
+
+    function bid() {
+        if (msg.value < highestBid) throw;
+
+        if (highestBidder != 0) {
+            if (!highestBidder.send(highestBid)) { // if this call consistently fails, no one else can bid
+                throw;
+            }
+        }
+
+       highestBidder = msg.sender;
+       highestBid = msg.value;
+    }
+}
+
+// good
 contract auction {
     address highestBidder;
     uint highestBid;
     mapping(address => uint) refunds;
 
     function bid() {
-	if (msg.value < highestBid) throw;
-	if (highestBidder != 0)
-	    refunds[highestBidder] += highestBid;
-	highestBidder = msg.sender;
-	highestBid = msg.value;
+        if (msg.value < highestBid) throw;
+
+        if (highestBidder != 0) {
+            refunds[highestBidder] += highestBid; // record the refund that this user can claim
+        }
+
+        highestBidder = msg.sender;
+        highestBid = msg.value;
     }
 
     function withdrawRefund() {
-	uint refund = refunds[msg.sender];
-	refunds[msg.sender] = 0;
-	if (!msg.sender.send(refund))
-	   refunds[msg.sender] = refund;
-      }
+        uint refund = refunds[msg.sender];
+        refunds[msg.sender] = 0;
+        if (!msg.sender.send(refund)) {
+            refunds[msg.sender] = refund;
+        }
+    }
 }
 ```
+
+Source: [Smart Contract Security](https://blog.ethereum.org/2016/06/10/smart-contract-security/)
 
 ### Keep fallback functions simple
 
