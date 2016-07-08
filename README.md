@@ -119,7 +119,7 @@ ExternalContract(someAddress).deposit.value(100); // raw call() is avoided, so i
 
 `send()` and raw external calls can fail (e.g., when the call depth of 1024 is breached), so you should always test if it succeeded. If you don't test the result, it's recommended to note in a comment.
 
-If you throw on a `send()` failure, be careful as you may create a [denial-of-service](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#dos-with-unexpected-throw) vulnerability.
+If you throw on a `send()` failure, be careful as you may create a [denial-of-service](https://github.com/ConsenSys/smart-contract-best-practices#dos-with-unexpected-throw) vulnerability.
 
 ```
 // bad
@@ -295,11 +295,11 @@ Bank.withdraw(100); // external but trusted bank contract maintained by XYZ Corp
 
 <a name="call-depth-attack"></a>
 
-### Call depth attack (or *Call stack attack*)
+### Call Depth Attack
 
-Even if it is known that the likelihood of failure in a sub-execution is possible, this can be forced to happen through a call depth attack. There’s a limit to how deep the call stack can become in one transaction (limit of 1024). Thus an attacker can build up a chain of calls and then call a contract, forcing subsequent calls to fail even if enough gas is available. It has to be a call, within a call, within a call, etc.
+Even if it is known that the likelihood of failure in a sub-execution is possible, this can be forced to happen through a Call Depth Attack. There’s a limit to how deep the message-call/contract-creation stack can become in one transaction (limit of 1024). Thus, an attacker can build up a chain of calls and then call a contract, forcing subsequent calls to fail even if enough gas is available. It has to be a call, within a call, within a call, etc.  This is sometimes called the Call stack attack, but as the EVM is stack-based and operates on a stack (that is different from the message-call/contract-creation stack), ambiguity is avoided by simply calling this a Call Depth Attack.
 
-For example, looking at the auction code from previously:
+Example auction code from above:
 
 ```
 // DO NOT USE. THIS IS VULNERABLE.
