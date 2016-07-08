@@ -49,7 +49,7 @@ contract SomeRegister {
 }
 ```
 
-**Example 2: Use a `DELEGATECALL` to forward data and calls**
+**Example 2: [Use a `DELEGATECALL`](http://ethereum.stackexchange.com/questions/2404/upgradeable-contracts) to forward data and calls**
 
 ```
 contract Relay {
@@ -79,8 +79,6 @@ contract Relay {
     }
 }
 ```
-
-Source: [Stack Overflow](http://ethereum.stackexchange.com/questions/2404/upgradeable-contracts)
 
 ### Circuit Breakers (Pause contract functionality)
 
@@ -121,9 +119,7 @@ onlyInEmergency() {
 }
 ```
 
-Source: [We Need Fault Tolerant Smart Contracts](https://medium.com/@peterborah/we-need-fault-tolerant-smart-contracts-ec1b56596dbc#.ju7t49u82) (Peter Borah)
-
-### Speed Bumps(Delay contract actions)
+### Speed Bumps (Delay contract actions)
 
 Speed bumps slow down actions, so that if malicious actions occur, there is time to recover. For example, [The DAO](https://github.com/slockit/DAO/) required 27 days between a successful request to split the DAO and the ability to do so. This ensured the funds were kept within the contract, increasing the likelihood of recovery (other fundamental flaws made this functionality useless without a fork in Ethereum). Speed bumps can be combined with other techniques (like circuit breakers or root access) for maximal effectiveness.
 
@@ -170,8 +166,6 @@ Rate limiting halts or requires approval for substantial changes. For example, a
 
 [Example](https://gist.github.com/PeterBorah/110c331dca7d23236f80e69c83a9d58c#file-circuitbreaker-sol)
 
-Source: [We Need Fault Tolerant Smart Contracts](https://medium.com/@peterborah/we-need-fault-tolerant-smart-contracts-ec1b56596dbc)
-
 ### Assert Guards
 
 An assert guard triggers when an assertion fails - such as an invariant property changing. For example, the token to ether issuance ratio, in a token issuance contract, may be fixed. You can verify that this is the case at all times with an assertion. Assert guards should often be combined with other techniques, such as pausing the contract and allowing upgrades.
@@ -213,8 +207,6 @@ contract TokenWithInvariants {
     }
 }
 ```
-
-Source: [We Need Fault Tolerant Smart Contracts](https://medium.com/@peterborah/we-need-fault-tolerant-smart-contracts-ec1b56596dbc#.ju7t49u82) (Peter Borah)
 
 ### Contract Rollout
 
