@@ -44,7 +44,7 @@ ExternalContract(someAddress).deposit.value(100); // raw call() is avoided, so i
 
 `send()` and raw external calls can fail (e.g., when the call depth of 1024 is breached), so you should always test if it succeeded. If you don't test the result, it's recommended to note in a comment.
 
-If you throw on a `send()` failure, be careful as you may create a [denial-of-service](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#dos-with-unexpected-throw) vulnerability.
+If you throw on a `send()` failure, be careful as you may create a [denial-of-service](https://github.com/ConsenSys/smart-contract-best-practices#dos-with-unexpected-throw) vulnerability.
 
 ```
 // bad
