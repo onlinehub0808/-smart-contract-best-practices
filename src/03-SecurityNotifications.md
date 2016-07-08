@@ -4,6 +4,7 @@
 This is a list of resources that will often highlight discovered exploits in Ethereum or Solidity:
 
 - [Ethereum Blog](https://blog.ethereum.org/): The official Ethereum blog
+  - [Ethereum Blog - Security only](https://blog.ethereum.org/category/security/): All blog posts that are tagged *Security*
 - [Ethereum Gitter](https://gitter.im/orgs/ethereum/rooms) chat rooms
   - [Solidity](https://gitter.im/ethereum/solidity)
   - [Go-Ethereum](https://gitter.im/ethereum/go-ethereum)

@@ -26,11 +26,12 @@ Write for an intermediate Ethereum developer, they know the basics of Solidity p
 #### Recommendations Section
 
 - Always favor a declarative tip starting with a verb for the section title
-- Include an example of good and bad examples
+- Include good and bad examples, when possible
+- Ensure each subsection has an anchor tag for future hyperlinking
 
 #### Attacks Section
 
 - Provide an example - then point to a recommendation for the solution in the relevant section of the doc
 - List first/most visible attack, where possible
-
+- Ensure each subsection has an anchor tag for future hyperlinking
 
