@@ -33,7 +33,7 @@ contract auction {
 }
 ```
 
-The send() can fail if the call depth is too large, causing ether to not be sent. However it would be marked as if it did send. As previously shown, the external call should be checked for errors. This example, the state would just revert to the previous state.
+The send() can fail if the call depth is too large, causing ether to not be sent. However it would be marked as if it did send. As previously shown, the external call should be checked for errors. This example, the state would just revert to the previous state:
 
 ```
 contract auction {
@@ -41,20 +41,22 @@ contract auction {
     uint highestBid;
     mapping(address => uint) refunds;
 
-    function bid() {
+    function bid() external {
         if (msg.value < highestBid) throw;
-        if (highestBidder != 0)
+        if (highestBidder != 0) {
 	    refunds[highestBidder] += highestBid;
+	}
 
         highestBidder = msg.sender;
         highestBid = msg.value;
     }
 
-    function withdrawRefund() {
+    function withdrawRefund() external {
 	uint refund = refunds[msg.sender];
 	refunds[msg.sender] = 0;
-	if (!msg.sender.send(refund))
+	if (!msg.sender.send(refund)) {
 	   refunds[msg.sender] = refund;
+	}
     }
 }
 ```
