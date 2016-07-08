@@ -22,9 +22,9 @@ When launching a contract that will have substantial funds or is required to be 
 
 **Procedures**
 
-- Notification process if bug is discovered
+- Action plan in case a bug is discovered (e.g., emergency options, public notification process, etc.)
 - Wind down process if something goes wrong (e.g., funders will get percentage of your balance before attack, from remaining funds)
-- If hacker bounty*provided for discovered bugs, responsible disclosure policy, where to report, etc
+- Responsible disclosure policy (e.g., where to report bugs found, the rules of any bug bounty program)
 - Recourse in case of failure (e.g., insurance, penalty fund, no recourse)
 
 **Contact Information**
