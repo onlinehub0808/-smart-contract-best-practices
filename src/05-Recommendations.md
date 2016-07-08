@@ -124,12 +124,12 @@ Fallback functions are the default functions called when a contract is sent a me
 
 ```
 // bad
-function () { balances[msg.sender] += msg.value; }
+function() { balances[msg.sender] += msg.value; }
 
 // good
 function() { throw; }
 function() { LogDepositReceived(msg.sender); }
-function deposit() { balances[msg.sender] += msg.value; }
+function deposit() external { balances[msg.sender] += msg.value; }
 ```
 
 <a name="mark-visibility"></a>
@@ -207,5 +207,5 @@ function transfer() {}
 
 // good
 event LogTransfer() {}
-function transfer() {}
+function transfer() external {}
 ```
