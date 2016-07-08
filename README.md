@@ -170,7 +170,7 @@ contract auction {
     uint highestBid;
     mapping(address => uint) refunds;
 
-    function bid() {
+    function bid() external {
         if (msg.value < highestBid) throw;
 
         if (highestBidder != 0) {
@@ -181,7 +181,7 @@ contract auction {
         highestBid = msg.value;
     }
 
-    function withdrawRefund() {
+    function withdrawRefund() external {
         uint refund = refunds[msg.sender];
         refunds[msg.sender] = 0;
         if (!msg.sender.send(refund)) {
@@ -191,8 +191,6 @@ contract auction {
 }
 ```
 
-Source: [Smart Contract Security](https://blog.ethereum.org/2016/06/10/smart-contract-security/)
-
 <a name="keep-fallback-functions-simple"></a>
 
 ### Keep fallback functions simple
@@ -201,57 +199,13 @@ Fallback functions are the default functions called when a contract is sent a me
 
 ```
 // bad
-function () { balances[msg.sender] += msg.value; }
+function() { balances[msg.sender] += msg.value; }
 
 // good
 function() { throw; }
-function() { LogSomeEvent(); }
-function deposit() { balances[msg.sender] += msg.value; }
+function() { LogDepositReceived(msg.sender); }
+function deposit() external { balances[msg.sender] += msg.value; }
 ```
-
-<a name="beware-rounding-with-integer-division"></a>
-
-### Beware rounding with integer division
-
-All integer divison rounds down to the nearest integer - use a multiplier to keep track, or use the future fixed point data types.
-
-```
-// bad
-uint x = 5 / 2; // Result is 2, all integer divison rounds DOWN to the nearest integer
-
-// good
-uint multiplier = 10;
-uint x = (5 * multiplier) / 2;
-
-// in the near future, Solidity will have fixed point data types like fixed, ufixed
-```
-
-Source:
-
-<a name="beware-division-by-zero"></a>
-
-### Beware division by zero
-
-Currently, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not
-`throw` an exception when a number is divided by zero.
-
-<a name="differentiate-functions-events"></a>
-
-### Differentiate functions and events
-
-Favor capitalization and a prefix in front of events (we suggest *Log*), to prevent the risk of confusion between functions and events. For functions, always start with a lowercase letter, except for the constructor.
-
-```
-// bad
-event transferHappened() {}
-function Transfer() {}
-
-// good
-event LogTransfer() {}
-function transfer() {}
-```
-
-Source: [Deconstructing the DAO Attack: A Brief Code Tour](http://vessenes.com/deconstructing-thedao-attack-a-brief-code-tour/) (Peter Vessenes)
 
 <a name="mark-visibility"></a>
 
@@ -291,6 +245,46 @@ ExternalBank.withdraw(100); // untrusted external call
 Bank.withdraw(100); // external but trusted bank contract maintained by XYZ Corp
 ```
 
+<a name="beware-rounding-with-integer-division"></a>
+
+### Beware rounding with integer division
+
+All integer divison rounds down to the nearest integer - use a multiplier to keep track, or use the future fixed point data types.
+
+```
+// bad
+uint x = 5 / 2; // Result is 2, all integer divison rounds DOWN to the nearest integer
+
+// good
+uint multiplier = 10;
+uint x = (5 * multiplier) / 2;
+
+// in the near future, Solidity will have fixed point data types like fixed, ufixed
+```
+
+<a name="beware-division-by-zero"></a>
+
+### Beware division by zero
+
+Currently, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not
+`throw` an exception when a number is divided by zero.
+
+<a name="differentiate-functions-events"></a>
+
+### Differentiate functions and events
+
+Favor capitalization and a prefix in front of events (we suggest *Log*), to prevent the risk of confusion between functions and events. For functions, always start with a lowercase letter, except for the constructor.
+
+```
+// bad
+event Transfer() {}
+function transfer() {}
+
+// good
+event LogTransfer() {}
+function transfer() external {}
+```
+
 ## Known Attacks
 
 <a name="call-depth-attack"></a>
@@ -325,7 +319,7 @@ contract auction {
 }
 ```
 
-The send() can fail if the call depth is too large, causing ether to not be sent. However it would be marked as if it did send. As previously shown, the external call should be checked for errors. This example, the state would just revert to the previous state.
+The send() can fail if the call depth is too large, causing ether to not be sent. However it would be marked as if it did send. As previously shown, the external call should be checked for errors. This example, the state would just revert to the previous state:
 
 ```
 contract auction {
@@ -333,20 +327,22 @@ contract auction {
     uint highestBid;
     mapping(address => uint) refunds;
 
-    function bid() {
+    function bid() external {
         if (msg.value < highestBid) throw;
-        if (highestBidder != 0)
+        if (highestBidder != 0) {
 	    refunds[highestBidder] += highestBid;
+	}
 
         highestBidder = msg.sender;
         highestBid = msg.value;
     }
 
-    function withdrawRefund() {
+    function withdrawRefund() external {
 	uint refund = refunds[msg.sender];
 	refunds[msg.sender] = 0;
-	if (!msg.sender.send(refund))
+	if (!msg.sender.send(refund)) {
 	   refunds[msg.sender] = refund;
+	}
     }
 }
 ```
