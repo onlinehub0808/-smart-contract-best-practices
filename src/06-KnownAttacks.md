@@ -3,11 +3,11 @@
 
 <a name="call-depth-attack"></a>
 
-### Call depth attack (or *Call stack attack*)
+### Call Depth Attack
 
-Even if it is known that the likelihood of failure in a sub-execution is possible, this can be forced to happen through a call depth attack. There’s a limit to how deep the call stack can become in one transaction (limit of 1024). Thus an attacker can build up a chain of calls and then call a contract, forcing subsequent calls to fail even if enough gas is available. It has to be a call, within a call, within a call, etc.
+Even if it is known that the likelihood of failure in a sub-execution is possible, this can be forced to happen through a Call Depth Attack. There’s a limit to how deep the message-call/contract-creation stack can become in one transaction (limit of 1024). Thus, an attacker can build up a chain of calls and then call a contract, forcing subsequent calls to fail even if enough gas is available. It has to be a call, within a call, within a call, etc.  This is sometimes called the Call stack attack, but as the EVM is stack-based and operates on a stack (that is different from the message-call/contract-creation stack), ambiguity is avoided by simply calling this a Call Depth Attack.
 
-For example, looking at the auction code from previously:
+Example auction code from above:
 
 ```
 // DO NOT USE. THIS IS VULNERABLE.
