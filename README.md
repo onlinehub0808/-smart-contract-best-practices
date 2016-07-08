@@ -670,11 +670,6 @@ onlyInEmergency() {
 }
 ```
 
-<<<<<<< HEAD
-Source: [We Need Fault Tolerant Smart Contracts](https://medium.com/@peterborah/we-need-fault-tolerant-smart-contracts-ec1b56596dbc#.ju7t49u82) (Peter Borah)
-
-=======
->>>>>>> 9c0b7981bbf49afca6a68e5fc07944638355bc3c
 ### Speed Bumps (Delay contract actions)
 
 Speed bumps slow down actions, so that if malicious actions occur, there is time to recover. For example, [The DAO](https://github.com/slockit/DAO/) required 27 days between a successful request to split the DAO and the ability to do so. This ensured the funds were kept within the contract, increasing the likelihood of recovery (other fundamental flaws made this functionality useless without a fork in Ethereum). Speed bumps can be combined with other techniques (like circuit breakers or root access) for maximal effectiveness.
