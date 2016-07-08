@@ -49,30 +49,23 @@ As a result, beyond protecting yourself against currently known hacks, it's crit
 
 This is a list of resources that will often highlight discovered exploits in Ethereum or Solidity:
 
+- [Ethereum Blog](https://blog.ethereum.org/): The official Ethereum blog
 - [Ethereum Gitter](https://gitter.im/orgs/ethereum/rooms) chat rooms
   - [Solidity](https://gitter.im/ethereum/solidity)
   - [Go-Ethereum](https://gitter.im/ethereum/go-ethereum)
   - [CPP-Ethereum](https://gitter.im/ethereum/cpp-ethereum)
   - [Research](https://gitter.im/ethereum/research)
-- [Ethereum Blog](https://blog.ethereum.org/): The official Ethereum blog
-- [Hacking Distributed](http://hackingdistributed.com/): Professor Sirer's blog with regular posts on cryptocurrencies and security
 - [Reddit](https://www.reddit.com/r/ethereum)
-- [Vessenes.com](http://vessenes.com/): Peter Vessenes blog
 - [Network Stats](https://ethstats.net/)
 
 It's highly recommended that you *regularly* read all these sources, as exploits they note may impact your contracts.
 
-Additionally, this is a list of community members who may write about security:
+Additionally, here is a list of Ethereum core developers who may write about security, and see the [bibliography](https://github.com/ConsenSys/smart-contract-best-practices#smart-contract-security-bibliography) for more from the community.
 
 - **Vitalik Buterin**: [Twitter](https://twitter.com/vitalikbuterin), [Github](https://github.com/vbuterin), [Reddit](https://www.reddit.com/user/vbuterin), [Ethereum Blog](https://blog.ethereum.org/author/vitalik-buterin/)
 - **Dr. Christian Reitwiessner**: [Twitter](https://twitter.com/ethchris), [Github](https://github.com/chriseth), [Ethereum Blog](https://blog.ethereum.org/author/christian_r/)
 - **Dr. Gavin Wood**: [Twitter](https://twitter.com/gavofyork), [Blog](http://gavwood.com/), [Github](https://github.com/gavofyork)
-- **Dr. Emin Gun Sirer**: [Twitter](https://twitter.com/el33th4xor)
 - **Vlad Zamfir**: [Twitter](https://twitter.com/vladzamfir), [Github](https://github.com/vladzamfir), [Ethereum Blog](https://blog.ethereum.org/author/vlad/)
-
-## Key Security Tools
-
-- [Oyente](http://www.comp.nus.edu.sg/~loiluu/papers/oyente.pdf), an upcoming tool, will analyze Ethereum code to find common vulnerabilities (e.g., Transaction Order Dependence, no checking for exceptions)
 
 ## Recommendations for Smart Contract Security in Solidity
 
@@ -119,7 +112,7 @@ ExternalContract(someAddress).deposit.value(100); // raw call() is avoided, so i
 
 `send()` and raw external calls can fail (e.g., when the call depth of 1024 is breached), so you should always test if it succeeded. If you don't test the result, it's recommended to note in a comment.
 
-If you throw on a `send()` failure, be careful as you may create a [denial-of-service](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#dos-with-unexpected-throw) vulnerability.
+If you throw on a `send()` failure, be careful as you may create a [denial-of-service](https://github.com/ConsenSys/smart-contract-best-practices#dos-with-unexpected-throw) vulnerability.
 
 ```
 // bad
@@ -170,7 +163,7 @@ contract auction {
     uint highestBid;
     mapping(address => uint) refunds;
 
-    function bid() {
+    function bid() external {
         if (msg.value < highestBid) throw;
 
         if (highestBidder != 0) {
@@ -181,7 +174,7 @@ contract auction {
         highestBid = msg.value;
     }
 
-    function withdrawRefund() {
+    function withdrawRefund() external {
         uint refund = refunds[msg.sender];
         refunds[msg.sender] = 0;
         if (!msg.sender.send(refund)) {
@@ -191,67 +184,21 @@ contract auction {
 }
 ```
 
-Source: [Smart Contract Security](https://blog.ethereum.org/2016/06/10/smart-contract-security/)
-
 <a name="keep-fallback-functions-simple"></a>
 
 ### Keep fallback functions simple
 
-Fallback functions are the default functions called when a contract is sent a message with no arguments, and only has access to 2,300 gas when called from a `.send()` call. As such, the most you should do in most fallback functions is call an event. Use a proper function if a computation or more gas is required.
+[Fallback functions](http://solidity.readthedocs.io/en/latest/contracts.html#fallback-function) are called when a contract is sent a message with no arguments (or when no function matches), and only has access to 2,300 gas when called from a `.send()` call. The most you should do in most fallback functions is call an event. Use a proper function if a computation or more gas is required.
 
 ```
 // bad
-function () { balances[msg.sender] += msg.value; }
+function() { balances[msg.sender] += msg.value; }
 
 // good
 function() { throw; }
-function() { LogSomeEvent(); }
-function deposit() { balances[msg.sender] += msg.value; }
+function() { LogDepositReceived(msg.sender); }
+function deposit() external { balances[msg.sender] += msg.value; }
 ```
-
-<a name="beware-rounding-with-integer-division"></a>
-
-### Beware rounding with integer division
-
-All integer divison rounds down to the nearest integer - use a multiplier to keep track, or use the future fixed point data types.
-
-```
-// bad
-uint x = 5 / 2; // Result is 2, all integer divison rounds DOWN to the nearest integer
-
-// good
-uint multiplier = 10;
-uint x = (5 * multiplier) / 2;
-
-// in the near future, Solidity will have fixed point data types like fixed, ufixed
-```
-
-Source:
-
-<a name="beware-division-by-zero"></a>
-
-### Beware division by zero
-
-Currently, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not
-`throw` an exception when a number is divided by zero.
-
-<a name="differentiate-functions-events"></a>
-
-### Differentiate functions and events
-
-Favor capitalization and a prefix in front of events (we suggest *Log*), to prevent the risk of confusion between functions and events. For functions, always start with a lowercase letter, except for the constructor.
-
-```
-// bad
-event transferHappened() {}
-function Transfer() {}
-
-// good
-event LogTransfer() {}
-function transfer() {}
-```
-
-Source: [Deconstructing the DAO Attack: A Brief Code Tour](http://vessenes.com/deconstructing-thedao-attack-a-brief-code-tour/) (Peter Vessenes)
 
 <a name="mark-visibility"></a>
 
@@ -288,18 +235,58 @@ Bank.withdraw(100); // Unclear whether trusted or untrusted
 
 // good
 ExternalBank.withdraw(100); // untrusted external call
-Bank.withdraw(100); // external but trusted bank contract maintained by XYZ Corp
+TrustedBank.withdraw(100); // external but trusted bank contract maintained by XYZ Corp
+```
+
+<a name="beware-rounding-with-integer-division"></a>
+
+### Beware rounding with integer division
+
+All integer divison rounds down to the nearest integer - use a multiplier to keep track, or use the future fixed point data types.
+
+```
+// bad
+uint x = 5 / 2; // Result is 2, all integer divison rounds DOWN to the nearest integer
+
+// good
+uint multiplier = 10;
+uint x = (5 * multiplier) / 2;
+
+// in the near future, Solidity will have fixed point data types like fixed, ufixed
+```
+
+<a name="beware-division-by-zero"></a>
+
+### Beware division by zero
+
+Currently, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not
+`throw` an exception when a number is divided by zero.
+
+<a name="differentiate-functions-events"></a>
+
+### Differentiate functions and events
+
+Favor capitalization and a prefix in front of events (we suggest *Log*), to prevent the risk of confusion between functions and events. For functions, always start with a lowercase letter, except for the constructor.
+
+```
+// bad
+event Transfer() {}
+function transfer() {}
+
+// good
+event LogTransfer() {}
+function transfer() external {}
 ```
 
 ## Known Attacks
 
 <a name="call-depth-attack"></a>
 
-### Call depth attack (or *Call stack attack*)
+### Call Depth Attack
 
-Even if it is known that the likelihood of failure in a sub-execution is possible, this can be forced to happen through a call depth attack. There’s a limit to how deep the call stack can become in one transaction (limit of 1024). Thus an attacker can build up a chain of calls and then call a contract, forcing subsequent calls to fail even if enough gas is available. It has to be a call, within a call, within a call, etc.
+Even if it is known that the likelihood of failure in a sub-execution is possible, this can be forced to happen through a Call Depth Attack. There’s a limit to how deep the message-call/contract-creation stack can become in one transaction (limit of 1024). Thus, an attacker can build up a chain of calls and then call a contract, forcing subsequent calls to fail even if enough gas is available. It has to be a call, within a call, within a call, etc.  This is sometimes called the Call stack attack, but as the EVM is stack-based and operates on a stack (that is different from the message-call/contract-creation stack), ambiguity is avoided by simply calling this a Call Depth Attack.
 
-For example, looking at the auction code from previously:
+Example auction code from above:
 
 ```
 // DO NOT USE. THIS IS VULNERABLE.
@@ -325,7 +312,7 @@ contract auction {
 }
 ```
 
-The send() can fail if the call depth is too large, causing ether to not be sent. However it would be marked as if it did send. As previously shown, the external call should be checked for errors. This example, the state would just revert to the previous state.
+The send() can fail if the call depth is too large, causing ether to not be sent. However it would be marked as if it did send. As previously shown, the external call should be checked for errors. This example, the state would just revert to the previous state:
 
 ```
 contract auction {
@@ -333,20 +320,22 @@ contract auction {
     uint highestBid;
     mapping(address => uint) refunds;
 
-    function bid() {
+    function bid() external {
         if (msg.value < highestBid) throw;
-        if (highestBidder != 0)
+        if (highestBidder != 0) {
 	    refunds[highestBidder] += highestBid;
+	}
 
         highestBidder = msg.sender;
         highestBid = msg.value;
     }
 
-    function withdrawRefund() {
+    function withdrawRefund() external {
 	uint refund = refunds[msg.sender];
 	refunds[msg.sender] = 0;
-	if (!msg.sender.send(refund))
+	if (!msg.sender.send(refund)) {
 	   refunds[msg.sender] = refund;
+	}
     }
 }
 ```
@@ -361,9 +350,27 @@ As you can see, the call depth attack can be a malicious attack on a contract fo
 
 ### Reentrant Attacks
 
-A key benefit of Ethereum is the ability for one contract to call another - but this also can introduce risks, especially when you don't know exactly what the external call will do. Reentrant attacks, which allow a function to be called in a contract when a function in that contract is running, are one example of ths. This can occur when the same function s called again, or when another function that shares state with the previously called function is called.
+A key benefit of Ethereum is the ability for one contract to call another - but this also can introduce risks, especially when you don't know exactly what the external call will do. Reentrant attacks, which allow a function to be called in a contract while a function in that contract is running, are one example of ths. This can occur when the same function is called again (a recursive reentrant attack), or when another function that shares state with the previously called function is called.
 
 (The DAO hack combined both these attacks)
+
+```
+// VULNERABLE.  externalContract can call g() and affect the sharedState.
+contract C {
+    uint sharedState = 2;
+    function f(address externalContract) internal {
+       sharedState = 44;
+       externalContract.call.value(3)();
+       // normally it would be assumed that sharedState would be 44 here.
+       // But this guarantee cannot hold since a reentrant attack calling g() will change sharedState
+    }
+    
+    function g() external {
+        sharedState = 55;
+    }
+}
+```
+
 
 #### Recursive Reentrant Attack
 
@@ -372,6 +379,7 @@ This attack occurs when the state has not been properly set before the external 
 Example:
 
 ```
+// DO NOT USE. THIS IS VULNERABLE.
 mapping (address => uint) private userBalances;
 
 function getBalance(address user) constant returns(uint) {
@@ -384,7 +392,7 @@ function addToBalance() public {
 
 function withdrawBalance() public {
     uint amountToWithdraw = userBalances[msg.sender];
-    if (!(msg.sender.call.value(amountToWithdraw)())) { throw; } // the ether is sent without zeroing out the user's balance
+    if (!(msg.sender.call.value(amountToWithdraw)())) { throw; } // the ether is sent without zeroing out msg.sender's balance, so msg.sender can repeatedly call withdrawBalance().
     userBalances[msg.sender] = 0;
 }
 ```
@@ -392,8 +400,6 @@ function withdrawBalance() public {
 In the DAO hack, this occurred when the fallback function was called by `address.call.value()()`, but can occur for any external call.
 
 To protect against recursive reentry, the function needs to set the state such that if the function is called again in the same transaction, it won’t continue to execute.
-
-Source: [Race to Empty is the Real Deal](http://vessenes.com/more-ethereum-attacks-race-to-empty-is-the-real-deal/) (Peter Vessenes)
 
 #### Unexpected State Manipulation Reentrant Attack
 
@@ -457,7 +463,7 @@ function withdraw(uint amount) public returns (bool) {
 }
 ```
 
-Mutexes have their own disadvantages with the potential for deadlocks and reduced throughput - so choose the approach that works best for your use case and text extensively.
+Mutexes have their own disadvantages with the potential for deadlocks and reduced throughput - so choose the approach that works best for your use case and test extensively.
 
 
 <a name="dos-with-unexpected-throw"></a>
@@ -594,7 +600,7 @@ contract SomeRegister {
 }
 ```
 
-**Example 2: Use a `DELEGATECALL` to forward data and calls**
+**Example 2: [Use a `DELEGATECALL`](http://ethereum.stackexchange.com/questions/2404/upgradeable-contracts) to forward data and calls**
 
 ```
 contract Relay {
@@ -624,8 +630,6 @@ contract Relay {
     }
 }
 ```
-
-Source: [Stack Overflow](http://ethereum.stackexchange.com/questions/2404/upgradeable-contracts)
 
 ### Circuit Breakers (Pause contract functionality)
 
@@ -666,9 +670,12 @@ onlyInEmergency() {
 }
 ```
 
+<<<<<<< HEAD
 Source: [We Need Fault Tolerant Smart Contracts](https://medium.com/@peterborah/we-need-fault-tolerant-smart-contracts-ec1b56596dbc#.ju7t49u82) (Peter Borah)
 
-### Speed Bumps(Delay contract actions)
+=======
+>>>>>>> 9c0b7981bbf49afca6a68e5fc07944638355bc3c
+### Speed Bumps (Delay contract actions)
 
 Speed bumps slow down actions, so that if malicious actions occur, there is time to recover. For example, [The DAO](https://github.com/slockit/DAO/) required 27 days between a successful request to split the DAO and the ability to do so. This ensured the funds were kept within the contract, increasing the likelihood of recovery (other fundamental flaws made this functionality useless without a fork in Ethereum). Speed bumps can be combined with other techniques (like circuit breakers or root access) for maximal effectiveness.
 
@@ -715,8 +722,6 @@ Rate limiting halts or requires approval for substantial changes. For example, a
 
 [Example](https://gist.github.com/PeterBorah/110c331dca7d23236f80e69c83a9d58c#file-circuitbreaker-sol)
 
-Source: [We Need Fault Tolerant Smart Contracts](https://medium.com/@peterborah/we-need-fault-tolerant-smart-contracts-ec1b56596dbc)
-
 ### Assert Guards
 
 An assert guard triggers when an assertion fails - such as an invariant property changing. For example, the token to ether issuance ratio, in a token issuance contract, may be fixed. You can verify that this is the case at all times with an assertion. Assert guards should often be combined with other techniques, such as pausing the contract and allowing upgrades.
@@ -758,8 +763,6 @@ contract TokenWithInvariants {
     }
 }
 ```
-
-Source: [We Need Fault Tolerant Smart Contracts](https://medium.com/@peterborah/we-need-fault-tolerant-smart-contracts-ec1b56596dbc#.ju7t49u82) (Peter Borah)
 
 ### Contract Rollout
 
@@ -833,63 +836,48 @@ When launching a contract that will have substantial funds or is required to be 
 - Names of programmers and/or other important parties
 - Chat room where questions can be asked
 
+## Key Security Tools
+
+- [Oyente](http://www.comp.nus.edu.sg/~loiluu/papers/oyente.pdf), an upcoming tool, will analyze Ethereum code to find common vulnerabilities (e.g., Transaction Order Dependence, no checking for exceptions)
+
 ## Future improvements
 - **Editor Security Warnings**: Editors will soon alert for common security errors, not just compilation errors. Browser Solidity is getting these features soon.
 
 - **New functional languages that compile to EVM bytecode**: Functional languages gives certain guarantees over procedural languages like Solidity, namely immutability within a function and strong compile time checking. This can reduce the risk of errors by providing deterministic behavior. (for more see [this](https://plus.google.com/u/0/events/cmqejp6d43n5cqkdl3iu0582f4k), Curry-Howard correspondence, and linear logic)
-## Noted Security Blog Posts
 
-A lot of this document contains code, examples and insights gained from various parts already written by the community. Here are noted posts.
+## Smart Contract Security Bibliography
 
-##### Writing Safer Contracts
+A lot of this document contains code, examples and insights gained from various parts already written by the community. 
+Here are some of them.  Feel free to add more.
 
-- [How to Write Safe Smart Contracts](https://chriseth.github.io/notes/talks/safe_solidity): Blog post from Devcon 1 from the creator or Solidity
-- [Making Smart Contracts Smarter](http://www.comp.nus.edu.sg/~loiluu/papers/oyente.pdf) (Loi Luu, Duc-Hiep Chu, Prateek Saxena, Hrishi Olickel, Aquinas Hobor)
-- [We need fault-tolerant smart contracts](https://medium.com/@peterborah/we-need-fault-tolerant-smart-contracts-ec1b56596dbc) (Peter Borah)
-- [We need Escape Hatches](http://hackingdistributed.com/2016/06/22/smart-contract-escape-hatches/) (Hacking Distributed)
-- [Thinking about Smart Contract Security](https://blog.ethereum.org/2016/06/19/thinking-smart-contract-security/) (Vitalik Buterin)
-- [Assert Guards: Towards Automated Code Bounties & Safe Smart Contract Coding on Ethereum](https://medium.com/@ConsenSys/assert-guards-towards-automated-code-bounties-safe-smart-contract-coding-on-ethereum-8e74364b795c) (Simon de la Rouviere)
-- [Safer Smart Contracts through type-driven development](http://publications.lib.chalmers.se/records/fulltext/234939/234939.pdf) (Jack Pettersson and Robert Edström)
-- [Simple Contracts are Better Contracts](https://blog.blockstack.org/simple-contracts-are-better-contracts-what-we-can-learn-from-the-dao-6293214bad3a)
-- [In Bits We Trust?](https://medium.com/@coriacetic/in-bits-we-trust-4e464b418f0b) (David Xiao)
+##### By Ethereum core developers
 
-##### Common Contract Errors
-
+- [How to Write Safe Smart Contracts](https://chriseth.github.io/notes/talks/safe_solidity) (Christian Reitwiessner)
 - [Smart Contract Security](https://blog.ethereum.org/2016/06/10/smart-contract-security/) (Christian Reitwiessner)
-- [More Ethereum Attacks: Race-to-empty is the Real Deal](http://vessenes.com/more-ethereum-attacks-race-to-empty-is-the-real-deal/)
-- [Devcon1 and Ethereum Contract Security](http://martin.swende.se/blog/Devcon1-and-contract-security.html)
-- [Potential Attacks against Rouleth contract](https://github.com/Bunjin/Rouleth/blob/master/Security.md)
-- [Ethereum Griefing Wallets: Send w/Throw Is Dangerous](http://vessenes.com/ethereum-griefing-wallets-send-w-throw-considered-harmful/)
+- [Thinking about Smart Contract Security](https://blog.ethereum.org/2016/06/19/thinking-smart-contract-security/) (Vitalik Buterin)
+- [Solidity](http://solidity.readthedocs.io)
+- [Solidity Security Considerations](http://solidity.readthedocs.io/en/latest/security-considerations.html)
 
-##### DAO-related Security Posts
+##### By Community
 
-- [Deja Vu DAO Smart Contracts Audit Results](https://blog.slock.it/deja-vu-dao-smart-contracts-audit-results-d26bc088e32e#.x9frbu72d) (Stephen Tual)
-- [DAO Call for Moratorium](http://hackingdistributed.com/2016/05/27/dao-call-for-moratorium/) (Dino Mark, Vlad Zamfir, and Emin Gün Sirer)
-- [Analysis of the DAO Exploit](http://hackingdistributed.com/2016/06/18/analysis-of-the-dao-exploit/) (Phil Daian/Hacking Distributed)
-- [Deconstructing the DAO Attack](http://vessenes.com/deconstructing-thedao-attack-a-brief-code-tour/) (Peter Vessenes)
-- [Chasing the DAO Attacker's Wake](https://pdaian.com/blog/chasing-the-dao-attackers-wake/) (Phil Daian)
-
-##### Other
-
-[Least Authority Security Audit](https://github.com/LeastAuthority/ethereum-analyses)
-
-## Security Related References
-
+- http://forum.ethereum.org/discussion/1317/reentrant-contracts
 - http://hackingdistributed.com/2016/06/16/scanning-live-ethereum-contracts-for-bugs/
 - http://hackingdistributed.com/2016/06/18/analysis-of-the-dao-exploit/
 - http://hackingdistributed.com/2016/06/22/smart-contract-escape-hatches/
 - http://martin.swende.se/blog/Devcon1-and-contract-security.html
 - http://publications.lib.chalmers.se/records/fulltext/234939/234939.pdf
-- https://blog.ethereum.org/2016/06/10/smart-contract-security/
-- https://blog.ethereum.org/2016/06/19/thinking-smart-contract-security/
+- http://vessenes.com/deconstructing-thedao-attack-a-brief-code-tour
+- http://vessenes.com/ethereum-griefing-wallets-send-w-throw-considered-harmful
+- http://vessenes.com/more-ethereum-attacks-race-to-empty-is-the-real-deal
+- https://blog.blockstack.org/simple-contracts-are-better-contracts-what-we-can-learn-from-the-dao-6293214bad3a
 - https://blog.slock.it/deja-vu-dao-smart-contracts-audit-results-d26bc088e32e
-- https://chriseth.github.io/notes/talks/safe_solidity
 - https://github.com/Bunjin/Rouleth/blob/master/Security.md
 - https://github.com/LeastAuthority/ethereum-analyses
 - https://medium.com/@ConsenSys/assert-guards-towards-automated-code-bounties-safe-smart-contract-coding-on-ethereum-8e74364b795c
 - https://medium.com/@coriacetic/in-bits-we-trust-4e464b418f0b
 - https://medium.com/@hrishiolickel/why-smart-contracts-fail-undiscovered-bugs-and-what-we-can-do-about-them-119aa2843007
 - https://medium.com/@peterborah/we-need-fault-tolerant-smart-contracts-ec1b56596dbc
+- https://pdaian.com/blog/chasing-the-dao-attackers-wake
 - http://www.comp.nus.edu.sg/~loiluu/papers/oyente.pdf
 
 ## Reviewers

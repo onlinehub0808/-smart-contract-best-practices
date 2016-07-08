@@ -44,7 +44,7 @@ ExternalContract(someAddress).deposit.value(100); // raw call() is avoided, so i
 
 `send()` and raw external calls can fail (e.g., when the call depth of 1024 is breached), so you should always test if it succeeded. If you don't test the result, it's recommended to note in a comment.
 
-If you throw on a `send()` failure, be careful as you may create a [denial-of-service](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#dos-with-unexpected-throw) vulnerability.
+If you throw on a `send()` failure, be careful as you may create a [denial-of-service](https://github.com/ConsenSys/smart-contract-best-practices#dos-with-unexpected-throw) vulnerability.
 
 ```
 // bad
@@ -95,7 +95,7 @@ contract auction {
     uint highestBid;
     mapping(address => uint) refunds;
 
-    function bid() {
+    function bid() external {
         if (msg.value < highestBid) throw;
 
         if (highestBidder != 0) {
@@ -106,7 +106,7 @@ contract auction {
         highestBid = msg.value;
     }
 
-    function withdrawRefund() {
+    function withdrawRefund() external {
         uint refund = refunds[msg.sender];
         refunds[msg.sender] = 0;
         if (!msg.sender.send(refund)) {
@@ -116,67 +116,21 @@ contract auction {
 }
 ```
 
-Source: [Smart Contract Security](https://blog.ethereum.org/2016/06/10/smart-contract-security/)
-
 <a name="keep-fallback-functions-simple"></a>
 
 ### Keep fallback functions simple
 
-Fallback functions are the default functions called when a contract is sent a message with no arguments, and only has access to 2,300 gas when called from a `.send()` call. As such, the most you should do in most fallback functions is call an event. Use a proper function if a computation or more gas is required.
+[Fallback functions](http://solidity.readthedocs.io/en/latest/contracts.html#fallback-function) are called when a contract is sent a message with no arguments (or when no function matches), and only has access to 2,300 gas when called from a `.send()` call. The most you should do in most fallback functions is call an event. Use a proper function if a computation or more gas is required.
 
 ```
 // bad
-function () { balances[msg.sender] += msg.value; }
+function() { balances[msg.sender] += msg.value; }
 
 // good
 function() { throw; }
-function() { LogSomeEvent(); }
-function deposit() { balances[msg.sender] += msg.value; }
+function() { LogDepositReceived(msg.sender); }
+function deposit() external { balances[msg.sender] += msg.value; }
 ```
-
-<a name="beware-rounding-with-integer-division"></a>
-
-### Beware rounding with integer division
-
-All integer divison rounds down to the nearest integer - use a multiplier to keep track, or use the future fixed point data types.
-
-```
-// bad
-uint x = 5 / 2; // Result is 2, all integer divison rounds DOWN to the nearest integer
-
-// good
-uint multiplier = 10;
-uint x = (5 * multiplier) / 2;
-
-// in the near future, Solidity will have fixed point data types like fixed, ufixed
-```
-
-Source:
-
-<a name="beware-division-by-zero"></a>
-
-### Beware division by zero
-
-Currently, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not
-`throw` an exception when a number is divided by zero.
-
-<a name="differentiate-functions-events"></a>
-
-### Differentiate functions and events
-
-Favor capitalization and a prefix in front of events (we suggest *Log*), to prevent the risk of confusion between functions and events. For functions, always start with a lowercase letter, except for the constructor.
-
-```
-// bad
-event transferHappened() {}
-function Transfer() {}
-
-// good
-event LogTransfer() {}
-function transfer() {}
-```
-
-Source: [Deconstructing the DAO Attack: A Brief Code Tour](http://vessenes.com/deconstructing-thedao-attack-a-brief-code-tour/) (Peter Vessenes)
 
 <a name="mark-visibility"></a>
 
@@ -213,5 +167,45 @@ Bank.withdraw(100); // Unclear whether trusted or untrusted
 
 // good
 ExternalBank.withdraw(100); // untrusted external call
-Bank.withdraw(100); // external but trusted bank contract maintained by XYZ Corp
+TrustedBank.withdraw(100); // external but trusted bank contract maintained by XYZ Corp
+```
+
+<a name="beware-rounding-with-integer-division"></a>
+
+### Beware rounding with integer division
+
+All integer divison rounds down to the nearest integer - use a multiplier to keep track, or use the future fixed point data types.
+
+```
+// bad
+uint x = 5 / 2; // Result is 2, all integer divison rounds DOWN to the nearest integer
+
+// good
+uint multiplier = 10;
+uint x = (5 * multiplier) / 2;
+
+// in the near future, Solidity will have fixed point data types like fixed, ufixed
+```
+
+<a name="beware-division-by-zero"></a>
+
+### Beware division by zero
+
+Currently, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not
+`throw` an exception when a number is divided by zero.
+
+<a name="differentiate-functions-events"></a>
+
+### Differentiate functions and events
+
+Favor capitalization and a prefix in front of events (we suggest *Log*), to prevent the risk of confusion between functions and events. For functions, always start with a lowercase letter, except for the constructor.
+
+```
+// bad
+event Transfer() {}
+function transfer() {}
+
+// good
+event LogTransfer() {}
+function transfer() external {}
 ```

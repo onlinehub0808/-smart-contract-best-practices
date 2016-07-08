@@ -3,11 +3,11 @@
 
 <a name="call-depth-attack"></a>
 
-### Call depth attack (or *Call stack attack*)
+### Call Depth Attack
 
-Even if it is known that the likelihood of failure in a sub-execution is possible, this can be forced to happen through a call depth attack. There’s a limit to how deep the call stack can become in one transaction (limit of 1024). Thus an attacker can build up a chain of calls and then call a contract, forcing subsequent calls to fail even if enough gas is available. It has to be a call, within a call, within a call, etc.
+Even if it is known that the likelihood of failure in a sub-execution is possible, this can be forced to happen through a Call Depth Attack. There’s a limit to how deep the message-call/contract-creation stack can become in one transaction (limit of 1024). Thus, an attacker can build up a chain of calls and then call a contract, forcing subsequent calls to fail even if enough gas is available. It has to be a call, within a call, within a call, etc.  This is sometimes called the Call stack attack, but as the EVM is stack-based and operates on a stack (that is different from the message-call/contract-creation stack), ambiguity is avoided by simply calling this a Call Depth Attack.
 
-For example, looking at the auction code from previously:
+Example auction code from above:
 
 ```
 // DO NOT USE. THIS IS VULNERABLE.
@@ -33,7 +33,7 @@ contract auction {
 }
 ```
 
-The send() can fail if the call depth is too large, causing ether to not be sent. However it would be marked as if it did send. As previously shown, the external call should be checked for errors. This example, the state would just revert to the previous state.
+The send() can fail if the call depth is too large, causing ether to not be sent. However it would be marked as if it did send. As previously shown, the external call should be checked for errors. This example, the state would just revert to the previous state:
 
 ```
 contract auction {
@@ -41,20 +41,22 @@ contract auction {
     uint highestBid;
     mapping(address => uint) refunds;
 
-    function bid() {
+    function bid() external {
         if (msg.value < highestBid) throw;
-        if (highestBidder != 0)
+        if (highestBidder != 0) {
 	    refunds[highestBidder] += highestBid;
+	}
 
         highestBidder = msg.sender;
         highestBid = msg.value;
     }
 
-    function withdrawRefund() {
+    function withdrawRefund() external {
 	uint refund = refunds[msg.sender];
 	refunds[msg.sender] = 0;
-	if (!msg.sender.send(refund))
+	if (!msg.sender.send(refund)) {
 	   refunds[msg.sender] = refund;
+	}
     }
 }
 ```
@@ -69,9 +71,27 @@ As you can see, the call depth attack can be a malicious attack on a contract fo
 
 ### Reentrant Attacks
 
-A key benefit of Ethereum is the ability for one contract to call another - but this also can introduce risks, especially when you don't know exactly what the external call will do. Reentrant attacks, which allow a function to be called in a contract when a function in that contract is running, are one example of ths. This can occur when the same function s called again, or when another function that shares state with the previously called function is called.
+A key benefit of Ethereum is the ability for one contract to call another - but this also can introduce risks, especially when you don't know exactly what the external call will do. Reentrant attacks, which allow a function to be called in a contract while a function in that contract is running, are one example of ths. This can occur when the same function is called again (a recursive reentrant attack), or when another function that shares state with the previously called function is called.
 
 (The DAO hack combined both these attacks)
+
+```
+// VULNERABLE.  externalContract can call g() and affect the sharedState.
+contract C {
+    uint sharedState = 2;
+    function f(address externalContract) internal {
+       sharedState = 44;
+       externalContract.call.value(3)();
+       // normally it would be assumed that sharedState would be 44 here.
+       // But this guarantee cannot hold since a reentrant attack calling g() will change sharedState
+    }
+    
+    function g() external {
+        sharedState = 55;
+    }
+}
+```
+
 
 #### Recursive Reentrant Attack
 
@@ -80,6 +100,7 @@ This attack occurs when the state has not been properly set before the external 
 Example:
 
 ```
+// DO NOT USE. THIS IS VULNERABLE.
 mapping (address => uint) private userBalances;
 
 function getBalance(address user) constant returns(uint) {
@@ -92,7 +113,7 @@ function addToBalance() public {
 
 function withdrawBalance() public {
     uint amountToWithdraw = userBalances[msg.sender];
-    if (!(msg.sender.call.value(amountToWithdraw)())) { throw; } // the ether is sent without zeroing out the user's balance
+    if (!(msg.sender.call.value(amountToWithdraw)())) { throw; } // the ether is sent without zeroing out msg.sender's balance, so msg.sender can repeatedly call withdrawBalance().
     userBalances[msg.sender] = 0;
 }
 ```
@@ -100,8 +121,6 @@ function withdrawBalance() public {
 In the DAO hack, this occurred when the fallback function was called by `address.call.value()()`, but can occur for any external call.
 
 To protect against recursive reentry, the function needs to set the state such that if the function is called again in the same transaction, it won’t continue to execute.
-
-Source: [Race to Empty is the Real Deal](http://vessenes.com/more-ethereum-attacks-race-to-empty-is-the-real-deal/) (Peter Vessenes)
 
 #### Unexpected State Manipulation Reentrant Attack
 
@@ -165,7 +184,7 @@ function withdraw(uint amount) public returns (bool) {
 }
 ```
 
-Mutexes have their own disadvantages with the potential for deadlocks and reduced throughput - so choose the approach that works best for your use case and text extensively.
+Mutexes have their own disadvantages with the potential for deadlocks and reduced throughput - so choose the approach that works best for your use case and test extensively.
 
 
 <a name="dos-with-unexpected-throw"></a>
