@@ -71,9 +71,27 @@ As you can see, the call depth attack can be a malicious attack on a contract fo
 
 ### Reentrant Attacks
 
-A key benefit of Ethereum is the ability for one contract to call another - but this also can introduce risks, especially when you don't know exactly what the external call will do. Reentrant attacks, which allow a function to be called in a contract while a function in that contract is running, are one example of ths. This can occur when the same function is called again, or when another function that shares state with the previously called function is called.
+A key benefit of Ethereum is the ability for one contract to call another - but this also can introduce risks, especially when you don't know exactly what the external call will do. Reentrant attacks, which allow a function to be called in a contract while a function in that contract is running, are one example of ths. This can occur when the same function is called again (a recursive reentrant attack), or when another function that shares state with the previously called function is called.
 
 (The DAO hack combined both these attacks)
+
+```
+// VULNERABLE.  externalContract can call g() and affect the sharedState.
+contract C {
+    uint sharedState = 2;
+    function f(address externalContract) internal {
+       sharedState = 44;
+       externalContract.call.value(3)();
+       // normally it would be assumed that sharedState would be 44 here.
+       // But this guarantee cannot hold since a reentrant attack calling g() will change sharedState
+    }
+    
+    function g() external {
+        sharedState = 55;
+    }
+}
+```
+
 
 #### Recursive Reentrant Attack
 
@@ -82,6 +100,7 @@ This attack occurs when the state has not been properly set before the external 
 Example:
 
 ```
+// DO NOT USE. THIS IS VULNERABLE.
 mapping (address => uint) private userBalances;
 
 function getBalance(address user) constant returns(uint) {
@@ -94,7 +113,7 @@ function addToBalance() public {
 
 function withdrawBalance() public {
     uint amountToWithdraw = userBalances[msg.sender];
-    if (!(msg.sender.call.value(amountToWithdraw)())) { throw; } // the ether is sent without zeroing out the user's balance
+    if (!(msg.sender.call.value(amountToWithdraw)())) { throw; } // the ether is sent without zeroing out msg.sender's balance, so msg.sender can repeatedly call withdrawBalance().
     userBalances[msg.sender] = 0;
 }
 ```
