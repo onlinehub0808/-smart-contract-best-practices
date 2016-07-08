@@ -9,7 +9,7 @@ As a result, beyond protecting yourself against currently known hacks, it's crit
   - pause the contract ('circuit breaker')
   - manage the amount of money at risk (rate limiting, maximum usage)
   - fix and iterate on the code when errors are discovered
-  - provide superuser power to a party or many parties
+  - provide superuser power to a party or many parties for contract administration
 
 - **Conduct a thoughtful and carefully staged rollout**
   - Test contracts thoroughly, adding in all newly discovered failure cases
@@ -17,7 +17,7 @@ As a result, beyond protecting yourself against currently known hacks, it's crit
   - Rollout in phases, with increasing usage and testing in each phase
 
 - **Keep contracts simple** - complexity increases the likelihood of errors
-  - Ensure the contract logic simple, especially at first when the code is untested
+  - Ensure the contract logic is simple, especially at first when the code is untested - or lightly used
   - Modularize code, minimizing performance optimizations at the cost of readability; legibility increases audibility
   - Put logic that requires decentralization on the blockchain, and put other logic off; this allows you to continue rapid iteration off the blockchain
 
