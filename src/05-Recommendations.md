@@ -38,6 +38,7 @@ if(!someAddress.send(100)) {
 }
 
 ExternalContract(someAddress).deposit.value(100); // raw call() is avoided, so if deposit throws an exception, the whole transaction IS reverted
+```
 
 ### Always test if `send()` and other raw calls have succeeded
 
@@ -58,7 +59,6 @@ if(!someAddress.call.value(55)(calldata)) { // checks the return value of call()
 if(!someAddress.send(55)) {
     // Some failure code
 }
-
 ```
 
 <a name="favor-pull-over-push-payments"></a>
