@@ -167,6 +167,39 @@ function withdraw(uint amount) public returns (bool) {
 
 Mutexes have their own disadvantages with the potential for deadlocks and reduced throughput - so choose the approach that works best for your use case and text extensively.
 
+
+<a name="dos-with-unexpected-throw"></a>
+
+### DoS with (Unexpected) Throw
+
+One example of this is where the routine throw on a failed `send()` can cause a denial-of-service.
+
+In this auction, an attacker can [reject payments](https://solidity.readthedocs.io/en/latest/contracts.html#fallback-function) to themselves and will always be the highest bidder. Any resource that is owned by the highest bidder, will permanently be owned by the attacker.
+
+It should be the responsibility of the recipient to accept payment.
+
+```
+TODO: Add code snippet
+```
+
+Another example is when a contract may iterate through an array to pay users (e.g., supporters in a crowdfunding contract). It's common to want to make sure that each payment succeeds. If not, one should throw. The issue is that if one call fails, you are reverting the whole payout system, meaning the loop will never complete. No one gets paid, because one address is forcing an error.
+
+```
+address[] private refundAddresses;
+mapping (address => uint) public refunds;
+
+// bad
+function refundAll() public {
+    for(uint x; x < refundAddresses.length; x++) { // arbitrary length iteration based on how many addresses participated
+        if(refundAddresses[x].send(refunds[refundAddresses[x]])) {
+            throw; // doubly bad, now a single failure on send will hold up all funds
+        }
+    }
+}
+```
+
+The recommended solution is to [favor pull over push payments](#favor-pull-over-push-payments).
+
 <a name="dos-with-block-gas-limit"></a>
 
 ### DoS with Block Gas Limit
