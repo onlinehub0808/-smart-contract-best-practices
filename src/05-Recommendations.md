@@ -15,7 +15,7 @@ When possible, avoid external Contract calls (eg `ExternalContract.doSomething()
 
 ### Use external calls safely
 
-*Raw calls* (`address.call()`, `address.callcode()`, `address.delegatecall()`) never throw an exception, but will return `false` if the call encounters an exception. On the other hand, *contract calls* (e.g., `ExternalContract.doSomething()`) will automatically propogate a throw (for example, `ExternalContract.doSomething()` will also `throw` if `doSomething()` throws)
+*Raw calls* (`address.call()`, `address.callcode()`, `address.delegatecall()`) never throw an exception, but will return `false` if the call encounters an exception. On the other hand, *contract calls* (e.g., `ExternalContract.doSomething()`) will automatically propogate a throw (for example, `ExternalContract.doSomething()` will also `throw` if `doSomething()` throws).
 
 Whether using *raw calls* or *contract calls*, assume that malicious code will execute if `ExternalContract` is untrusted.  Additionally, if you trust an `ExternalContract`, you also trust any contracts it calls.  If any malicious contract exists in the call chain, the malicious contract can attack you (see [Reentrant Attacks](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#reentrant-attacks)).
 

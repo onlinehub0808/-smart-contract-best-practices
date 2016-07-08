@@ -8,6 +8,8 @@
 
 This document is designed to provide a starting security baseline for intermediate Solidity programmers. It includes security philosophies, code idioms, known attacks, and software engineering techniques for blockchain contract programming - and aims to cover all communities, techniques, and tools that improve smart contract security. At this stage, this document is focused primarily on Solidity, a javascript-like language for Ethereum, but other languages are welcome.
 
+To contribute, see our [Contribution Guidelines](CONTRIBUTING.md).
+
 #### Additional Requested Content
 
 We especially welcome content in the following areas:
@@ -25,7 +27,7 @@ As a result, beyond protecting yourself against currently known hacks, it's crit
   - pause the contract ('circuit breaker')
   - manage the amount of money at risk (rate limiting, maximum usage)
   - fix and iterate on the code when errors are discovered
-  - provide superuser power to a party or many parties
+  - provide superuser power to a party or many parties for contract administration
 
 - **Conduct a thoughtful and carefully staged rollout**
   - Test contracts thoroughly, adding in all newly discovered failure cases
@@ -33,7 +35,7 @@ As a result, beyond protecting yourself against currently known hacks, it's crit
   - Rollout in phases, with increasing usage and testing in each phase
 
 - **Keep contracts simple** - complexity increases the likelihood of errors
-  - Ensure the contract logic simple, especially at first when the code is untested
+  - Ensure the contract logic is simple, especially at first when the code is untested - or lightly used
   - Modularize code, minimizing performance optimizations at the cost of readability; legibility increases audibility
   - Put logic that requires decentralization on the blockchain, and put other logic off; this allows you to continue rapid iteration off the blockchain
 
@@ -74,6 +76,8 @@ Additionally, this is a list of community members who may write about security:
 
 ## Recommendations for Smart Contract Security in Solidity
 
+<a name="avoid-external-calls"></a>
+
 ### Avoid external calls, when possible
 
 External calls (including raw `call()`, `callcode()`, `delegatecall()`) can introduce several unexpected risks or errors. For calls to untrusted contracts, you may be executing malicious code in that contract _or_ any other contract that it depends upon. As such, it is strongly encouraged to minimize external calls. Over time, it is likely that a paradigm will develop that leads to safer external calls - but the risk currently is high.
@@ -82,17 +86,21 @@ If you must make an external call, ensure that external calls are the last call 
 
 When possible, avoid external Contract calls (eg `ExternalContract.doSomething()`), including raw `call()`, `callcode()`, `delegatecall()`.
 
-### Safely using external calls
+<a name="use-external-calls-safely"></a>
 
-There is an important difference in Solidity as to what happens with Contract calls (eg `ExternalContract.doSomething()`) vs raw calls (`address.call()`, `address.callcode()`, `address.delegatecall()`).  A raw call never throws an exception: it returns `false` if the call encounters an exception. Contract calls will automatically propagate a `throw` (vs a raw call). For example `ExternalContract.doSomething()` will also `throw` if `doSomething()` throws.
+### Use external calls safely
 
-The most important point is the same for both, whether using `ExternalContract.doSomething()` or `address.call()`, if `ExternalContract` is untrusted, assume that malicious code will execute.  Note that if you trust an `ExternalContract`, you also trust any contracts it calls, and that those call, are all non-malicious.  If any malicious contract exists in the call chain, the malicious contract can attack you (see [Reentrant Attacks](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#reentrant-attacks)).
+*Raw calls* (`address.call()`, `address.callcode()`, `address.delegatecall()`) never throw an exception, but will return `false` if the call encounters an exception. On the other hand, *contract calls* (e.g., `ExternalContract.doSomething()`) will automatically propogate a throw (for example, `ExternalContract.doSomething()` will also `throw` if `doSomething()` throws)
 
-### Use `send()`, avoid call.value()
+Whether using *raw calls* or *contract calls*, assume that malicious code will execute if `ExternalContract` is untrusted.  Additionally, if you trust an `ExternalContract`, you also trust any contracts it calls.  If any malicious contract exists in the call chain, the malicious contract can attack you (see [Reentrant Attacks](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#reentrant-attacks)).
 
-When sending Ether, use `someAddress.send()`.  Avoid `someAddress.call.value()()`.
+<a name="avoid-call-value"></a>
 
-As noted above, external calls, such as `someAddress.call.value()()` are potentially dangerous because they always trigger code.  `send()` also triggers code, specifically the [fallback function](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#keep-fallback-functions-simple). `send()` is safe because it only has access to gas stipend of 2300 gas, which is insufficient for the send recipient to trigger any state changes (the intention of the 2300 gas stipend was to allow the recipient to log an event).
+### Use `send()`, avoid `call.value()`
+
+When sending Ether, use `someAddress.send()`, avoid `someAddress.call.value()()`.
+
+As noted, external calls, such as `someAddress.call.value()()` are potentially dangerous because they always trigger code. `send()` also triggers code, specifically the [fallback function](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#keep-fallback-functions-simple), but `send()` is safe because it only has access to gas stipend of 2,300 gas. This is insufficient for the send recipient to trigger any state changes (the intention of the 2,300 gas stipend was to allow the recipient to log an event).
 
 ```
 // bad
@@ -105,8 +113,6 @@ if(!someAddress.send(100)) {
 }
 
 ExternalContract(someAddress).deposit.value(100); // raw call() is avoided, so if deposit throws an exception, the whole transaction IS reverted
-```
-
 
 ### Always test if `send()` and other raw calls have succeeded
 
@@ -130,47 +136,7 @@ if(!someAddress.send(55)) {
 
 ```
 
-
-### DoS with (Unexpected) Throw
-
-Example 1: Here is an example where the routine throw on a failed `send()` can cause a denial-of-service.
-In this auction, an attacker can [reject payments](https://solidity.readthedocs.io/en/latest/contracts.html#fallback-function) to it and will always be
-the highest bidder. Any resource that is owned by the highest bidder, will permanently be owned by the attacker.
-This is an example where it should be the responsibility of the recipient to accept payment.
-
-((code snippet))
-
-Example 2: Let’s assume one wants to iterate through an array to pay users accordingly. In some circumstances, one wants to make sure that a contract call succeeding (like having paid the address). If not, one should throw. The issue in this scenario is that if one call fails, you are reverting the whole payout system, essentially forcing a deadlock. No one gets paid, because one address is forcing an error.
-
-```
-address[] private refundAddresses;
-mapping (address => uint) public refunds;
-
-// bad
-function refundAll() public {
-    for(uint x; x < refundAddresses.length; x++) { // arbitrary length iteration based on how many addresses participated
-        if(refundAddresses[x].send(refunds[refundAddresses[x]])) {
-            throw; // doubly bad, now a single failure on send will hold up all funds
-        }
-    }
-}
-
-// good
-mapping (address => uint) private refunds;
-
-function getRefund() public {
-    if(refunds[msg.sender] > 0) {
-        uint amountToSend = refunds[msg.sender];
-        refunds[msg.sender] = 0;
-
-        if(!msg.sender.send(refunds[msg.sender])) {
-            refunds[msg.sender] = amountToSend;
-        }
-    }
-}
-```
-
-The recommended pattern is that each user should withdraw their payout themselves.
+<a name="favor-pull-over-push-payments"></a>
 
 ### Favor *pull* payments over *push* payments
 
@@ -227,6 +193,8 @@ contract auction {
 
 Source: [Smart Contract Security](https://blog.ethereum.org/2016/06/10/smart-contract-security/)
 
+<a name="keep-fallback-functions-simple"></a>
+
 ### Keep fallback functions simple
 
 Fallback functions are the default functions called when a contract is sent a message with no arguments, and only has access to 2,300 gas when called from a `.send()` call. As such, the most you should do in most fallback functions is call an event. Use a proper function if a computation or more gas is required.
@@ -240,6 +208,8 @@ function() { throw; }
 function() { LogSomeEvent(); }
 function deposit() { balances[msg.sender] += msg.value; }
 ```
+
+<a name="beware-rounding-with-integer-division"></a>
 
 ### Beware rounding with integer division
 
@@ -258,11 +228,14 @@ uint x = (5 * multiplier) / 2;
 
 Source:
 
+<a name="beware-division-by-zero"></a>
+
 ### Beware division by zero
 
 Currently, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not
 `throw` an exception when a number is divided by zero.
 
+<a name="differentiate-functions-events"></a>
 
 ### Differentiate functions and events
 
@@ -280,7 +253,9 @@ function transfer() {}
 
 Source: [Deconstructing the DAO Attack: A Brief Code Tour](http://vessenes.com/deconstructing-thedao-attack-a-brief-code-tour/) (Peter Vessenes)
 
-#### Explicitly mark visibility in functions and state variables
+<a name="mark-visibility"></a>
+
+### Explicitly mark visibility in functions and state variables
 
 Explicitly label the visibility of functions and state variables. Functions can be specified as being `external`, `public`, `internal` or `private`. For state variables, `external` is not possible.
 
@@ -301,10 +276,11 @@ function internalAction() internal {
 
 }
 ```
+<a name="mark-untrusted-contracts"></a>
 
 ### Mark untrusted contracts
 
-Mark which contracts are untrusted.  For example, some abstract contracts are implementable by 3rd parties. Use a prefix, or at minimum a comment, to highlight untrusted contracts.
+Mark which contracts are untrusted. For example, some abstract contracts are implementable by 3rd parties. Use a prefix, or at minimum a comment, to highlight untrusted contracts.
 
 ```
 // bad
@@ -317,9 +293,9 @@ Bank.withdraw(100); // external but trusted bank contract maintained by XYZ Corp
 
 ## Known Attacks
 
-### Call depth attack
+<a name="call-depth-attack"></a>
 
-(it is sometimes also referred as the call stack attack)
+### Call depth attack (or *Call stack attack*)
 
 Even if it is known that the likelihood of failure in a sub-execution is possible, this can be forced to happen through a call depth attack. There’s a limit to how deep the call stack can become in one transaction (limit of 1024). Thus an attacker can build up a chain of calls and then call a contract, forcing subsequent calls to fail even if enough gas is available. It has to be a call, within a call, within a call, etc.
 
@@ -380,6 +356,8 @@ Thus:
 All raw external calls should be examined and handled carefully for errors.  In most cases, the return values should be checked and handled carefully.  We recommend explicit comments in the code when such a return value is deliberately not checked.
 
 As you can see, the call depth attack can be a malicious attack on a contract for the purpose of failing a subsequent call. Thus even if you know what code will be executed, it could still be forced to fail.
+
+<a name="reentrant-attacks"></a>
 
 ### Reentrant Attacks
 
@@ -481,15 +459,48 @@ function withdraw(uint amount) public returns (bool) {
 
 Mutexes have their own disadvantages with the potential for deadlocks and reduced throughput - so choose the approach that works best for your use case and text extensively.
 
-<a name="timestamp-dependence"></a>
+
+<a name="dos-with-unexpected-throw"></a>
+
+### DoS with (Unexpected) Throw
+
+One example of this is where the routine throw on a failed `send()` can cause a denial-of-service.
+
+In this auction, an attacker can [reject payments](https://solidity.readthedocs.io/en/latest/contracts.html#fallback-function) to themselves and will always be the highest bidder. Any resource that is owned by the highest bidder, will permanently be owned by the attacker.
+
+It should be the responsibility of the recipient to accept payment.
+
+```
+TODO: Add code snippet
+```
+
+Another example is when a contract may iterate through an array to pay users (e.g., supporters in a crowdfunding contract). It's common to want to make sure that each payment succeeds. If not, one should throw. The issue is that if one call fails, you are reverting the whole payout system, meaning the loop will never complete. No one gets paid, because one address is forcing an error.
+
+```
+address[] private refundAddresses;
+mapping (address => uint) public refunds;
+
+// bad
+function refundAll() public {
+    for(uint x; x < refundAddresses.length; x++) { // arbitrary length iteration based on how many addresses participated
+        if(refundAddresses[x].send(refunds[refundAddresses[x]])) {
+            throw; // doubly bad, now a single failure on send will hold up all funds
+        }
+    }
+}
+```
+
+The recommended solution is to [favor pull over push payments](#favor-pull-over-push-payments).
+
+<a name="dos-with-block-gas-limit"></a>
 
 ### DoS with Block Gas Limit
 
-All Ethereum transactions must consume an amount of gas lower than the block gas limit (BGL).  An attacker can cause a denial-of-service against the contract, if the attacker can manipulate the gas used by the contract to provide the service.
+All Ethereum transactions must consume an amount of gas lower than the block gas limit (BGL).  An attacker can cause a contract denial-of-service, if the attacker can manipulate the gas used by the contract to provide the service.
 
-Example: Manipulating the amount of elements in an array can increase gas costs substantially, forcing a DoS with the BGL. Taking the previous example, of wanting to pay out some stakeholders iteratively, it might seem fine, assuming that the amount of stakeholders won’t increase too much. The attacker would buy up, say 10000 tokens, and then split all 10000 tokens amongst 10000 addresses, causing the amount of iterations to increase, potentially exceeding the BGL.  Note that a contract cannot rely on gas refunds to protect against this DoS, because gas refunds are only provided at the end.
+For example, manipulating the amount of elements in an array can increase gas costs substantially, forcing a DoS with the BGL. Taking the previous example, of wanting to pay out some stakeholders iteratively, it might seem fine, assuming that the amount of stakeholders won’t increase too much. The attacker would buy up, say 10000 tokens, and then split all 10000 tokens amongst 10000 addresses, causing the amount of iterations to increase, potentially exceeding the BGL.  Note that a contract cannot rely on gas refunds to protect against this DoS, because gas refunds are only provided at the end.
 
-To mitigate around this, a pull vs push model comes in handy. For example:
+To mitigate this, use a pull rather than a push model. For example:
 
 ((code snippet))
 
@@ -512,29 +523,30 @@ function payOut() {
     nextPayeeIndex = i;
 }
 ```
+<a name="timestamp-dependence"></a>
 
-### Timestamp Dependence Bug
+### Timestamp Dependence
 
-In Solidity, one has access to the timestamp of the block. If it is used as an important part of the contract, the developer needs to know that it can be manipulated by the miner.
+The timestamp of the block can be manipulated by the miner, and so should not be used for critical components of the contract. *Block numbers* and *average block time* can be used to estimate time, but this is not future proof as block times may change (such as the changes expected during Casper).
 
-((code snippet))
+```
+uint startTime = SOME_START_TIME;
 
-A way around this could be to use block numbers and estimate time that has passed based on the average block time. However, this is NOT future proof as block times might change in the future (such as the current planned 4 second block times in Casper). So, consider this when using block numbers as as timekeeping mechanism (how long your code will be around).
+if (now > startTime + 1 week) { // the now can be manipulated by the miner
+
+}
+```
+
+<a name="transaction-ordering-dependence"></a>
 
 ### Transaction-Ordering Dependence (TOD)
 
-Since a transaction is in the mempool for a short while, one can know what actions will occur, before it is properly recorded (included in a block). This can be troublesome for things like decentralized markets, where a transaction to buy some tokens can be seen, and a market order implemented before the other transaction gets included. Protecting against is difficult, as it would come down to the specific contract itself. For example, in markets, it would be better to implement batch auctions (this also protects against high frequency trading concerns). Another potential way to use a pre-commit scheme (“I’m going to submit the details later”).
+Since a transaction is in the mempool for a short while, one can know what actions will occur, before it is included in a block. This can be troublesome for things like decentralized markets, where a transaction to buy some tokens can be seen, and a market order implemented before the other transaction gets included. Protecting against is difficult, as it would come down to the specific contract itself. For example, in markets, it would be better to implement batch auctions (this also protects against high frequency trading concerns). Another way to use a pre-commit scheme (“I’m going to submit the details later”).
 
-
-### Leech attack
-
-If your contract is an oracle, it may want protection from leeches that will use your contract’s data for free. If not encrypted, the data would always be readable, but one can restrict the usage of this information in other smart contracts.
-
-Part of the solution is to carefully review the visibilities of all function and state variable.
 
 ## Software Engineering Techniques
 
-Designing your contract for unknown, often unknowable, failure scenarios is a key aspect of defensive programming, which aims to reduce the risk from newly discovered bugs. We list potential techniques you can use to mitigate many unknown failure scenarios - and many of these can be used together.
+Designing your contract for unknown, often unknowable, failure scenarios is a key aspect of defensive programming, which aims to reduce the risk from newly discovered bugs. We list potential techniques you can use to mitigate various unknown failure scenarios - and many of these can be used together.
 
 Be thoughtful about what techniques you incorporate, as certain techniques require more Solidity code, leading to a greater risk of bugs.
 
@@ -619,7 +631,7 @@ Source: [Stack Overflow](http://ethereum.stackexchange.com/questions/2404/upgrad
 
 Circuit breakers stop execution if certain conditions are met, and can be useful when new errors are discovered. For example, most actions may be suspended in a contract if a bug is discovered, and the only action now active is a withdrawal. They can come at the cost of injecting some level of trust, though smart design can minimize the trust required.
 
-A circuit breaker can also be combined with assert guards, automatically pausing the contract if certain assertions fail (e.g., sum of balances drops below contract ether amount).
+A circuit breaker can also be combined with assert guards, automatically pausing the contract if certain assertions fail (e.g., ether to token peg changes).
 
 Example:
 
@@ -658,7 +670,7 @@ Source: [We Need Fault Tolerant Smart Contracts](https://medium.com/@peterborah/
 
 ### Speed Bumps(Delay contract actions)
 
-Speed bumps slow down actions, so that if malicious actions occur, there is time to recover. For example, [The DAO](https://github.com/slockit/DAO/) required 27 days between a successful request to split the DAO and the ability to do so. This ensured the funds were kept within the contract, allowing a greater likelihood of recovery (other fundamental flaws made this functionality useless without a fork in Ethereum). Speed bumps can be combined with other techniques (like circuit breakers or root access) for maximal effectiveness.
+Speed bumps slow down actions, so that if malicious actions occur, there is time to recover. For example, [The DAO](https://github.com/slockit/DAO/) required 27 days between a successful request to split the DAO and the ability to do so. This ensured the funds were kept within the contract, increasing the likelihood of recovery (other fundamental flaws made this functionality useless without a fork in Ethereum). Speed bumps can be combined with other techniques (like circuit breakers or root access) for maximal effectiveness.
 
 Example:
 
@@ -707,10 +719,9 @@ Source: [We Need Fault Tolerant Smart Contracts](https://medium.com/@peterborah/
 
 ### Assert Guards
 
-An assert guard triggers when an assertion fails - such as an invariant property changing. For example, the token to ether issuance ratio in a token issuance contract may be fixed, and so you can verify that this is the case at all times with an assertion. Assert guards should often be combined with other techniques, such as pausing the contract and allowing upgrades.
+An assert guard triggers when an assertion fails - such as an invariant property changing. For example, the token to ether issuance ratio, in a token issuance contract, may be fixed. You can verify that this is the case at all times with an assertion. Assert guards should often be combined with other techniques, such as pausing the contract and allowing upgrades.
 
 Assert guards can also be combined with automated bug bounties that payout if the ratio changes in a test contract.
-
 
 The following example reverts transactions if the ratio of ether to total number of tokens changes:
 
@@ -756,15 +767,15 @@ Contracts should have a substantial and prolonged testing period - before substa
 
 At minimum, you should:
 
-- Have a full test suite with 100% test coverage
+- Have a full test suite with 100% test coverage (or close to it)
 - Deploy on your own testnet
 - Deploy on the public testnet with substantial testing and bug bounties
 - Exhaustive testing should allow various players to interact with the contract at volume
-- Deploy on the mainnet in beta with limits to the amount at risk
+- Deploy on the mainnet in beta, with limits to the amount at risk
 
 ##### Automatic Deprecation
 
-During testing, you can force an automatic deprecation by preventing any actions after a certain time period. For example, an alpha contract may work for several weeks and then automatically shut down all actions, except for the final withdrawal.
+During testing, you can force an automatic deprecation by preventing any actions, after a certain time period. For example, an alpha contract may work for several weeks and then automatically shut down all actions, except for the final withdrawal.
 
 ```
 modifier isActive() {
@@ -799,7 +810,7 @@ When launching a contract that will have substantial funds or is required to be 
 **Known Issues**
 
 - Key risks with contract
-- e.g., You can lose all your money, hacker can vote for certain outcomes
+  - e.g., You can lose all your money, hacker can vote for certain outcomes
 - All known bugs/limitations
 - Potential attacks and mitigants
 - Potential conflicts of interest (e.g., will be using yourself, like Slock.it did with the DAO)
@@ -821,6 +832,7 @@ When launching a contract that will have substantial funds or is required to be 
 - Who to contact with issues
 - Names of programmers and/or other important parties
 - Chat room where questions can be asked
+
 ## Future improvements
 - **Editor Security Warnings**: Editors will soon alert for common security errors, not just compilation errors. Browser Solidity is getting these features soon.
 

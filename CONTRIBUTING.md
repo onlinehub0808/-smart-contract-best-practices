@@ -20,7 +20,7 @@ Write for an intermediate Ethereum developer, they know the basics of Solidity p
   - Include a simple, illustrative example rather than complex examples that require substantial, extraneous reading
 - **Add a source link to the original document when available**
 - **Create new sections when warranted**
-- **Keep lines under 80 characters when possible**
+- **Keep code lines under 80 characters when possible**
 - Use the format of the [Airbnb Javascript Style guide](https://github.com/airbnb/javascript) as a starting point
 
 #### Recommendations Section
