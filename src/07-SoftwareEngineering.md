@@ -1,7 +1,7 @@
 
 ## Software Engineering Techniques
 
-Designing your contract for unknown, often unknowable, failure scenarios is a key aspect of defensive programming, which aims to reduce the risk from newly discovered bugs. We list potential techniques you can use to mitigate many unknown failure scenarios - and many of these can be used together.
+Designing your contract for unknown, often unknowable, failure scenarios is a key aspect of defensive programming, which aims to reduce the risk from newly discovered bugs. We list potential techniques you can use to mitigate various unknown failure scenarios - and many of these can be used together.
 
 Be thoughtful about what techniques you incorporate, as certain techniques require more Solidity code, leading to a greater risk of bugs.
 
@@ -86,7 +86,7 @@ Source: [Stack Overflow](http://ethereum.stackexchange.com/questions/2404/upgrad
 
 Circuit breakers stop execution if certain conditions are met, and can be useful when new errors are discovered. For example, most actions may be suspended in a contract if a bug is discovered, and the only action now active is a withdrawal. They can come at the cost of injecting some level of trust, though smart design can minimize the trust required.
 
-A circuit breaker can also be combined with assert guards, automatically pausing the contract if certain assertions fail (e.g., sum of balances drops below contract ether amount).
+A circuit breaker can also be combined with assert guards, automatically pausing the contract if certain assertions fail (e.g., ether to token peg changes).
 
 Example:
 
@@ -125,7 +125,7 @@ Source: [We Need Fault Tolerant Smart Contracts](https://medium.com/@peterborah/
 
 ### Speed Bumps(Delay contract actions)
 
-Speed bumps slow down actions, so that if malicious actions occur, there is time to recover. For example, [The DAO](https://github.com/slockit/DAO/) required 27 days between a successful request to split the DAO and the ability to do so. This ensured the funds were kept within the contract, allowing a greater likelihood of recovery (other fundamental flaws made this functionality useless without a fork in Ethereum). Speed bumps can be combined with other techniques (like circuit breakers or root access) for maximal effectiveness.
+Speed bumps slow down actions, so that if malicious actions occur, there is time to recover. For example, [The DAO](https://github.com/slockit/DAO/) required 27 days between a successful request to split the DAO and the ability to do so. This ensured the funds were kept within the contract, increasing the likelihood of recovery (other fundamental flaws made this functionality useless without a fork in Ethereum). Speed bumps can be combined with other techniques (like circuit breakers or root access) for maximal effectiveness.
 
 Example:
 
@@ -174,10 +174,9 @@ Source: [We Need Fault Tolerant Smart Contracts](https://medium.com/@peterborah/
 
 ### Assert Guards
 
-An assert guard triggers when an assertion fails - such as an invariant property changing. For example, the token to ether issuance ratio in a token issuance contract may be fixed, and so you can verify that this is the case at all times with an assertion. Assert guards should often be combined with other techniques, such as pausing the contract and allowing upgrades.
+An assert guard triggers when an assertion fails - such as an invariant property changing. For example, the token to ether issuance ratio, in a token issuance contract, may be fixed. You can verify that this is the case at all times with an assertion. Assert guards should often be combined with other techniques, such as pausing the contract and allowing upgrades.
 
 Assert guards can also be combined with automated bug bounties that payout if the ratio changes in a test contract.
-
 
 The following example reverts transactions if the ratio of ether to total number of tokens changes:
 
@@ -223,15 +222,15 @@ Contracts should have a substantial and prolonged testing period - before substa
 
 At minimum, you should:
 
-- Have a full test suite with 100% test coverage
+- Have a full test suite with 100% test coverage (or close to it)
 - Deploy on your own testnet
 - Deploy on the public testnet with substantial testing and bug bounties
 - Exhaustive testing should allow various players to interact with the contract at volume
-- Deploy on the mainnet in beta with limits to the amount at risk
+- Deploy on the mainnet in beta, with limits to the amount at risk
 
 ##### Automatic Deprecation
 
-During testing, you can force an automatic deprecation by preventing any actions after a certain time period. For example, an alpha contract may work for several weeks and then automatically shut down all actions, except for the final withdrawal.
+During testing, you can force an automatic deprecation by preventing any actions, after a certain time period. For example, an alpha contract may work for several weeks and then automatically shut down all actions, except for the final withdrawal.
 
 ```
 modifier isActive() {
