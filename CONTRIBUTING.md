@@ -15,7 +15,7 @@ Write for an intermediate Ethereum developer, they know the basics of Solidity p
 #### General
 
 - **Favor succinctness in writing**
-  - Use max 3-4 sentences in a sectin (exceptions can be made when critical)
+  - Use max 3-4 sentences in a section (exceptions can be made when critical)
   - Show, don’t tell (examples speak more than lengthy exposition)
   - Include a simple, illustrative example rather than complex examples that require substantial, extraneous reading
 - **Add a source link to the original document when available**
