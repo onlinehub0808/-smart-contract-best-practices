@@ -10,6 +10,8 @@ Here are some of them.  Feel free to add more.
 - [How to Write Safe Smart Contracts](https://chriseth.github.io/notes/talks/safe_solidity) (Christian Reitwiessner)
 - [Smart Contract Security](https://blog.ethereum.org/2016/06/10/smart-contract-security/) (Christian Reitwiessner)
 - [Thinking about Smart Contract Security](https://blog.ethereum.org/2016/06/19/thinking-smart-contract-security/) (Vitalik Buterin)
+- [Solidity](http://solidity.readthedocs.io)
+- [Solidity Security Considerations](http://solidity.readthedocs.io/en/latest/security-considerations.html)
 
 ##### By Community
 
