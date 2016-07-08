@@ -34,3 +34,22 @@ A lot of this document contains code, examples and insights gained from various 
 ##### Other
 
 [Least Authority Security Audit](https://github.com/LeastAuthority/ethereum-analyses)
+
+## Security Related References
+
+- http://hackingdistributed.com/2016/06/16/scanning-live-ethereum-contracts-for-bugs/
+- http://hackingdistributed.com/2016/06/18/analysis-of-the-dao-exploit/
+- http://hackingdistributed.com/2016/06/22/smart-contract-escape-hatches/
+- http://martin.swende.se/blog/Devcon1-and-contract-security.html
+- http://publications.lib.chalmers.se/records/fulltext/234939/234939.pdf
+- https://blog.ethereum.org/2016/06/10/smart-contract-security/
+- https://blog.ethereum.org/2016/06/19/thinking-smart-contract-security/
+- https://blog.slock.it/deja-vu-dao-smart-contracts-audit-results-d26bc088e32e
+- https://chriseth.github.io/notes/talks/safe_solidity
+- https://github.com/Bunjin/Rouleth/blob/master/Security.md
+- https://github.com/LeastAuthority/ethereum-analyses
+- https://medium.com/@ConsenSys/assert-guards-towards-automated-code-bounties-safe-smart-contract-coding-on-ethereum-8e74364b795c
+- https://medium.com/@coriacetic/in-bits-we-trust-4e464b418f0b
+- https://medium.com/@hrishiolickel/why-smart-contracts-fail-undiscovered-bugs-and-what-we-can-do-about-them-119aa2843007
+- https://medium.com/@peterborah/we-need-fault-tolerant-smart-contracts-ec1b56596dbc
+- http://www.comp.nus.edu.sg/~loiluu/papers/oyente.pdf
