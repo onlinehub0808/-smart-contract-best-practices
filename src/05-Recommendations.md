@@ -1,6 +1,8 @@
 
 ## Recommendations for Smart Contract Security in Solidity
 
+<a name="avoid-external-calls"></a>
+
 ### Avoid external calls, when possible
 
 External calls (including raw `call()`, `callcode()`, `delegatecall()`) can introduce several unexpected risks or errors. For calls to untrusted contracts, you may be executing malicious code in that contract _or_ any other contract that it depends upon. As such, it is strongly encouraged to minimize external calls. Over time, it is likely that a paradigm will develop that leads to safer external calls - but the risk currently is high.
@@ -9,17 +11,21 @@ If you must make an external call, ensure that external calls are the last call 
 
 When possible, avoid external Contract calls (eg `ExternalContract.doSomething()`), including raw `call()`, `callcode()`, `delegatecall()`.
 
-### Safely using external calls
+<a name="use-external-calls-safely"></a>
 
-There is an important difference in Solidity as to what happens with Contract calls (eg `ExternalContract.doSomething()`) vs raw calls (`address.call()`, `address.callcode()`, `address.delegatecall()`).  A raw call never throws an exception: it returns `false` if the call encounters an exception. Contract calls will automatically propagate a `throw` (vs a raw call). For example `ExternalContract.doSomething()` will also `throw` if `doSomething()` throws.
+### Use external calls safely
 
-The most important point is the same for both, whether using `ExternalContract.doSomething()` or `address.call()`, if `ExternalContract` is untrusted, assume that malicious code will execute.  Note that if you trust an `ExternalContract`, you also trust any contracts it calls, and that those call, are all non-malicious.  If any malicious contract exists in the call chain, the malicious contract can attack you (see [Reentrant Attacks](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#reentrant-attacks)).
+*Raw calls* (`address.call()`, `address.callcode()`, `address.delegatecall()`) never throw an exception, but will return `false` if the call encounters an exception. On the other hand, *contract calls* (e.g., `ExternalContract.doSomething()`) will automatically propogate a throw (for example, `ExternalContract.doSomething()` will also `throw` if `doSomething()` throws)
 
-### Use `send()`, avoid call.value()
+Whether using *raw calls* or *contract calls*, assume that malicious code will execute if `ExternalContract` is untrusted.  Additionally, if you trust an `ExternalContract`, you also trust any contracts it calls.  If any malicious contract exists in the call chain, the malicious contract can attack you (see [Reentrant Attacks](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#reentrant-attacks)).
 
-When sending Ether, use `someAddress.send()`.  Avoid `someAddress.call.value()()`.
+<a name="avoid-call-value"></a>
 
-As noted above, external calls, such as `someAddress.call.value()()` are potentially dangerous because they always trigger code.  `send()` also triggers code, specifically the [fallback function](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#keep-fallback-functions-simple). `send()` is safe because it only has access to gas stipend of 2300 gas, which is insufficient for the send recipient to trigger any state changes (the intention of the 2300 gas stipend was to allow the recipient to log an event).
+### Use `send()`, avoid `call.value()`
+
+When sending Ether, use `someAddress.send()`, avoid `someAddress.call.value()()`.
+
+As noted, external calls, such as `someAddress.call.value()()` are potentially dangerous because they always trigger code. `send()` also triggers code, specifically the [fallback function](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#keep-fallback-functions-simple), but `send()` is safe because it only has access to gas stipend of 2,300 gas. This is insufficient for the send recipient to trigger any state changes (the intention of the 2,300 gas stipend was to allow the recipient to log an event).
 
 ```
 // bad
@@ -32,8 +38,6 @@ if(!someAddress.send(100)) {
 }
 
 ExternalContract(someAddress).deposit.value(100); // raw call() is avoided, so if deposit throws an exception, the whole transaction IS reverted
-```
-
 
 ### Always test if `send()` and other raw calls have succeeded
 
@@ -57,6 +61,7 @@ if(!someAddress.send(55)) {
 
 ```
 
+<a name="dos-with-unexpected-throw"></a>
 
 ### DoS with (Unexpected) Throw
 
@@ -98,6 +103,8 @@ function getRefund() public {
 ```
 
 The recommended pattern is that each user should withdraw their payout themselves.
+
+<a name="favor-pull-over-push-payments"></a>
 
 ### Favor *pull* payments over *push* payments
 
@@ -154,6 +161,8 @@ contract auction {
 
 Source: [Smart Contract Security](https://blog.ethereum.org/2016/06/10/smart-contract-security/)
 
+<a name="keep-fallback-functions-simple"></a>
+
 ### Keep fallback functions simple
 
 Fallback functions are the default functions called when a contract is sent a message with no arguments, and only has access to 2,300 gas when called from a `.send()` call. As such, the most you should do in most fallback functions is call an event. Use a proper function if a computation or more gas is required.
@@ -167,6 +176,8 @@ function() { throw; }
 function() { LogSomeEvent(); }
 function deposit() { balances[msg.sender] += msg.value; }
 ```
+
+<a name="beware-rounding-with-integer-division"></a>
 
 ### Beware rounding with integer division
 
@@ -185,11 +196,14 @@ uint x = (5 * multiplier) / 2;
 
 Source:
 
+<a name="beware-division-by-zero"></a>
+
 ### Beware division by zero
 
 Currently, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not
 `throw` an exception when a number is divided by zero.
 
+<a name="differentiate-functions-events"></a>
 
 ### Differentiate functions and events
 
@@ -207,7 +221,9 @@ function transfer() {}
 
 Source: [Deconstructing the DAO Attack: A Brief Code Tour](http://vessenes.com/deconstructing-thedao-attack-a-brief-code-tour/) (Peter Vessenes)
 
-#### Explicitly mark visibility in functions and state variables
+<a name="mark-visibility"></a>
+
+### Explicitly mark visibility in functions and state variables
 
 Explicitly label the visibility of functions and state variables. Functions can be specified as being `external`, `public`, `internal` or `private`. For state variables, `external` is not possible.
 
@@ -228,10 +244,11 @@ function internalAction() internal {
 
 }
 ```
+<a name="mark-untrusted-contracts"></a>
 
 ### Mark untrusted contracts
 
-Mark which contracts are untrusted.  For example, some abstract contracts are implementable by 3rd parties. Use a prefix, or at minimum a comment, to highlight untrusted contracts.
+Mark which contracts are untrusted. For example, some abstract contracts are implementable by 3rd parties. Use a prefix, or at minimum a comment, to highlight untrusted contracts.
 
 ```
 // bad
