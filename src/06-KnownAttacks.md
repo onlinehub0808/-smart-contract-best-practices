@@ -184,7 +184,7 @@ function withdraw(uint amount) public returns (bool) {
 }
 ```
 
-Mutexes have their own disadvantages with the potential for deadlocks and reduced throughput - so choose the approach that works best for your use case and text extensively.
+Mutexes have their own disadvantages with the potential for deadlocks and reduced throughput - so choose the approach that works best for your use case and test extensively.
 
 
 <a name="dos-with-unexpected-throw"></a>

@@ -167,7 +167,7 @@ Bank.withdraw(100); // Unclear whether trusted or untrusted
 
 // good
 ExternalBank.withdraw(100); // untrusted external call
-Bank.withdraw(100); // external but trusted bank contract maintained by XYZ Corp
+TrustedBank.withdraw(100); // external but trusted bank contract maintained by XYZ Corp
 ```
 
 <a name="beware-rounding-with-integer-division"></a>

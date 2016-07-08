@@ -239,7 +239,7 @@ Bank.withdraw(100); // Unclear whether trusted or untrusted
 
 // good
 ExternalBank.withdraw(100); // untrusted external call
-Bank.withdraw(100); // external but trusted bank contract maintained by XYZ Corp
+TrustedBank.withdraw(100); // external but trusted bank contract maintained by XYZ Corp
 ```
 
 <a name="beware-rounding-with-integer-division"></a>
@@ -467,7 +467,7 @@ function withdraw(uint amount) public returns (bool) {
 }
 ```
 
-Mutexes have their own disadvantages with the potential for deadlocks and reduced throughput - so choose the approach that works best for your use case and text extensively.
+Mutexes have their own disadvantages with the potential for deadlocks and reduced throughput - so choose the approach that works best for your use case and test extensively.
 
 
 <a name="dos-with-unexpected-throw"></a>
