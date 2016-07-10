@@ -6,7 +6,7 @@ The recent attack on [The DAO](https://github.com/slockit/DAO) highlights the im
 
 #### Note for contributors
 
-This document is designed to provide a starting security baseline for intermediate Solidity programmers. It includes security philosophies, code idioms, known attacks, and software engineering techniques for blockchain contract programming - and aims to cover all communities, techniques, and tools that improve smart contract security. At this stage, this document is focused primarily on Solidity, a javascript-like language for Ethereum, but other languages are welcome.
+This document is designed to provide a starting *security* baseline for intermediate Solidity programmers. It includes security philosophies, code idioms, known attacks, and software engineering techniques for blockchain contract programming - and aims to cover all communities, techniques, and tools that improve smart contract security. At this stage, this document is focused primarily on Solidity, a javascript-like language for Ethereum, but other languages are welcome.
 
 To contribute, see our [Contribution Guidelines](CONTRIBUTING.md).
 
@@ -19,7 +19,7 @@ We especially welcome content in the following areas:
 
 ## General Philosophy
 
-Ethereum and complex blockchain programs are new and highly experimental. Therefore, you should expect constant changes in the security landscape, as new bugs and security risks are discovered, and new best practices are developed. Following the security practices in this document is therefore only the beginning of the security work you will need to do as a smart contract developer. 
+Ethereum and complex blockchain programs are new and highly experimental. Therefore, you should expect constant changes in the security landscape, as new bugs and security risks are discovered, and new best practices are developed. Following the security practices in this document is therefore only the beginning of the security work you will need to do as a smart contract developer.
 
 Smart contract programming requires a different engineering mindset than you may be used to. The cost of failure can be high, and change can be difficult, making it in some ways more similar to hardware programming or financial services programming than web or mobile development. It is therefore not enough to defend against known vulnerabilities. Instead, you will need to learn a new philosophy of development:
 
@@ -44,9 +44,9 @@ Smart contract programming requires a different engineering mindset than you may
   - Upgrade to the latest version of any tool or library as soon as possible
   - Adopt new security techniques that appear useful
 
-- **Be aware of the blockchain's unique properties**. While much of your programming experience will be relevant to Ethereum programming, there are new and unique pitfalls to be aware of.
+- **Rethink programming concepts you know**. While much of your programming experience will be relevant to Ethereum programming, there are new and unique pitfalls to be aware of.
   - Be extremely careful about external contract calls, which may execute malicious code and change control flow.
-  - Understand that your public functions are public, and may be called maliciously.
+  - Understand that your public functions are public, and may be called maliciously. Your private data is also viewable by anyone.
   - Keep gas costs and the gas block limit in mind.
 
 ## Security Notifications
@@ -72,6 +72,8 @@ Additionally, here is a list of Ethereum core developers who may write about sec
 - **Dr. Gavin Wood**: [Twitter](https://twitter.com/gavofyork), [Blog](http://gavwood.com/), [Github](https://github.com/gavofyork)
 - **Vlad Zamfir**: [Twitter](https://twitter.com/vladzamfir), [Github](https://github.com/vladzamfir), [Ethereum Blog](https://blog.ethereum.org/author/vlad/)
 
+Beyond following core developers, it is critical to participate in the wider blockchain-related security community - as security disclosures or observations will come through a variety of parties.
+
 ## Recommendations for Smart Contract Security in Solidity
 
 
@@ -88,7 +90,7 @@ Calls to untrusted contracts can introduce several unexpected risks or errors. E
 
 When sending Ether, use `someAddress.send()` and avoid `someAddress.call.value()()`.
 
-As noted, external calls such as `someAddress.call.value()()` can trigger malicious code. While `send()` also triggers code, it is safe because it only has access to gas stipend of 2,300 gas. This is only enough to log an event, not enough to launch an attack.
+External calls such as `someAddress.call.value()()` can trigger malicious code. While `send()` also triggers code, it is safe because it only has access to gas stipend of 2,300 gas. This is generally enough to log an event, but typically not enough to launch an attack.
 
 ```
 // bad
@@ -128,7 +130,7 @@ ExternalContract(someAddress).deposit.value(100);
 
 #### Don't make control flow assumptions after external calls
 
-Whether using *raw calls* or *contract calls*, assume that malicious code will execute if `ExternalContract` is untrusted. Even if `ExternalContract` is not malicious, malicious code can be executed by any contracts *it* calls. One particular danger is malicious code may hijack the control flow, leading to race conditions. (See [Race Conditions](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#race-conditions) for a much fuller discussion of this problem).
+Whether using *raw calls* or *contract calls*, assume that malicious code will execute if `ExternalContract` is untrusted. Even if `ExternalContract` is not malicious, malicious code can be executed by any contracts *it* calls. One particular danger is malicious code may hijack the control flow, leading to race conditions. (See [Race Conditions](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#race-conditions) for a fuller discussion of this problem).
 
 <a name="favor-pull-over-push-payments"></a>
 
@@ -187,7 +189,7 @@ contract auction {
 
 #### Mark untrusted contracts
 
-When interacting with external contracts, name your variables, methods, and contract interfaces in a way that makes it clear that interacting with them is potentially unsafe.
+When interacting with external contracts, name your variables, methods, and contract interfaces in a way that makes it clear that interacting with them is potentially unsafe. This applies to your own functions that call external contracts.
 
 ```
 // bad
@@ -310,12 +312,12 @@ function transfer() external {}
 
 ### Call Depth Attack
 
-With the Call Depth Attack, an attack can cause *any* call (even a fully trusted and correct one) to fail. This is because there is a limit on how deep the "call stack" can go. If the attacker does a bunch of recursive calls and brings the stack depth to 1023, then they can call your function and automatically cause all of its subcalls to fail.
+With the Call Depth Attack, *any* call (even a fully trusted and correct one) can fail. This is because there is a limit on how deep the "call stack" can go. If the attacker does a bunch of recursive calls and brings the stack depth to 1023, then they can call your function and automatically cause all of its subcalls to fail (subcalls include internal function calls, external calls, sends, etc.).
 
-An example based on the auction code from above.
+An example based on the previous auction code:
 
 ```
-// DO NOT USE. THIS IS VULNERABLE.
+// INSECURE
 contract auction {
     mapping(address => uint) refunds;
 
@@ -347,18 +349,16 @@ contract auction {
 
 <a name="race-conditions"></a>
 
-### Race Conditions
+### Race Conditions<sup><a href='#footnote-race-condition-terminology'>\*</a></sup>
 
 One of the major dangers of calling external contracts is that they can take over the control flow, and make changes to your data that the calling function wasn't expecting. This class of bug can take many forms, and both of the major bugs that led to the DAO's collapse were bugs of this sort.
-
-(Some may object to the use of the term "race condition", since Ethereum does not currently have true parallelism. However, there is still the fundamental feature of logically distinct processes contending for resources, and the same sorts of pitfalls and potential solutions apply.)
 
 #### Reentrancy
 
 The first version of this bug to be noticed involved functions that could be called repeatedly, before the first invocation of the function was finished. This may cause the different invocations of the function to interact in destructive ways.
 
 ```
-// DO NOT USE. THIS IS VULNERABLE.
+// INSECURE
 mapping (address => uint) private userBalances;
 
 function withdrawBalance() public {
@@ -391,10 +391,10 @@ Note that if you had another function which called `withdrawBalance()`, it would
 An attacker may also be able to do a similar attack using two different functions that share the same state.
 
 ```
-// VULNERABLE
+// INSECURE
 mapping (address => uint) private userBalances;
 
-function transfer(address to, uint amount) { 
+function transfer(address to, uint amount) {
     if (userBalances[msg.sender] >= amount) {
        userBalances[to] += amount;
        userBalances[msg.sender] -= amount;
@@ -408,7 +408,7 @@ function withdrawBalance() public {
 }
 ```
 
-In this case, the attacker calls `transfer()` when their code is executed. Since their balance has not yet been set to 0, they are able to transfer the tokens even though they already received the withdrawal. This vulnerability was also used in the DAO attack.
+In this case, the attacker calls `transfer()` when their code is executed on the external call in `withdrawBalance`. Since their balance has not yet been set to 0, they are able to transfer the tokens even though they already received the withdrawal. This vulnerability was also used in the DAO attack.
 
 The same solutions will work, with the same caveats. Also note that in this example, both functions were part of the same contract. However, the same bug can occur across multiple contracts, if those contracts share state.
 
@@ -419,7 +419,7 @@ Since race conditions can occur across multiple functions, and even multiple con
 Instead, we have recommended finishing all internal work first, and only then calling the external function. This rule, if followed carefully, will allow you to avoid race conditions. However, you need to not only avoid calling external functions too soon, but also avoid calling functions which call external functions. For example, the following is insecure:
 
 ```
-// VULNERABLE
+// INSECURE
 mapping (address => uint) private userBalances;
 mapping (address => bool) private claimedBonus;
 mapping (address => uint) private rewardsForA;
@@ -427,7 +427,7 @@ mapping (address => uint) private rewardsForA;
 function withdraw(address recipient) public {
     uint amountToWithdraw = userBalances[recipient];
     rewardsForA[recipient] = 0;
-    if (!(recipient.call.value(amountToWithdraw)())) { throw; } 
+    if (!(recipient.call.value(amountToWithdraw)())) { throw; }
 }
 
 function getFirstWithdrawalBonus(address recipient) public {
@@ -449,7 +449,7 @@ mapping (address => uint) private rewardsForA;
 function untrustedWithdraw(address recipient) public {
     uint amountToWithdraw = userBalances[recipient];
     rewardsForA[recipient] = 0;
-    if (!(recipient.call.value(amountToWithdraw)())) { throw; } 
+    if (!(recipient.call.value(amountToWithdraw)())) { throw; }
 }
 
 function untrustedGetFirstWithdrawalBonus(address recipient) public {
@@ -463,7 +463,7 @@ function untrustedGetFirstWithdrawalBonus(address recipient) public {
 
 In addition to the fix making reentry impossible, [untrusted functions have been marked.](https://github.com/ConsenSys/smart-contract-best-practices#mark-untrusted-contracts) This same pattern repeats at every level: since `untrustedGetFirstWithdrawalBonus()` calls `untrustedWithdraw()`, which calls an external contract, you must also treat `untrustedGetFirstWithdrawalBonus()` as insecure.
 
-Another solution often suggested is a [mutex](https://en.wikipedia.org/wiki/Mutual_exclusion). This allows you to "lock" some state so it can only be changed by the owner of the lock. A simple example might look like this: 
+Another solution often suggested is a [mutex](https://en.wikipedia.org/wiki/Mutual_exclusion). This allows you to "lock" some state so it can only be changed by the owner of the lock. A simple example might look like this:
 
 ```
 // Note: This is a rudimentary example, and mutexes are particularly useful where there is substantial logic and/or shared state
@@ -499,7 +499,7 @@ function withdraw(uint amount) public returns (bool) {
 If the user tries to call `withdraw()` again before the first call finishes, the lock will prevent it from having any effect. This can be an effective pattern, but it gets tricky when you have multiple contracts that need to cooperate. The following is insecure:
 
 ```
-//VULNERABLE
+// INSECURE
 contract StateHolder {
     uint private n;
     address private lockHolder;
@@ -522,6 +522,10 @@ contract StateHolder {
 
 An attacker can call `getLock()`, and then never call `releaseLock()`. If they do this, then the contract will be locked forever, and no further changes will be able to be made. If you use mutexes to protect against race conditions, you will need to carefully ensure that there are no ways for a lock to be claimed and never released. (There are other potential dangers when programming with mutexes, such as deadlocks and livelocks. You should consult the large amount of literature already written on mutexes, if you decide to go this route.)
 
+<a name="footnote-race-condition-terminology"></a>
+
+<div style='font-size: 80%; display: inline;'>* Some may object to the use of the term <i>race condition</i>, since Ethereum does not currently have true parallelism. However, there is still the fundamental feature of logically distinct processes contending for resources, and the same sorts of pitfalls and potential solutions apply.</div>
+
 <a name="dos-with-unexpected-throw"></a>
 
 ### DoS with (Unexpected) Throw
@@ -529,12 +533,12 @@ An attacker can call `getLock()`, and then never call `releaseLock()`. If they d
 Consider a simple auction contract:
 
 ```
-//VULNERABLE
+// INSECURE
 contract Auction {
     address currentLeader;
     uint highestBid;
 
-    function bid() { 
+    function bid() {
         if (msg.value <= highestBid) { throw; }
 
         if (!currentLeader.send(highestBid)) { throw; } // Refund the old leader, and throw if it fails
@@ -596,7 +600,7 @@ function payOut() {
 }
 ```
 
-Note that this is vulnerable to the [Call Depth Attack](#call-depth-attack), however. And you will need to make sure that nothing bad will happen if other transactions are processed while waiting for the next iteration of the `payOut()` function. So only use this pattern if it's really necessary.
+Note that this is vulnerable to the [Call Depth Attack](#call-depth-attack), however. And you will need to make sure that nothing bad will happen if other transactions are processed while waiting for the next iteration of the `payOut()` function. So only use this pattern if absolutely necessary.
 
 <a name="timestamp-dependence"></a>
 
@@ -625,11 +629,11 @@ As we discussed in the [General Philosophy](#general-philosophy) section, it is 
 
 The approach we advocate is to "prepare for failure". It is impossible to know in advance whether your code is secure. However, you can architect your contracts in a way that allows them to fail gracefully, and with minimal damage. This section presents a variety of techniques that will help you prepare for failure.
 
-Note: There's always a risk when you add a new component to your system. A badly designed failsafe could itself become a vulnerability. Be thoughtful about each technique you add to your contracts, and consider carefully how they work together to create a robust system.
+Note: There's always a risk when you add a new component to your system. A badly designed failsafe could itself become a vulnerability - as can the interaction between a number of well designed failsafes. Be thoughtful about each technique you use in your contracts, and consider carefully how they work together to create a robust system.
 
 ### Upgrading Broken Contracts
 
-Code will need to be changed if errors are discovered or if improvements need to be made. It is no good to discover a bug, but have no way to deal with it!
+Code will need to be changed if errors are discovered or if improvements need to be made. It is no good to discover a bug, but have no way to deal with it.
 
 Designing an effective upgrade system for smart contracts is an area of active research, and we won't be able to cover all of the complications in this document. However, there are two basic approaches that are most commonly used. The simpler of the two is to have a registry contract that holds the address of the latest version of the contract. A more seamless approach for contract users is to have a contract that forwards calls and data onto the latest version of the contract.
 
@@ -673,7 +677,12 @@ contract SomeRegister {
 }
 ```
 
-There are two main disadvantages to this approach: First, users must always look up the current address, and anyone who fails to do so risks using an old version of the contract. Second, you will need to think carefully about how to deal with the contract data, when you replace the contract.
+There are two main disadvantages to this approach:
+
+1. Users must always look up the current address, and anyone who fails to do so risks using an old version of the contract
+2. You will need to think carefully about how to deal with the contract data, when you replace the contract
+
+The alternate approach is to have a contract forward calls and data to the latest version of the contract:
 
 **Example 2: [Use a `DELEGATECALL`](http://ethereum.stackexchange.com/questions/2404/upgradeable-contracts) to forward data and calls**
 
@@ -708,7 +717,7 @@ contract Relay {
 
 This approach avoids the previous problems, but has problems of its own. You must be extremely careful with how you store data in this contract. If your new contract has a different storage layout than the first, your data may end up corrupted. Additionally, this simple version of the pattern cannot return values from functions, only forward them, which limits its applicability. ([More complex implementations](https://github.com/ownage-ltd/ether-router) attempt to solve this with in-line assembly code and a registry of return sizes.)
 
-Regardless of your approach, it is important to have some way to upgrade your contracts, or they will become unusable when the inevitable bugs are discovered in them. 
+Regardless of your approach, it is important to have some way to upgrade your contracts, or they will become unusable when the inevitable bugs are discovered in them.
 
 ### Circuit Breakers (Pause contract functionality)
 
@@ -749,7 +758,7 @@ onlyInEmergency() {
 
 ### Speed Bumps (Delay contract actions)
 
-Speed bumps slow down actions, so that if malicious actions occur, there is time to recover. For example, [The DAO](https://github.com/slockit/DAO/) required 27 days between a successful request to split the DAO and the ability to do so. This ensured the funds were kept within the contract, increasing the likelihood of recovery. In the case of the DAO, there was no effective action that could be taken during the time given by the speed bump, but in combination with our other techniques, they can be quite effective. 
+Speed bumps slow down actions, so that if malicious actions occur, there is time to recover. For example, [The DAO](https://github.com/slockit/DAO/) required 27 days between a successful request to split the DAO and the ability to do so. This ensured the funds were kept within the contract, increasing the likelihood of recovery. In the case of the DAO, there was no effective action that could be taken during the time given by the speed bump, but in combination with our other techniques, they can be quite effective.
 
 Example:
 
