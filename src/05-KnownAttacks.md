@@ -65,7 +65,7 @@ function withdrawBalance() public {
 
 Since the user's balance is not set to 0 until the very end of the function, the second (and later) invocations will still succeed, and will withdraw the balance over and over again. A very similar bug was one of the vulnerabilities in the DAO attack.
 
-In the example given, the best way to avoid the problem is to use `send()` instead of `call.value()()`. This will prevent any external code from being executed.
+In the example given, the best way to avoid the problem is to [use `send()` instead of `call.value()()`](https://github.com/ConsenSys/smart-contract-best-practices#use-send-avoid-callvalue). This will prevent any external code from being executed.
 
 However, if you can't remove the external call, the next simplest way to prevent this attack is to make sure you don't call an external function until you've done all the internal work you need to do:
 
