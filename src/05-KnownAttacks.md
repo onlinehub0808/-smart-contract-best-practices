@@ -141,22 +141,22 @@ mapping (address => uint) private userBalances;
 mapping (address => bool) private claimedBonus;
 mapping (address => uint) private rewardsForA;
 
-function withdraw(address recipient) public {
+function untrustedWithdraw(address recipient) public {
     uint amountToWithdraw = userBalances[recipient];
     rewardsForA[recipient] = 0;
     if (!(recipient.call.value(amountToWithdraw)())) { throw; } 
 }
 
-function getFirstWithdrawalBonus(address recipient) public {
+function untrustedGetFirstWithdrawalBonus(address recipient) public {
     if (claimedBonus[recipient]) { throw; } // Each recipient should only be able to claim the bonus once
 
     claimedBonus[recipient] = true;
     rewardsForA[recipient] += 100;
-    withdraw(recipient); // claimedBonus has been set to true, so reentry is impossible
+    untrustedWithdraw(recipient); // claimedBonus has been set to true, so reentry is impossible
 }
 ```
 
-This same pattern repeats at every level: since `getFirstWithdrawalBonus()` calls `withdraw()`, which calls an external contract, you must also treat `getFirstWithdrawalBonus()` as insecure.
+In addition to the fix making reentry impossible, [untrusted functions have been marked.](https://github.com/ConsenSys/smart-contract-best-practices#mark-untrusted-contracts) This same pattern repeats at every level: since `untrustedGetFirstWithdrawalBonus()` calls `untrustedWithdraw()`, which calls an external contract, you must also treat `untrustedGetFirstWithdrawalBonus()` as insecure.
 
 Another solution often suggested is a [mutex](https://en.wikipedia.org/wiki/Mutual_exclusion). This allows you to "lock" some state so it can only be changed by the owner of the lock. A simple example might look like this: 
 
