@@ -1,73 +1,67 @@
 
 ## Recommendations for Smart Contract Security in Solidity
 
+
+### External Calls
+
+#### Avoid external calls when possible
 <a name="avoid-external-calls"></a>
 
-### Avoid external calls, when possible
-
-External calls (including raw `call()`, `callcode()`, `delegatecall()`) can introduce several unexpected risks or errors. For calls to untrusted contracts, you may be executing malicious code in that contract _or_ any other contract that it depends upon. As such, it is strongly encouraged to minimize external calls. Over time, it is likely that a paradigm will develop that leads to safer external calls - but the risk currently is high.
-
-If you must make an external call, ensure that external calls are the last call in a function - and that you've finalized your contract state before the call is made.
-
-When possible, avoid external Contract calls (eg `ExternalContract.doSomething()`), including raw `call()`, `callcode()`, `delegatecall()`.
-
-<a name="use-external-calls-safely"></a>
-
-### Use external calls safely
-
-*Raw calls* (`address.call()`, `address.callcode()`, `address.delegatecall()`) never throw an exception, but will return `false` if the call encounters an exception. On the other hand, *contract calls* (e.g., `ExternalContract.doSomething()`) will automatically propogate a throw (for example, `ExternalContract.doSomething()` will also `throw` if `doSomething()` throws).
-
-Whether using *raw calls* or *contract calls*, assume that malicious code will execute if `ExternalContract` is untrusted.  Additionally, if you trust an `ExternalContract`, you also trust any contracts it calls.  If any malicious contract exists in the call chain, the malicious contract can attack you (see [Reentrant Attacks](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#reentrant-attacks)).
+Calls to untrusted contracts can introduce several unexpected risks or errors. External calls may execute malicious code in that contract _or_ any other contract that it depends upon. As such, every external call should be treated as a potential security risk, and removed if possible. When it is not possible to remove external calls, use the recommendations in the rest of this section to minimize the danger.
 
 <a name="avoid-call-value"></a>
 
-### Use `send()`, avoid `call.value()`
+#### Use `send()`, avoid `call.value()`
 
-When sending Ether, use `someAddress.send()`, avoid `someAddress.call.value()()`.
+When sending Ether, use `someAddress.send()` and avoid `someAddress.call.value()()`.
 
-As noted, external calls, such as `someAddress.call.value()()` are potentially dangerous because they always trigger code. `send()` also triggers code, specifically the [fallback function](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#keep-fallback-functions-simple), but `send()` is safe because it only has access to gas stipend of 2,300 gas. This is insufficient for the send recipient to trigger any state changes (the intention of the 2,300 gas stipend was to allow the recipient to log an event).
+As noted, external calls such as `someAddress.call.value()()` can trigger malicious code. While `send()` also triggers code, it is safe because it only has access to gas stipend of 2,300 gas. This is only enough to log an event, not enough to launch an attack.
 
 ```
 // bad
-someAddress.call.value(100)(); // this is doubly dangerous, as it will forward all remaining gas and doesn't check for result
-someAddress.call.value(100)(bytes4(sha3("deposit()"))); // if deposit throws an exception, the raw call() will only return false and transaction will NOT be reverted
+if(!someAddress.call.value(100)()) {
+    // Some failure code
+}
 
 // good
 if(!someAddress.send(100)) {
     // Some failure code
 }
-
-ExternalContract(someAddress).deposit.value(100); // raw call() is avoided, so if deposit throws an exception, the whole transaction IS reverted
 ```
 
-### Always test if `send()` and other raw calls have succeeded
+<a name="handle-external-errors"></a>
 
-`send()` and raw external calls can fail (e.g., when the call depth of 1024 is breached), so you should always test if it succeeded. If you don't test the result, it's recommended to note in a comment.
+#### Handle errors in external calls
 
-If you throw on a `send()` failure, be careful as you may create a [denial-of-service](https://github.com/ConsenSys/smart-contract-best-practices#dos-with-unexpected-throw) vulnerability.
+Solidity offers low-level call methods that work on raw addresses: `address.call()`, `address.callcode()`, `address.delegatecall()`, and `address.send`. These low-level methods never throw an exception, but will return `false` if the call encounters an exception. On the other hand, *contract calls* (e.g., `ExternalContract.doSomething()`) will automatically propogate a throw (for example, `ExternalContract.doSomething()` will also `throw` if `doSomething()` throws).
+
+If you choose to use the low-level call methods, make sure to handle the possibility that the call will fail, by checking the return value. Note that the [Call Depth Attack](https://github.com/ConsenSys/smart-contract-best-practices/#call-depth-attack) can cause *any* call to fail, even if the external contract's code is working and non-malicious.
 
 ```
 // bad
 someAddress.send(55);
 someAddress.call.value(55)(); // this is doubly dangerous, as it will forward all remaining gas and doesn't check for result
-
-if(!someAddress.call.value(55)(calldata)) { // checks the return value of call() but is not recommended since call() should be avoided
-    // Some failure code
-}
+someAddress.call.value(100)(bytes4(sha3("deposit()"))); // if deposit throws an exception, the raw call() will only return false and transaction will NOT be reverted
 
 // good
 if(!someAddress.send(55)) {
     // Some failure code
 }
+
+ExternalContract(someAddress).deposit.value(100);
 ```
+
+<a name="expect-control-flow-loss"></a>
+
+#### Don't make control flow assumptions after external calls
+
+Whether using *raw calls* or *contract calls*, assume that malicious code will execute if `ExternalContract` is untrusted. Even if `ExternalContract` is not malicious, malicious code can be executed by any contracts *it* calls. One particular danger is malicious code may hijack the control flow, leading to race conditions. (See [Race Conditions](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#race-conditions) for a much fuller discussion of this problem).
 
 <a name="favor-pull-over-push-payments"></a>
 
-### Favor *pull* payments over *push* payments
+#### Favor *pull* over *push* for external calls
 
-As noted, payments can fail for multiple reasons - including if the call stack exceeds 1024 or a failure on externally. To prevent payments failing, create a balance in an action that can be separately withdrawn by the external party using another action. This requires two actions on external party's part - a request to withdraw and a withdrawal - but reduces a number of potential errors.
-
-In the future, with lower block times and having to interact across shards, this asynchronous payment might become a more important pattern for reasons other than security.
+As we've seen, external calls can fail for a number of reasons, including external errors and malicious [Call Depth Attacks](https://github.com/ConsenSys/smart-contract-best-practices/#call-depth-attack). To minimize the damage caused by such failures, it is often better to isolate each external call into its own transaction that can be initiated by the recipient of the call. This is especially relevant for payments, where it is better to let users withdraw funds rather than push funds to them automatically. (This also reduces the chance of [problems with the gas limit](https://github.com/ConsenSys/smart-contract-best-practices/#dos-with-block-gas-limit).)
 
 ```
 // bad
@@ -116,65 +110,36 @@ contract auction {
 }
 ```
 
-<a name="keep-fallback-functions-simple"></a>
-
-### Keep fallback functions simple
-
-[Fallback functions](http://solidity.readthedocs.io/en/latest/contracts.html#fallback-function) are called when a contract is sent a message with no arguments (or when no function matches), and only has access to 2,300 gas when called from a `.send()` call. The most you should do in most fallback functions is call an event. Use a proper function if a computation or more gas is required.
-
-```
-// bad
-function() { balances[msg.sender] += msg.value; }
-
-// good
-function() { throw; }
-function() { LogDepositReceived(msg.sender); }
-function deposit() external { balances[msg.sender] += msg.value; }
-```
-
-<a name="mark-visibility"></a>
-
-### Explicitly mark visibility in functions and state variables
-
-Explicitly label the visibility of functions and state variables. Functions can be specified as being `external`, `public`, `internal` or `private`. For state variables, `external` is not possible.
-
-```
-// not great
-uint x; // the default is private for state variables, but it should be made explicit
-function transfer() { // the default is public
-
-}
-
-// good
-uint private y;
-function transfer() public {
-
-}
-
-function internalAction() internal {
-
-}
-```
 <a name="mark-untrusted-contracts"></a>
 
-### Mark untrusted contracts
+#### Mark untrusted contracts
 
-Mark which contracts are untrusted. For example, some abstract contracts are implementable by 3rd parties. Use a prefix, or at minimum a comment, to highlight untrusted contracts.
+When interacting with external contracts, name your variables, methods, and contract interfaces in a way that makes it clear that interacting with them is potentially unsafe.
 
 ```
 // bad
 Bank.withdraw(100); // Unclear whether trusted or untrusted
 
+function makeWithdrawal(uint amount) { // Isn't clear that this function is potentially unsafe
+    UntrustedBank.withdraw(amount);
+}
+
 // good
-ExternalBank.withdraw(100); // untrusted external call
+UntrustedBank.withdraw(100); // untrusted external call
 TrustedBank.withdraw(100); // external but trusted bank contract maintained by XYZ Corp
+
+function makeUntrustedWithdrawal(uint amount) {
+    UntrustedBank.withdraw(amount);
+}
 ```
 
 <a name="beware-rounding-with-integer-division"></a>
 
 ### Beware rounding with integer division
 
-All integer divison rounds down to the nearest integer - use a multiplier to keep track, or use the future fixed point data types.
+All integer divison rounds down to the nearest integer. If you need more precision, consider using a multiplier, or store both the numerator and denominator.
+
+(In the future, Solidity will have a fixed-point type, which will make this easier.)
 
 ```
 // bad
@@ -184,15 +149,71 @@ uint x = 5 / 2; // Result is 2, all integer divison rounds DOWN to the nearest i
 uint multiplier = 10;
 uint x = (5 * multiplier) / 2;
 
-// in the near future, Solidity will have fixed point data types like fixed, ufixed
+uint numerator = 5;
+uint denominator = 2;
 ```
+
+<a name="keep-fallback-functions-simple"></a>
+
+### Keep fallback functions simple
+
+[Fallback functions](http://solidity.readthedocs.io/en/latest/contracts.html#fallback-function) are called when a contract is sent a message with no arguments (or when no function matches), and only has access to 2,300 gas when called from a `.send()` call. If you wish to be able to recieve Ether from a `.send()`, the most you can do in a fallback function is call an event. Use a proper function if a computation or more gas is required.
+
+```
+// bad
+function() { balances[msg.sender] += msg.value; }
+
+// good
+function() { throw; }
+function deposit() external { balances[msg.sender] += msg.value; }
+
+function() { LogDepositReceived(msg.sender); }
+```
+
+<a name="mark-visibility"></a>
+
+### Explicitly mark visibility in functions and state variables
+
+Explicitly label the visibility of functions and state variables. Functions can be specified as being `external`, `public`, `internal` or `private`. For state variables, `external` is not possible. Labeling the visibility explicitly will make it easier to catch incorrect assumptions about who can call the function or access the variable.
+
+```
+// bad
+uint x; // the default is private for state variables, but it should be made explicit
+function transfer() { // the default is public
+    // public code
+}
+
+// good
+uint private y;
+function transfer() public {
+    // public code
+}
+
+function internalAction() internal {
+    // internal code
+}
+```
+
 
 <a name="beware-division-by-zero"></a>
 
 ### Beware division by zero
 
-Currently, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not
-`throw` an exception when a number is divided by zero.
+Currently, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not `throw` an exception when a number is divided by zero. You therefore need to check for division by zero manually.
+
+```
+// bad
+function divide(uint x, uint y) returns(uint) {
+    return x / y;
+}
+
+// good
+function divide(uint x, uint y) returns(uint) {
+   if (y == 0) { throw; }
+
+   return x / y;
+}
+```
 
 <a name="differentiate-functions-events"></a>
 

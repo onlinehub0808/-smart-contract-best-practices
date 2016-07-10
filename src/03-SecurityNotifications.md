@@ -1,7 +1,7 @@
 
 ## Security Notifications
 
-This is a list of resources that will often highlight discovered exploits in Ethereum or Solidity:
+This is a list of resources that will often highlight discovered exploits in Ethereum or Solidity. The official source of security notifications is the Ethereum Blog, but in many cases vulnerabilities will be disclosed and discussed earlier in other locations.
 
 - [Ethereum Blog](https://blog.ethereum.org/): The official Ethereum blog
   - [Ethereum Blog - Security only](https://blog.ethereum.org/category/security/): All blog posts that are tagged *Security*

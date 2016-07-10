@@ -5,153 +5,158 @@
 
 ### Call Depth Attack
 
-Even if it is known that the likelihood of failure in a sub-execution is possible, this can be forced to happen through a Call Depth Attack. There’s a limit to how deep the message-call/contract-creation stack can become in one transaction (limit of 1024). Thus, an attacker can build up a chain of calls and then call a contract, forcing subsequent calls to fail even if enough gas is available. It has to be a call, within a call, within a call, etc.  This is sometimes called the Call stack attack, but as the EVM is stack-based and operates on a stack (that is different from the message-call/contract-creation stack), ambiguity is avoided by simply calling this a Call Depth Attack.
+With the Call Depth Attack, an attack can cause *any* call (even a fully trusted and correct one) to fail. This is because there is a limit on how deep the "call stack" can go. If the attacker does a bunch of recursive calls and brings the stack depth to 1023, then they can call your function and automatically cause all of its subcalls to fail.
 
-Example auction code from above:
+An example based on the auction code from above.
 
 ```
 // DO NOT USE. THIS IS VULNERABLE.
 contract auction {
-    address highestBidder;
-    uint highestBid;
     mapping(address => uint) refunds;
 
-    function bid() {
-	if (msg.value < highestBid) throw;
-	if (highestBidder != 0)
-	    refunds[highestBidder] += highestBid;
-	highestBidder = msg.sender;
-	highestBid = msg.value;
-    }
+    // [...]
 
-    function withdrawRefund() {
-	uint refund = refunds[msg.sender];
-	refunds[msg.sender] = 0;
-	msg.sender.send(refund); // vulnerable line.
-	refunds[msg.sender] = refund;
+    function withdrawRefund(address recipient) {
+      uint refund = refunds[recipient];
+      refunds[recipient] = 0;
+      recipient.send(refund); // this line is vulnerable to a call depth attack
     }
 }
 ```
 
-The send() can fail if the call depth is too large, causing ether to not be sent. However it would be marked as if it did send. As previously shown, the external call should be checked for errors. This example, the state would just revert to the previous state:
+The send() can fail if the call depth is too large, causing ether to not be sent. However, the rest of the function would succeed, including the previous line which set the victim's refund balance to 0. The solution is to explicitly check for errors, as discussed previously:
 
 ```
 contract auction {
-    address highestBidder;
-    uint highestBid;
     mapping(address => uint) refunds;
 
-    function bid() external {
-        if (msg.value < highestBid) throw;
-        if (highestBidder != 0) {
-	    refunds[highestBidder] += highestBid;
-	}
+    // [...]
 
-        highestBidder = msg.sender;
-        highestBid = msg.value;
-    }
-
-    function withdrawRefund() external {
-	uint refund = refunds[msg.sender];
-	refunds[msg.sender] = 0;
-	if (!msg.sender.send(refund)) {
-	   refunds[msg.sender] = refund;
-	}
+    function withdrawRefund(address recipient) {
+      uint refund = refunds[recipient];
+      refunds[recipient] = 0;
+      if (!recipient.send(refund)) { throw; } // the transaction will be reverted in case of call depth attack
     }
 }
 ```
 
-Thus:
+<a name="race-conditions"></a>
 
-All raw external calls should be examined and handled carefully for errors.  In most cases, the return values should be checked and handled carefully.  We recommend explicit comments in the code when such a return value is deliberately not checked.
+### Race Conditions
 
-As you can see, the call depth attack can be a malicious attack on a contract for the purpose of failing a subsequent call. Thus even if you know what code will be executed, it could still be forced to fail.
+One of the major dangers of calling external contracts is that they can take over the control flow, and make changes to your data that the calling function wasn't expecting. This class of bug can take many forms, and both of the major bugs that led to the DAO's collapse were bugs of this sort.
 
-<a name="reentrant-attacks"></a>
+(Some may object to the use of the term "race condition", since Ethereum does not currently have true parallelism. However, there is still the fundamental feature of logically distinct processes contending for resources, and the same sorts of pitfalls and potential solutions apply.)
 
-### Reentrant Attacks
+#### Reentrancy
 
-A key benefit of Ethereum is the ability for one contract to call another - but this also can introduce risks, especially when you don't know exactly what the external call will do. Reentrant attacks, which allow a function to be called in a contract while a function in that contract is running, are one example of ths. This can occur when the same function is called again (a recursive reentrant attack), or when another function that shares state with the previously called function is called.
-
-(The DAO hack combined both these attacks)
-
-```
-// VULNERABLE.  externalContract can call g() and affect the sharedState.
-contract C {
-    uint sharedState = 2;
-    function f(address externalContract) internal {
-       sharedState = 44;
-       externalContract.call.value(3)();
-       // normally it would be assumed that sharedState would be 44 here.
-       // But this guarantee cannot hold since a reentrant attack calling g() will change sharedState
-    }
-    
-    function g() external {
-        sharedState = 55;
-    }
-}
-```
-
-
-#### Recursive Reentrant Attack
-
-This attack occurs when the state has not been properly set before the external call in a function. The attacker can reenter and call the function again, even though the programmer never intended for this to happen. For example, you can withdraw money and recursively call the withdraw again, as the balance may only be updated at the end of the `withdraw` function. The attacker can recursively call until the gas limit has been reached or before the call depth is reached.
-
-Example:
+The first version of this bug to be noticed involved functions that could be called repeatedly, before the first invocation of the function was finished. This may cause the different invocations of the function to interact in destructive ways.
 
 ```
 // DO NOT USE. THIS IS VULNERABLE.
 mapping (address => uint) private userBalances;
 
-function getBalance(address user) constant returns(uint) {
-    return userBalances[user];
-}
-
-function addToBalance() public {
-    userBalances[msg.sender] += msg.value;
-}
-
 function withdrawBalance() public {
     uint amountToWithdraw = userBalances[msg.sender];
-    if (!(msg.sender.call.value(amountToWithdraw)())) { throw; } // the ether is sent without zeroing out msg.sender's balance, so msg.sender can repeatedly call withdrawBalance().
+    if (!(msg.sender.call.value(amountToWithdraw)())) { throw; } // At this point, the caller's code is executed, and can call withdrawBalance again
     userBalances[msg.sender] = 0;
 }
 ```
 
-In the DAO hack, this occurred when the fallback function was called by `address.call.value()()`, but can occur for any external call.
+Since the user's balance is not set to 0 until the very end of the function, the second (and later) invocations will still succeed, and will withdraw the balance over and over again. A very similar bug was one of the vulnerabilities in the DAO attack.
 
-To protect against recursive reentry, the function needs to set the state such that if the function is called again in the same transaction, it won’t continue to execute.
+In the example given, the best way to avoid the problem is to use `send()` instead of `call.value()()`. This will prevent any external code from being executed.
 
-#### Unexpected State Manipulation Reentrant Attack
-
-This attack occurs when a function expects a certain state, but another contract function alters this state, while the original function is still running. A malicious party starts the first function, then calls the second function before the first function completes.
-
-In [The DAO](https://github.com/slockit/DAO), the splitting function zeroed out token balances. However, before that was complete, the attacker reentered and transfered out his/her balance to another address, meaning the split function zeroed out an account that already had zero funds. The attacker could then call the splitting function in multiple transactions, as long as s/he kept transferring the tokens around before the final split.
+However, if you can't remove the external call, the next simplest way to prevent this attack is to make sure you don't call an external function until you've done all the internal work you need to do:
 
 ```
-TODO: Add snippet
-```
+mapping (address => uint) private userBalances;
 
-If external functions (and the functions they call) share the same state, an attacker can cause substantial damage. Functions that do not share any state, are safe from this attack (even if state changes happen after the external call). This is not generally a safe pattern, so it is still recommended to make state changes before any external calls, even if no functions share state in your contract.
-
-To mitigate this attack, you should:
-
-- Always check the result of a contract call, even when using `send()` (don't ever assume things went well)
-- Only make external calls at the end of functions, once state has been set
-
-You can alternatively ensure that functions do not modify the same state variables:
-
-```
-contract StateManipulationReentrantSafe {
-    uint fState;
-    uint gState;
-
-    f()  // only changes fState
-    g() // only changes gState
+function withdrawBalance() public {
+    uint amountToWithdraw = userBalances[msg.sender];
+    userBalances[msg.sender] = 0;
+    if (!(msg.sender.call.value(amountToWithdraw)())) { throw; } // The user's balance is already 0, so future invocations won't withdraw anything
 }
 ```
 
-Also, you can use a [mutex](https://en.wikipedia.org/wiki/Mutual_exclusion) (often used in concurrent programming) where you lock certain variables:
+Note that if you had another function which called `withdrawBalance()`, it would be potentially subject to the same attack, so you must treat any function which calls an untrusted contract as itself untrusted. See below for further discussion of potential solutions.
+
+#### Cross-function Race Conditions
+
+An attacker may also be able to do a similar attack using two different functions that share the same state.
+
+```
+// VULNERABLE
+mapping (address => uint) private userBalances;
+
+function transfer(address to, uint amount) { 
+    if (userBalance[msg.sender] >= amount) {
+       userBalance[to] += amount;
+       userBalance[msg.sender] -= amount;
+    }
+}
+
+function withdrawBalance() public {
+    uint amountToWithdraw = userBalances[msg.sender];
+    if (!(msg.sender.call.value(amountToWithdraw)())) { throw; } // At this point, the caller's code is executed, and can call transfer()
+    userBalances[msg.sender] = 0;
+}
+```
+
+In this case, the attacker calls `transfer()` when their code is executed. Since their balance has not yet been set to 0, they are able to transfer the tokens even though they already received the withdrawal. This vulnerability was also used in the DAO attack.
+
+The same solutions will work, with the same caveats. Also note that in this example, both functions were part of the same contract. However, the same bug can occur across multiple contracts, if those contracts share state.
+
+#### Pitfalls in Race Condition Solutions
+
+Since race conditions can occur across multiple functions, and even multiple contracts, any solution aimed at preventing reentry will not be sufficient.
+
+Instead, we have recommended finishing all internal work first, and only then calling the external function. This rule, if followed carefully, will allow you to avoid race conditions. However, you need to not only avoid calling external functions too soon, but also avoid calling functions which call external functions. For example, the following is insecure:
+
+```
+// VULNERABLE
+mapping (address => uint) private userBalances;
+mapping (address => bool) private claimedBonus;
+
+function withdraw(address recipient) public {
+    uint amountToWithdraw = userBalances[recipient];
+    rewardsForA[recipient] = 0;
+    if (!(recipient.call.value(amountToWithdraw)())) { throw; } 
+}
+
+function getFirstWithdrawalBonus(address recipient) public {
+    if (claimedBonus(recipient)) { throw; } // Each recipient should only be able to claim the bonus once
+
+    rewardsForA[recipient] += 100;
+    withdraw(recipient); // At this point, the caller will be able to execute getFirstWithdrawalBonus again.
+    claimedBonus[recipient] = true;
+}
+```
+
+Even though `getFirstWithdrawalBonus()` doesn't directly call an external contract, the call in `withdraw()` is enough to make it vulnerable to a race condition. you therefore need to treat `withdraw()` as if it were also untrusted.
+
+```
+mapping (address => uint) private userBalances;
+mapping (address => bool) private claimedBonus;
+
+function withdraw(address recipient) public {
+    uint amountToWithdraw = userBalances[recipient];
+    rewardsForA[recipient] = 0;
+    if (!(recipient.call.value(amountToWithdraw)())) { throw; } 
+}
+
+function getFirstWithdrawalBonus(address recipient) public {
+    if (claimedBonus(recipient)) { throw; } // Each recipient should only be able to claim the bonus once
+
+    claimedBonus[recipient] = true;
+    rewardsForA[recipient] += 100;
+    withdraw(recipient); // claimedBonus has been set to true, so reentry is impossible
+}
+```
+
+This same pattern repeats at every level: since `getFirstWithdrawalBonus()` calls `withdraw()`, which calls an external contract, you must also treat `getFirstWithdrawalBonus()` as insecure.
+
+Another solution often suggested is a [mutex](https://en.wikipedia.org/wiki/Mutual_exclusion). This allows you to "lock" some state so it can only be changed by the owner of the lock. A simple example might look like this: 
 
 ```
 // Note: This is a rudimentary example, and mutexes are particularly useful where there is substantial logic and/or shared state
@@ -160,9 +165,9 @@ bool private lockBalances;
 
 function deposit() public returns (bool) {
     if (!lockBalances) {
-	lockBalances = true;
-	balances[msg.sender] += msg.value;
-	lockBalances = false;
+        lockBalances = true;
+        balances[msg.sender] += msg.value;
+        lockBalances = false;
         return true;
     }
     throw;
@@ -171,11 +176,11 @@ function deposit() public returns (bool) {
 function withdraw(uint amount) public returns (bool) {
     if (!lockBalances && amount > 0 && balances[msg.sender] >= amount) {
         lockBalances = true;
-        balances[msg.sender] -= amount;
 
-        if (!msg.sender.send(amount)) {
-            throw;
+        if (msg.sender.call(amount)()) { // Normally insecure, but the mutex saves it
+          balances[msg.sender] -= amount;
         }
+
         lockBalances = false;
         return true;
     }
@@ -184,24 +189,58 @@ function withdraw(uint amount) public returns (bool) {
 }
 ```
 
-Mutexes have their own disadvantages with the potential for deadlocks and reduced throughput - so choose the approach that works best for your use case and test extensively.
+If the user tries to call `withdraw()` again before the first call finishes, the lock will prevent it from having any effect. This can be an effective pattern, but it gets tricky when you have multiple contracts that need to cooperate. The following is insecure:
 
+```
+//VULNERABLE
+contract StateHolder {
+    uint private n;
+    address private lockHolder;
+
+    function getLock() {
+        if (lockHolder != 0) { throw; }
+        lockHolder = msg.sender;
+    }
+
+    function releaseLock() {
+        lockHolder = 0;
+    }
+
+    function set(uint newState) {
+        if (msg.sender != lockHolder) { throw; }
+        n = newState;
+    }
+}
+```
+
+An attacker can call `getLock()`, and then never call `releaseLock()`. If they do this, then the contract will be locked forever, and no further changes will be able to be made. If you use mutexes to protect against race conditions, you will need to carefully ensure that there are no ways for a lock to be claimed and never released. (There are other potential dangers when programming with mutexes, such as deadlocks and livelocks. You should consult the large amount of literature already written on mutexes, if you decide to go this route.)
 
 <a name="dos-with-unexpected-throw"></a>
 
 ### DoS with (Unexpected) Throw
 
-One example of this is where the routine throw on a failed `send()` can cause a denial-of-service.
-
-In this auction, an attacker can [reject payments](https://solidity.readthedocs.io/en/latest/contracts.html#fallback-function) to themselves and will always be the highest bidder. Any resource that is owned by the highest bidder, will permanently be owned by the attacker.
-
-It should be the responsibility of the recipient to accept payment.
+Consider a simple auction contract:
 
 ```
-TODO: Add code snippet
+contract Auction {
+    address currentLeader;
+    uint highestBid;
+
+    function bid() { 
+        if (msg.value <= highestBid) { throw; }
+
+        if (!currentLeader.send(highestBid)) { throw; } // Refund the old leader, and throw if it fails
+
+        currentLeader = msg.sender;
+        highestBid = msg.value;
+    }
+}
 ```
+
+When it tries to refund the old leader, it throws if the refund fails. This means that a malicious bidder can become the leader, while making sure that any refunds to their address will *always* fail. In this way, they can prevent anyone else from calling the `bid()` function, and stay the leader forever. A natural solution might be to continue even if the refund fails, under the theory that it's their own fault if they can't accept the refund. But this is vulnerable to the [Call Depth Attack](https://github.com/ConsenSys/smart-contract-best-practices/#call-depth-attack)! So instead, you should set up a [pull payment system](https://github.com/ConsenSys/smart-contract-best-practices/#favor-pull-payments-over-push-payments) instead, as described earlier.
 
 Another example is when a contract may iterate through an array to pay users (e.g., supporters in a crowdfunding contract). It's common to want to make sure that each payment succeeds. If not, one should throw. The issue is that if one call fails, you are reverting the whole payout system, meaning the loop will never complete. No one gets paid, because one address is forcing an error.
+
 
 ```
 address[] private refundAddresses;
@@ -217,21 +256,19 @@ function refundAll() public {
 }
 ```
 
-The recommended solution is to [favor pull over push payments](#favor-pull-over-push-payments).
+Again, the recommended solution is to [favor pull over push payments](#favor-pull-over-push-payments).
 
 <a name="dos-with-block-gas-limit"></a>
 
 ### DoS with Block Gas Limit
 
-All Ethereum transactions must consume an amount of gas lower than the block gas limit (BGL).  An attacker can cause a contract denial-of-service, if the attacker can manipulate the gas used by the contract to provide the service.
+You may have noticed another problem with the previous example: by paying out to everyone at once, you risk running into the block gas limit. Each Ethereum block can process a certain maximum amount of computation. If you try to go over that, your transaction will fail.
 
-For example, manipulating the amount of elements in an array can increase gas costs substantially, forcing a DoS with the BGL. Taking the previous example, of wanting to pay out some stakeholders iteratively, it might seem fine, assuming that the amount of stakeholders won’t increase too much. The attacker would buy up, say 10000 tokens, and then split all 10000 tokens amongst 10000 addresses, causing the amount of iterations to increase, potentially exceeding the BGL.  Note that a contract cannot rely on gas refunds to protect against this DoS, because gas refunds are only provided at the end.
+This can lead to problems even in the absence of an intentional attack. However, it's especially bad if an attacker can manipulate the amount of gas needed. In the case of the previous example, the attacker could add a bunch of addresses, each of which needs to get a very small refund. The gas cost of refunding each of the attacker's addresses could therefore end up being more than the gas limit, blocking the refund transaction from happening at all.
 
-To mitigate this, use a pull rather than a push model. For example:
+This is another reason to [favor pull over push payments](#favor-pull-over-push-payments).
 
-((code snippet))
-
-An alternative approach is to have a payout loop that can be split across multiple transactions, like so:
+If you absolutely must loop over an array of unknown size, then you should plan for it to potentially take multiple blocks, and therefore require multiple transactions. You will need to keep track of how far you've gone, and be able to resume from that point, as in the following example:
 
 ```
 struct Payee {
@@ -244,12 +281,15 @@ uint256 nextPayeeIndex;
 function payOut() {
     uint256 i = nextPayeeIndex;
     while (i < payees.length && msg.gas > 200000) {
-	payees[i].addr.send(payees[i].value);
-	i++;
+      payees[i].addr.send(payees[i].value);
+      i++;
     }
     nextPayeeIndex = i;
 }
 ```
+
+Note that this is vulnerable to the [Call Depth Attack](#call-depth-attack), however. And you will need to make sure that nothing bad will happen if other transactions are processed while waiting for the next iteration of the `payOut()` function. So only use this pattern if it's really necessary.
+
 <a name="timestamp-dependence"></a>
 
 ### Timestamp Dependence
@@ -268,5 +308,5 @@ if (now > startTime + 1 week) { // the now can be manipulated by the miner
 
 ### Transaction-Ordering Dependence (TOD)
 
-Since a transaction is in the mempool for a short while, one can know what actions will occur, before it is included in a block. This can be troublesome for things like decentralized markets, where a transaction to buy some tokens can be seen, and a market order implemented before the other transaction gets included. Protecting against is difficult, as it would come down to the specific contract itself. For example, in markets, it would be better to implement batch auctions (this also protects against high frequency trading concerns). Another way to use a pre-commit scheme (“I’m going to submit the details later”).
+Since a transaction is in the mempool for a short while, one can know what actions will occur, before it is included in a block. This can be troublesome for things like decentralized markets, where a transaction to buy some tokens can be seen, and a market order implemented before the other transaction gets included. Protecting against this is difficult, as it would come down to the specific contract itself. For example, in markets, it would be better to implement batch auctions (this also protects against high frequency trading concerns). Another way to use a pre-commit scheme (“I’m going to submit the details later”).
 
