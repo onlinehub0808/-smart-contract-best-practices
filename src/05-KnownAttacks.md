@@ -5,12 +5,12 @@
 
 ### Call Depth Attack
 
-With the Call Depth Attack, an attack can cause *any* call (even a fully trusted and correct one) to fail. This is because there is a limit on how deep the "call stack" can go. If the attacker does a bunch of recursive calls and brings the stack depth to 1023, then they can call your function and automatically cause all of its subcalls to fail.
+With the Call Depth Attack, *any* call (even a fully trusted and correct one) can fail. This is because there is a limit on how deep the "call stack" can go. If the attacker does a bunch of recursive calls and brings the stack depth to 1023, then they can call your function and automatically cause all of its subcalls to fail (subcalls include internal function calls, external calls, sends, etc.).
 
-An example based on the auction code from above.
+An example based on the previous auction code:
 
 ```
-// DO NOT USE. THIS IS VULNERABLE.
+// INSECURE
 contract auction {
     mapping(address => uint) refunds;
 
@@ -42,18 +42,16 @@ contract auction {
 
 <a name="race-conditions"></a>
 
-### Race Conditions
+### Race Conditions<sup><a href='#footnote-race-condition-terminology'>\*</a></sup>
 
 One of the major dangers of calling external contracts is that they can take over the control flow, and make changes to your data that the calling function wasn't expecting. This class of bug can take many forms, and both of the major bugs that led to the DAO's collapse were bugs of this sort.
-
-(Some may object to the use of the term "race condition", since Ethereum does not currently have true parallelism. However, there is still the fundamental feature of logically distinct processes contending for resources, and the same sorts of pitfalls and potential solutions apply.)
 
 #### Reentrancy
 
 The first version of this bug to be noticed involved functions that could be called repeatedly, before the first invocation of the function was finished. This may cause the different invocations of the function to interact in destructive ways.
 
 ```
-// DO NOT USE. THIS IS VULNERABLE.
+// INSECURE
 mapping (address => uint) private userBalances;
 
 function withdrawBalance() public {
@@ -86,10 +84,10 @@ Note that if you had another function which called `withdrawBalance()`, it would
 An attacker may also be able to do a similar attack using two different functions that share the same state.
 
 ```
-// VULNERABLE
+// INSECURE
 mapping (address => uint) private userBalances;
 
-function transfer(address to, uint amount) { 
+function transfer(address to, uint amount) {
     if (userBalances[msg.sender] >= amount) {
        userBalances[to] += amount;
        userBalances[msg.sender] -= amount;
@@ -103,7 +101,7 @@ function withdrawBalance() public {
 }
 ```
 
-In this case, the attacker calls `transfer()` when their code is executed. Since their balance has not yet been set to 0, they are able to transfer the tokens even though they already received the withdrawal. This vulnerability was also used in the DAO attack.
+In this case, the attacker calls `transfer()` when their code is executed on the external call in `withdrawBalance`. Since their balance has not yet been set to 0, they are able to transfer the tokens even though they already received the withdrawal. This vulnerability was also used in the DAO attack.
 
 The same solutions will work, with the same caveats. Also note that in this example, both functions were part of the same contract. However, the same bug can occur across multiple contracts, if those contracts share state.
 
@@ -114,7 +112,7 @@ Since race conditions can occur across multiple functions, and even multiple con
 Instead, we have recommended finishing all internal work first, and only then calling the external function. This rule, if followed carefully, will allow you to avoid race conditions. However, you need to not only avoid calling external functions too soon, but also avoid calling functions which call external functions. For example, the following is insecure:
 
 ```
-// VULNERABLE
+// INSECURE
 mapping (address => uint) private userBalances;
 mapping (address => bool) private claimedBonus;
 mapping (address => uint) private rewardsForA;
@@ -122,7 +120,7 @@ mapping (address => uint) private rewardsForA;
 function withdraw(address recipient) public {
     uint amountToWithdraw = userBalances[recipient];
     rewardsForA[recipient] = 0;
-    if (!(recipient.call.value(amountToWithdraw)())) { throw; } 
+    if (!(recipient.call.value(amountToWithdraw)())) { throw; }
 }
 
 function getFirstWithdrawalBonus(address recipient) public {
@@ -144,7 +142,7 @@ mapping (address => uint) private rewardsForA;
 function untrustedWithdraw(address recipient) public {
     uint amountToWithdraw = userBalances[recipient];
     rewardsForA[recipient] = 0;
-    if (!(recipient.call.value(amountToWithdraw)())) { throw; } 
+    if (!(recipient.call.value(amountToWithdraw)())) { throw; }
 }
 
 function untrustedGetFirstWithdrawalBonus(address recipient) public {
@@ -158,7 +156,7 @@ function untrustedGetFirstWithdrawalBonus(address recipient) public {
 
 In addition to the fix making reentry impossible, [untrusted functions have been marked.](https://github.com/ConsenSys/smart-contract-best-practices#mark-untrusted-contracts) This same pattern repeats at every level: since `untrustedGetFirstWithdrawalBonus()` calls `untrustedWithdraw()`, which calls an external contract, you must also treat `untrustedGetFirstWithdrawalBonus()` as insecure.
 
-Another solution often suggested is a [mutex](https://en.wikipedia.org/wiki/Mutual_exclusion). This allows you to "lock" some state so it can only be changed by the owner of the lock. A simple example might look like this: 
+Another solution often suggested is a [mutex](https://en.wikipedia.org/wiki/Mutual_exclusion). This allows you to "lock" some state so it can only be changed by the owner of the lock. A simple example might look like this:
 
 ```
 // Note: This is a rudimentary example, and mutexes are particularly useful where there is substantial logic and/or shared state
@@ -194,7 +192,7 @@ function withdraw(uint amount) public returns (bool) {
 If the user tries to call `withdraw()` again before the first call finishes, the lock will prevent it from having any effect. This can be an effective pattern, but it gets tricky when you have multiple contracts that need to cooperate. The following is insecure:
 
 ```
-//VULNERABLE
+// INSECURE
 contract StateHolder {
     uint private n;
     address private lockHolder;
@@ -217,6 +215,10 @@ contract StateHolder {
 
 An attacker can call `getLock()`, and then never call `releaseLock()`. If they do this, then the contract will be locked forever, and no further changes will be able to be made. If you use mutexes to protect against race conditions, you will need to carefully ensure that there are no ways for a lock to be claimed and never released. (There are other potential dangers when programming with mutexes, such as deadlocks and livelocks. You should consult the large amount of literature already written on mutexes, if you decide to go this route.)
 
+<a name="footnote-race-condition-terminology"></a>
+
+<div style='font-size: 80%; display: inline;'>* Some may object to the use of the term <i>race condition</i>, since Ethereum does not currently have true parallelism. However, there is still the fundamental feature of logically distinct processes contending for resources, and the same sorts of pitfalls and potential solutions apply.</div>
+
 <a name="dos-with-unexpected-throw"></a>
 
 ### DoS with (Unexpected) Throw
@@ -224,12 +226,12 @@ An attacker can call `getLock()`, and then never call `releaseLock()`. If they d
 Consider a simple auction contract:
 
 ```
-//VULNERABLE
+// INSECURE
 contract Auction {
     address currentLeader;
     uint highestBid;
 
-    function bid() { 
+    function bid() {
         if (msg.value <= highestBid) { throw; }
 
         if (!currentLeader.send(highestBid)) { throw; } // Refund the old leader, and throw if it fails
@@ -291,7 +293,7 @@ function payOut() {
 }
 ```
 
-Note that this is vulnerable to the [Call Depth Attack](#call-depth-attack), however. And you will need to make sure that nothing bad will happen if other transactions are processed while waiting for the next iteration of the `payOut()` function. So only use this pattern if it's really necessary.
+Note that this is vulnerable to the [Call Depth Attack](#call-depth-attack), however. And you will need to make sure that nothing bad will happen if other transactions are processed while waiting for the next iteration of the `payOut()` function. So only use this pattern if absolutely necessary.
 
 <a name="timestamp-dependence"></a>
 

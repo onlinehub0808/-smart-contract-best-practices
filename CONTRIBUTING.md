@@ -21,6 +21,7 @@ Write for an intermediate Ethereum developer, they know the basics of Solidity p
 - **Add a source link to the original document when available**
 - **Create new sections when warranted**
 - **Keep code lines under 80 characters when possible**
+- **Mark code** as insecure, bad, good where relevant
 - Use the format of the [Airbnb Javascript Style guide](https://github.com/airbnb/javascript) as a starting point
 
 #### Recommendations Section
@@ -34,4 +35,5 @@ Write for an intermediate Ethereum developer, they know the basics of Solidity p
 - Provide an example - then point to a recommendation for the solution in the relevant section of the doc
 - List first/most visible attack, where possible
 - Ensure each subsection has an anchor tag for future hyperlinking
+- Mark vulnerable pieces of code as `// INSECURE`
 
