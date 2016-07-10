@@ -26,7 +26,7 @@ Smart contract programming requires a different engineering mindset than you may
   - Upgrade to the latest version of any tool or library as soon as possible
   - Adopt new security techniques that appear useful
 
-- **Rethink programming concepts you know**. While much of your programming experience will be relevant to Ethereum programming, there are new and unique pitfalls to be aware of.
+- **Be aware of blockchain properties**. While much of your programming experience will be relevant to Ethereum programming, there are some pitfalls to be aware of.
   - Be extremely careful about external contract calls, which may execute malicious code and change control flow.
   - Understand that your public functions are public, and may be called maliciously. Your private data is also viewable by anyone.
-  - Keep gas costs and the gas block limit in mind.
+  - Keep gas costs and the block gas limit in mind.
