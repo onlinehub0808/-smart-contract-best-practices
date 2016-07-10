@@ -5,11 +5,11 @@ As we discussed in the [General Philosophy](#general-philosophy) section, it is 
 
 The approach we advocate is to "prepare for failure". It is impossible to know in advance whether your code is secure. However, you can architect your contracts in a way that allows them to fail gracefully, and with minimal damage. This section presents a variety of techniques that will help you prepare for failure.
 
-Note: There's always a risk when you add a new component to your system. A badly designed failsafe could itself become a vulnerability. Be thoughtful about each technique you add to your contracts, and consider carefully how they work together to create a robust system.
+Note: There's always a risk when you add a new component to your system. A badly designed failsafe could itself become a vulnerability - as can the interaction between a number of well designed failsafes. Be thoughtful about each technique you use in your contracts, and consider carefully how they work together to create a robust system.
 
 ### Upgrading Broken Contracts
 
-Code will need to be changed if errors are discovered or if improvements need to be made. It is no good to discover a bug, but have no way to deal with it!
+Code will need to be changed if errors are discovered or if improvements need to be made. It is no good to discover a bug, but have no way to deal with it.
 
 Designing an effective upgrade system for smart contracts is an area of active research, and we won't be able to cover all of the complications in this document. However, there are two basic approaches that are most commonly used. The simpler of the two is to have a registry contract that holds the address of the latest version of the contract. A more seamless approach for contract users is to have a contract that forwards calls and data onto the latest version of the contract.
 
@@ -53,7 +53,12 @@ contract SomeRegister {
 }
 ```
 
-There are two main disadvantages to this approach: First, users must always look up the current address, and anyone who fails to do so risks using an old version of the contract. Second, you will need to think carefully about how to deal with the contract data, when you replace the contract.
+There are two main disadvantages to this approach:
+
+1. Users must always look up the current address, and anyone who fails to do so risks using an old version of the contract
+2. You will need to think carefully about how to deal with the contract data, when you replace the contract
+
+The alternate approach is to have a contract forward calls and data to the latest version of the contract:
 
 **Example 2: [Use a `DELEGATECALL`](http://ethereum.stackexchange.com/questions/2404/upgradeable-contracts) to forward data and calls**
 
@@ -88,7 +93,7 @@ contract Relay {
 
 This approach avoids the previous problems, but has problems of its own. You must be extremely careful with how you store data in this contract. If your new contract has a different storage layout than the first, your data may end up corrupted. Additionally, this simple version of the pattern cannot return values from functions, only forward them, which limits its applicability. ([More complex implementations](https://github.com/ownage-ltd/ether-router) attempt to solve this with in-line assembly code and a registry of return sizes.)
 
-Regardless of your approach, it is important to have some way to upgrade your contracts, or they will become unusable when the inevitable bugs are discovered in them. 
+Regardless of your approach, it is important to have some way to upgrade your contracts, or they will become unusable when the inevitable bugs are discovered in them.
 
 ### Circuit Breakers (Pause contract functionality)
 
@@ -129,7 +134,7 @@ onlyInEmergency() {
 
 ### Speed Bumps (Delay contract actions)
 
-Speed bumps slow down actions, so that if malicious actions occur, there is time to recover. For example, [The DAO](https://github.com/slockit/DAO/) required 27 days between a successful request to split the DAO and the ability to do so. This ensured the funds were kept within the contract, increasing the likelihood of recovery. In the case of the DAO, there was no effective action that could be taken during the time given by the speed bump, but in combination with our other techniques, they can be quite effective. 
+Speed bumps slow down actions, so that if malicious actions occur, there is time to recover. For example, [The DAO](https://github.com/slockit/DAO/) required 27 days between a successful request to split the DAO and the ability to do so. This ensured the funds were kept within the contract, increasing the likelihood of recovery. In the case of the DAO, there was no effective action that could be taken during the time given by the speed bump, but in combination with our other techniques, they can be quite effective.
 
 Example:
 
