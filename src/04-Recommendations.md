@@ -15,7 +15,7 @@ Calls to untrusted contracts can introduce several unexpected risks or errors. E
 
 When sending Ether, use `someAddress.send()` and avoid `someAddress.call.value()()`.
 
-As noted, external calls such as `someAddress.call.value()()` can trigger malicious code. While `send()` also triggers code, it is safe because it only has access to gas stipend of 2,300 gas. This is only enough to log an event, not enough to launch an attack.
+External calls such as `someAddress.call.value()()` can trigger malicious code. While `send()` also triggers code, it is safe because it only has access to gas stipend of 2,300 gas. This is generally enough to log an event, but typically not enough to launch an attack.
 
 ```
 // bad
@@ -55,7 +55,7 @@ ExternalContract(someAddress).deposit.value(100);
 
 #### Don't make control flow assumptions after external calls
 
-Whether using *raw calls* or *contract calls*, assume that malicious code will execute if `ExternalContract` is untrusted. Even if `ExternalContract` is not malicious, malicious code can be executed by any contracts *it* calls. One particular danger is malicious code may hijack the control flow, leading to race conditions. (See [Race Conditions](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#race-conditions) for a much fuller discussion of this problem).
+Whether using *raw calls* or *contract calls*, assume that malicious code will execute if `ExternalContract` is untrusted. Even if `ExternalContract` is not malicious, malicious code can be executed by any contracts *it* calls. One particular danger is malicious code may hijack the control flow, leading to race conditions. (See [Race Conditions](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#race-conditions) for a fuller discussion of this problem).
 
 <a name="favor-pull-over-push-payments"></a>
 
@@ -114,7 +114,7 @@ contract auction {
 
 #### Mark untrusted contracts
 
-When interacting with external contracts, name your variables, methods, and contract interfaces in a way that makes it clear that interacting with them is potentially unsafe.
+When interacting with external contracts, name your variables, methods, and contract interfaces in a way that makes it clear that interacting with them is potentially unsafe. This applies to your own functions that call external contracts.
 
 ```
 // bad
