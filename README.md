@@ -395,9 +395,9 @@ An attacker may also be able to do a similar attack using two different function
 mapping (address => uint) private userBalances;
 
 function transfer(address to, uint amount) { 
-    if (userBalance[msg.sender] >= amount) {
-       userBalance[to] += amount;
-       userBalance[msg.sender] -= amount;
+    if (userBalances[msg.sender] >= amount) {
+       userBalances[to] += amount;
+       userBalances[msg.sender] -= amount;
     }
 }
 
@@ -527,6 +527,7 @@ An attacker can call `getLock()`, and then never call `releaseLock()`. If they d
 Consider a simple auction contract:
 
 ```
+//VULNERABLE
 contract Auction {
     address currentLeader;
     uint highestBid;
