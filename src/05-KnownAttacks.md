@@ -117,6 +117,7 @@ Instead, we have recommended finishing all internal work first, and only then ca
 // VULNERABLE
 mapping (address => uint) private userBalances;
 mapping (address => bool) private claimedBonus;
+mapping (address => uint) private rewardsForA;
 
 function withdraw(address recipient) public {
     uint amountToWithdraw = userBalances[recipient];
@@ -125,7 +126,7 @@ function withdraw(address recipient) public {
 }
 
 function getFirstWithdrawalBonus(address recipient) public {
-    if (claimedBonus(recipient)) { throw; } // Each recipient should only be able to claim the bonus once
+    if (claimedBonus[recipient]) { throw; } // Each recipient should only be able to claim the bonus once
 
     rewardsForA[recipient] += 100;
     withdraw(recipient); // At this point, the caller will be able to execute getFirstWithdrawalBonus again.
