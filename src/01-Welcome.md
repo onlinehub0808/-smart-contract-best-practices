@@ -6,7 +6,7 @@ The recent attack on [The DAO](https://github.com/slockit/DAO) highlights the im
 
 #### Note for contributors
 
-This document is designed to provide a starting security baseline for intermediate Solidity programmers. It includes security philosophies, code idioms, known attacks, and software engineering techniques for blockchain contract programming - and aims to cover all communities, techniques, and tools that improve smart contract security. At this stage, this document is focused primarily on Solidity, a javascript-like language for Ethereum, but other languages are welcome.
+This document is designed to provide a starting *security* baseline for intermediate Solidity programmers. It includes security philosophies, code idioms, known attacks, and software engineering techniques for blockchain contract programming - and aims to cover all communities, techniques, and tools that improve smart contract security. At this stage, this document is focused primarily on Solidity, a javascript-like language for Ethereum, but other languages are welcome.
 
 To contribute, see our [Contribution Guidelines](CONTRIBUTING.md).
 

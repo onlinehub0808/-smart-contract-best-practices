@@ -1,7 +1,7 @@
 
 ## General Philosophy
 
-Ethereum and complex blockchain programs are new and highly experimental. Therefore, you should expect constant changes in the security landscape, as new bugs and security risks are discovered, and new best practices are developed. Following the security practices in this document is therefore only the beginning of the security work you will need to do as a smart contract developer. 
+Ethereum and complex blockchain programs are new and highly experimental. Therefore, you should expect constant changes in the security landscape, as new bugs and security risks are discovered, and new best practices are developed. Following the security practices in this document is therefore only the beginning of the security work you will need to do as a smart contract developer.
 
 Smart contract programming requires a different engineering mindset than you may be used to. The cost of failure can be high, and change can be difficult, making it in some ways more similar to hardware programming or financial services programming than web or mobile development. It is therefore not enough to defend against known vulnerabilities. Instead, you will need to learn a new philosophy of development:
 
@@ -26,7 +26,7 @@ Smart contract programming requires a different engineering mindset than you may
   - Upgrade to the latest version of any tool or library as soon as possible
   - Adopt new security techniques that appear useful
 
-- **Be aware of the blockchain's unique properties**. While much of your programming experience will be relevant to Ethereum programming, there are new and unique pitfalls to be aware of.
+- **Rethink programming concepts you know**. While much of your programming experience will be relevant to Ethereum programming, there are new and unique pitfalls to be aware of.
   - Be extremely careful about external contract calls, which may execute malicious code and change control flow.
-  - Understand that your public functions are public, and may be called maliciously.
+  - Understand that your public functions are public, and may be called maliciously. Your private data is also viewable by anyone.
   - Keep gas costs and the gas block limit in mind.
