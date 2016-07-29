@@ -5,7 +5,7 @@ As we discussed in the [General Philosophy](#general-philosophy) section, it is 
 
 The approach we advocate is to "prepare for failure". It is impossible to know in advance whether your code is secure. However, you can architect your contracts in a way that allows them to fail gracefully, and with minimal damage. This section presents a variety of techniques that will help you prepare for failure.
 
-Note: There's always a risk when you add a new component to your system. A badly designed failsafe could itself become a vulnerability - as can the interaction between a number of well designed failsafes. Be thoughtful about each technique you use in your contracts, and consider carefully how they work together to create a robust system.
+Note: There's always a risk when you add a new component to your system. A badly designed fail-safe could itself become a vulnerability - as can the interaction between a number of well designed fail-safes. Be thoughtful about each technique you use in your contracts, and consider carefully how they work together to create a robust system.
 
 ### Upgrading Broken Contracts
 
@@ -105,12 +105,6 @@ Example:
 bool private stopped = false;
 address private owner;
 
-function toggleContractActive() public
-isAdmin() {
-    // You can add an additional modifier that restricts stopping a contract to be based on another action, such as a vote of users
-    stopped = !stopped;
-}
-
 modifier isAdmin() {
     if(msg.sender != owner) {
         throw;
@@ -118,16 +112,22 @@ modifier isAdmin() {
     _
 }
 
+function toggleContractActive() isAdmin public
+{
+    // You can add an additional modifier that restricts stopping a contract to be based on another action, such as a vote of users
+    stopped = !stopped;
+}
+
 modifier stopInEmergency { if (!stopped) _ }
 modifier onlyInEmergency { if (stopped) _ }
 
-function deposit() public
-stopInEmergency() {
+function deposit() stopInEmergency public
+{
     // some code
 }
 
-function withdraw() public
-onlyInEmergency() {
+function withdraw() onlyInEmergency public
+{
     // some code
 }
 ```
