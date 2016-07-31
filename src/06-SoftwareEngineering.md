@@ -237,7 +237,7 @@ During testing, you can force an automatic deprecation by preventing any actions
 
 ```
 modifier isActive() {
-    if (now > SOME_BLOCK_NUMBER) {
+    if (block.number > SOME_BLOCK_NUMBER) {
         throw;
     }
     _
