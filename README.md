@@ -873,6 +873,33 @@ At minimum, you should:
 - Exhaustive testing should allow various players to interact with the contract at volume
 - Deploy on the mainnet in beta, with limits to the amount at risk
 
+##### Automatic Deprecation
+
+During testing, you can force an automatic deprecation by preventing any actions, after a certain time period. For example, an alpha contract may work for several weeks and then automatically shut down all actions, except for the final withdrawal.
+
+```
+modifier isActive() {
+    if (block.number > SOME_BLOCK_NUMBER) {
+        throw;
+    }
+    _
+}
+
+function deposit() public
+isActive() {
+    // some code
+}
+
+function withdraw() public {
+    // some code
+}
+
+```
+##### Restrict amount of Ether per user/contract
+
+In the early stages, you can restrict the amount of Ether for any user (or for the entire contract) - reducing the risk.
+
+
 <a name="bounties"></a>
 
 ### Bug Bounty Programs
@@ -900,32 +927,6 @@ For an example of the three tiers of rewards, see [Ethereum's Bounty Program](ht
 
 > The value of rewards paid out will vary depending on severity of impact. Rewards for minor 'harmless' bugs start at 0.05 BTC. Major bugs, for example leading to consensus issues, will be rewarded up to 5 BTC. Much higher rewards are possible (up to 25 BTC) in case of very severe vulnerabilities.
 
-
-##### Automatic Deprecation
-
-During testing, you can force an automatic deprecation by preventing any actions, after a certain time period. For example, an alpha contract may work for several weeks and then automatically shut down all actions, except for the final withdrawal.
-
-```
-modifier isActive() {
-    if (block.number > SOME_BLOCK_NUMBER) {
-        throw;
-    }
-    _
-}
-
-function deposit() public
-isActive() {
-    // some code
-}
-
-function withdraw() public {
-    // some code
-}
-
-```
-##### Restrict amount of Ether per user/contract
-
-In the early stages, you can restrict the amount of Ether for any user (or for the entire contract) - reducing the risk.
 
 ## Security-related Documentation and Procedures
 When launching a contract that will have substantial funds or is required to be mission critical, it is important to include proper documentation. Some documentation related to security includes:
