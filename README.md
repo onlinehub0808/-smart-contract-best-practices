@@ -28,9 +28,9 @@ Smart contract programming requires a different engineering mindset than you may
   - Manage the amount of money at risk (rate limiting, maximum usage)
   - Have an effective upgrade path for bugfixes and improvements
 
-- **Roll out carefully**. It is always better to catch bugs before a full production release.
+- [**Rollout carefully**.](https://github.com/ConsenSys/smart-contract-best-practices#contract-rollout) It is always better to catch bugs before a full production release.
   - Test contracts thoroughly, and add tests whenever new attack vectors are discovered
-  - Provide bug bounties starting from alpha testnet releases
+  - Provide [bug bounties](https://github.com/ConsenSys/smart-contract-best-practices#bounties) starting from alpha testnet releases
   - Rollout in phases, with increasing usage and testing in each phase
 
 - **Keep contracts simple**. Complexity increases the likelihood of errors.
@@ -859,6 +859,8 @@ contract TokenWithInvariants {
 }
 ```
 
+<a name="contract-rollout"></a>
+
 ### Contract Rollout
 
 Contracts should have a substantial and prolonged testing period - before substantial money is put at risk.
@@ -870,6 +872,34 @@ At minimum, you should:
 - Deploy on the public testnet with substantial testing and bug bounties
 - Exhaustive testing should allow various players to interact with the contract at volume
 - Deploy on the mainnet in beta, with limits to the amount at risk
+
+<a name="bounties"></a>
+
+### Bug Bounty Programs
+
+Some tips for running bounty programs:
+
+- Decide which currency will bounties be distributed in (BTC and/or ETH)
+- Decide on an estimated total budget for bounty rewards
+- From the budget, determine three tiers of rewards:
+  - smallest reward you are willing to give out
+  - highest reward that's usually awardable
+  - an extra range to be awarded in case of very severe vulnerabilities
+- Determine who the bounty judges are (3 may be ideal typically)
+- Lead developer should probably be one of the bounty judges
+- When a bug report is received, the lead developer, with advice from judges, should evaluate the severity of the bug
+- Work at this stage should be in a private repo, and the issue filed on Github
+- If it's a bug that should be fixed, in the private repo, a developer should write a test case, which should fail and thus confirm the bug
+- Developer should implement the fix and ensure the test now passes; writing additional tests as needed
+- Show the bounty hunter the fix; merge the fix back to the public repo is one way
+- Determine if bounty hunter has any other feedback about the fix
+- Bounty judges determine the size of the reward, based on their evaluation of both the *likelihood* and *impact* of the bug.
+- Keep bounty participants informed throughout the process, and then strive to avoid delays in sending them their reward
+
+For an example of the three tiers of rewards, see [Ethereum's Bounty Program](https://bounty.ethereum.org):
+
+> The value of rewards paid out will vary depending on severity of impact. Rewards for minor 'harmless' bugs start at 0.05 BTC. Major bugs, for example leading to consensus issues, will be rewarded up to 5 BTC. Much higher rewards are possible (up to 25 BTC) in case of very severe vulnerabilities.
+
 
 ##### Automatic Deprecation
 
