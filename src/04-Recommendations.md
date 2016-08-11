@@ -19,12 +19,12 @@ External calls such as `someAddress.call.value()()` can trigger malicious code. 
 
 ```
 // bad
-if(!someAddress.call.value(100)()) {
+if(!someAddress.call.value(100)()) { // forwards remaining gas
     // Some failure code
 }
 
 // good
-if(!someAddress.send(100)) {
+if(!someAddress.send(100)) { // gas is limited
     // Some failure code
 }
 ```
