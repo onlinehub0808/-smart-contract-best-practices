@@ -39,16 +39,16 @@ If you choose to use the low-level call methods, make sure to handle the possibi
 
 ```
 // bad
-someAddress.send(55);
+someAddress.send(55); // doesn't check return value for failure
 someAddress.call.value(55)(); // this is doubly dangerous, as it will forward all remaining gas and doesn't check for result
 someAddress.call.value(100)(bytes4(sha3("deposit()"))); // if deposit throws an exception, the raw call() will only return false and transaction will NOT be reverted
 
 // good
-if(!someAddress.send(55)) {
+if(!someAddress.send(55)) { // checks return value for failure
     // Some failure code
 }
 
-ExternalContract(someAddress).deposit.value(100);
+ExternalContract(someAddress).deposit.value(100); // throws exception on failure
 ```
 
 <a name="expect-control-flow-loss"></a>
