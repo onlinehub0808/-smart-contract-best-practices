@@ -14,7 +14,7 @@ Runtime Analysis
 ### ASSESSMENT
 
 ## Code Review Spreadsheet
-WeiFund Assessment Gate1 (code review) document, first draft: 
+WeiFund Assessment Gate1 (code review) document, first draft is available for comment at: 
 https://docs.google.com/a/consensys.net/spreadsheets/d/1soaZoaqz6S_T4042t9FrTXSoNaDfI5mSFy9Ae5z3Ey4/edit?usp=sharing
 
 ## Miscellaneous
