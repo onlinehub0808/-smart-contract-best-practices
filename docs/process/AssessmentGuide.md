@@ -1,9 +1,9 @@
-#### SCS Vulnerability Assessment Guide
+# SCS Vulnerability Assessment Guide
 
-### Code Review Checklist
+## Code Review Checklist
 
-## Source Code Inspection Codes
-#Forbidden
+### Source Code Inspection Codes
+#####Forbidden
 1.  Storing or providing private [sensitive] date
 2.  Prematurely revealing contract state via mempool
 3.  Use of call().value()
@@ -19,7 +19,7 @@
 13. Unjustified complexity
 
 
-#Conditional
+####Conditional
 1.  If external call, is external call trusted
 2.  If external function call, is error case handled
 3.  If untrusted external call, is at end of control flow
@@ -37,12 +37,12 @@
 15. If state is shared, is mutex used if relevant
 16. If looping, is state preserved if loop breaks
 
-## Attacks to Pursue in Dynamic Analysis
+### Attacks to Pursue in Dynamic Analysis
 1.  Re-entry
 2.  Call stack depth
 3.  Malicious contract (e.g., DoS)
 
-## Exploit Bounty Tiers
+### Exploit Bounty Tiers
 1. DoS and Race Condition
 2. Call Depth and Dependency [timestamp, transaction ordering]
 3. Unknown and Theft of Funds
