@@ -1,9 +1,9 @@
-### SCS Vulnerability Assessment Guide
+#### SCS Vulnerability Assessment Guide
 
-## Code Review Checklist
+### Code Review Checklist
 
-# Source Code Inspection Codes
-Forbidden
+## Source Code Inspection Codes
+#Forbidden
 1.  Storing or providing private [sensitive] date
 2.  Prematurely revealing contract state via mempool
 3.  Use of call().value()
@@ -19,7 +19,7 @@ Forbidden
 13. Unjustified complexity
 
 
-Conditional
+#Conditional
 1.  If external call, is external call trusted
 2.  If external function call, is error case handled
 3.  If untrusted external call, is at end of control flow
