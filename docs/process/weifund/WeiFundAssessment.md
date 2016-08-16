@@ -7,7 +7,7 @@ Code Review
  - Recommendations
 
 Static Analysis
- - <pending tool availability>
+ - pending tool availability
 
 Runtime Analysis
 
