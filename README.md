@@ -229,6 +229,17 @@ uint numerator = 5;
 uint denominator = 2;
 ```
 
+### Remember that Ether can be forcibly sent to an account
+
+Beware of coding an invariant that strictly checks the balance of a contract.
+
+An attacker can forcibly send wei to any account and this cannot be prevented (not even with a fallback function that does a `throw`).
+
+The attacker can do this by creating a contract, funding it with 1 wei, and invoking
+`selfdestruct(victimAddress)`.  No code is invoked in `victimAddress`, so it
+cannot be prevented.
+
+
 ### Remember that on-chain data is public
 
 Many applications require submitted data to be private up until some point in time in order to work. Games (eg. on-chain rock-paper-scissors) and auction mechanisms (eg. sealed-bid second-price auctions) are two major categories of examples. If you are building an application where privacy is an issue, take care to avoid requiring users to publish information too early.
