@@ -197,7 +197,7 @@ When interacting with external contracts, name your variables, methods, and cont
 Bank.withdraw(100); // Unclear whether trusted or untrusted
 
 function makeWithdrawal(uint amount) { // Isn't clear that this function is potentially unsafe
-    UntrustedBank.withdraw(amount);
+    Bank.withdraw(amount);
 }
 
 // good
