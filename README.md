@@ -299,23 +299,9 @@ function internalAction() internal {
 
 <a name="beware-division-by-zero"></a>
 
-### Beware division by zero
+### Beware division by zero (Solidity < 0.3.6)
 
-Currently, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not `throw` an exception when a number is divided by zero. You therefore need to check for division by zero manually.
-
-```
-// bad
-function divide(uint x, uint y) returns(uint) {
-    return x / y;
-}
-
-// good
-function divide(uint x, uint y) returns(uint) {
-   if (y == 0) { throw; }
-
-   return x / y;
-}
-```
+Prior to version 0.3.6, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not `throw` an exception when a number is divided by zero. Ensure your running the latest version of Solidity to [throw on divide by zero](https://github.com/ethereum/solidity/pull/888).
 
 <a name="differentiate-functions-events"></a>
 
@@ -996,7 +982,7 @@ When launching a contract that will have substantial funds or is required to be 
 
 ## Smart Contract Security Bibliography
 
-A lot of this document contains code, examples and insights gained from various parts already written by the community. 
+A lot of this document contains code, examples and insights gained from various parts already written by the community.
 Here are some of them.  Feel free to add more.
 
 ##### By Ethereum core developers
