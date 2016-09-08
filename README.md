@@ -937,6 +937,8 @@ When launching a contract that will have substantial funds or is required to be 
 **Status**
 
 - Where current code is deployed
+- Compiler version, flags used, and steps for verifying the deployed bytecode matches the source code
+- Compiler versions and flags that will be used for the different phases of rollout.
 - Current status of deployed code (including outstanding issues, performance stats, etc.)
 
 **Known Issues**
