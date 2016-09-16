@@ -1014,6 +1014,7 @@ Here are some of them.  Feel free to add more.
 - https://medium.com/@coriacetic/in-bits-we-trust-4e464b418f0b
 - https://medium.com/@hrishiolickel/why-smart-contracts-fail-undiscovered-bugs-and-what-we-can-do-about-them-119aa2843007
 - https://medium.com/@peterborah/we-need-fault-tolerant-smart-contracts-ec1b56596dbc
+- https://medium.com/zeppelin-blog/zeppelin-framework-proposal-and-development-roadmap-fdfa9a3a32ab
 - https://pdaian.com/blog/chasing-the-dao-attackers-wake
 - http://www.comp.nus.edu.sg/~loiluu/papers/oyente.pdf
 
