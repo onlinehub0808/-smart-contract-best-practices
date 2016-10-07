@@ -19,12 +19,12 @@ External calls such as `someAddress.call.value()()` can trigger malicious code. 
 
 ```
 // bad
-if(!someAddress.call.value(100)()) {
+if(!someAddress.call.value(100)()) { // forwards remaining gas
     // Some failure code
 }
 
 // good
-if(!someAddress.send(100)) {
+if(!someAddress.send(100)) { // gas is limited
     // Some failure code
 }
 ```
@@ -39,23 +39,23 @@ If you choose to use the low-level call methods, make sure to handle the possibi
 
 ```
 // bad
-someAddress.send(55);
+someAddress.send(55); // doesn't check return value for failure
 someAddress.call.value(55)(); // this is doubly dangerous, as it will forward all remaining gas and doesn't check for result
 someAddress.call.value(100)(bytes4(sha3("deposit()"))); // if deposit throws an exception, the raw call() will only return false and transaction will NOT be reverted
 
 // good
-if(!someAddress.send(55)) {
+if(!someAddress.send(55)) { // checks return value for failure
     // Some failure code
 }
 
-ExternalContract(someAddress).deposit.value(100);
+ExternalContract(someAddress).deposit.value(100); // throws exception on failure
 ```
 
 <a name="expect-control-flow-loss"></a>
 
 #### Don't make control flow assumptions after external calls
 
-Whether using *raw calls* or *contract calls*, assume that malicious code will execute if `ExternalContract` is untrusted. Even if `ExternalContract` is not malicious, malicious code can be executed by any contracts *it* calls. One particular danger is malicious code may hijack the control flow, leading to race conditions. (See [Race Conditions](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#race-conditions) for a fuller discussion of this problem).
+Whether using *raw calls* or *contract calls*, assume that malicious code will execute if `ExternalContract` is untrusted. Even if `ExternalContract` is not malicious, malicious code can be executed by any contracts *it* calls. One particular danger is malicious code may hijack the control flow, leading to race conditions. (See [Race Conditions](https://github.com/ConsenSys/smart-contract-best-practices/#race-conditions) for a fuller discussion of this problem).
 
 <a name="favor-pull-over-push-payments"></a>
 
@@ -154,6 +154,32 @@ uint x = (5 * multiplier) / 2;
 uint numerator = 5;
 uint denominator = 2;
 ```
+
+### Remember that Ether can be forcibly sent to an account
+
+Beware of coding an invariant that strictly checks the balance of a contract.
+
+An attacker can forcibly send wei to any account and this cannot be prevented (not even with a fallback function that does a `throw`).
+
+The attacker can do this by creating a contract, funding it with 1 wei, and invoking
+`selfdestruct(victimAddress)`.  No code is invoked in `victimAddress`, so it
+cannot be prevented.
+
+
+### Remember that on-chain data is public
+
+Many applications require submitted data to be private up until some point in time in order to work. Games (eg. on-chain rock-paper-scissors) and auction mechanisms (eg. sealed-bid second-price auctions) are two major categories of examples. If you are building an application where privacy is an issue, take care to avoid requiring users to publish information too early.
+
+Examples:
+
+* In rock paper scissors, require both players to submit a hash of their intended move first, then require both players to submit their move; if the submitted move does not match the hash throw it out.
+* In an auction, require players to submit a hash of their bid value in an initial phase (along with a deposit greater than their bid value), and then submit their action bid value in the second phase.
+* When developing an application that depends on a random number generator, the order should always be (1) players submit moves, (2) random number generated, (3) players paid out. The method by which random numbers are generated is itself an area of active research; current best-in-class solutions include Bitcoin block headers (verified through http://btcrelay.org), hash-commit-reveal schemes (ie. one party generates a number, publishes its hash to "commit" to the value, and then reveals the value later) and [RANDAO](http://github.com/randao/randao).
+* If you are implementing a frequent batch auction, a hash-commit scheme is also desirable.
+
+### In 2-party or N-party contracts, beware of the possibility that some participants may "drop offline" and not return
+
+Do not make refund or claim processes dependent on a specific party performing a particular action with no other way of getting the funds out. For example, in a rock-paper-scissors game, one common mistake is to not make a payout until both players submit their moves; however, a malicious player can "grief" the other by simply never submitting their move - in fact, if a player sees the other player's revealed move and determiners that they lost, they have no reason to submit their own move at all. This issue may also arise in the context of state channel settlement. When such situations are an issue, (1) provide a way of circumventing non-participating participants, perhaps through a time limit, and (2) consider adding an additional economic incentive for participants to submit information in all of the situations in which they are supposed to do so.
 
 <a name="keep-fallback-functions-simple"></a>
 

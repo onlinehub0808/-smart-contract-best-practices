@@ -28,14 +28,15 @@ Smart contract programming requires a different engineering mindset than you may
   - Manage the amount of money at risk (rate limiting, maximum usage)
   - Have an effective upgrade path for bugfixes and improvements
 
-- **Roll out carefully**. It is always better to catch bugs before a full production release.
+- [**Rollout carefully**.](https://github.com/ConsenSys/smart-contract-best-practices#contract-rollout) It is always better to catch bugs before a full production release.
   - Test contracts thoroughly, and add tests whenever new attack vectors are discovered
-  - Provide bug bounties starting from alpha testnet releases
+  - Provide [bug bounties](https://github.com/ConsenSys/smart-contract-best-practices#bounties) starting from alpha testnet releases
   - Rollout in phases, with increasing usage and testing in each phase
 
 - **Keep contracts simple**. Complexity increases the likelihood of errors.
   - Ensure the contract logic is simple
   - Modularize code to keep contracts and functions small
+  - Use already-written tools or code where possible (eg. don't roll your own random number generator)
   - Prefer clarity to performance whenever possible
   - Only use the blockchain for the parts of your system that require decentralization
 
@@ -130,7 +131,7 @@ ExternalContract(someAddress).deposit.value(100);
 
 #### Don't make control flow assumptions after external calls
 
-Whether using *raw calls* or *contract calls*, assume that malicious code will execute if `ExternalContract` is untrusted. Even if `ExternalContract` is not malicious, malicious code can be executed by any contracts *it* calls. One particular danger is malicious code may hijack the control flow, leading to race conditions. (See [Race Conditions](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/smart-contracts.md#race-conditions) for a fuller discussion of this problem).
+Whether using *raw calls* or *contract calls*, assume that malicious code will execute if `ExternalContract` is untrusted. Even if `ExternalContract` is not malicious, malicious code can be executed by any contracts *it* calls. One particular danger is malicious code may hijack the control flow, leading to race conditions. (See [Race Conditions](https://github.com/ConsenSys/smart-contract-best-practices/#race-conditions) for a fuller discussion of this problem).
 
 <a name="favor-pull-over-push-payments"></a>
 
@@ -196,7 +197,7 @@ When interacting with external contracts, name your variables, methods, and cont
 Bank.withdraw(100); // Unclear whether trusted or untrusted
 
 function makeWithdrawal(uint amount) { // Isn't clear that this function is potentially unsafe
-    UntrustedBank.withdraw(amount);
+    Bank.withdraw(amount);
 }
 
 // good
@@ -227,6 +228,32 @@ uint x = (5 * multiplier) / 2;
 uint numerator = 5;
 uint denominator = 2;
 ```
+
+### Remember that Ether can be forcibly sent to an account
+
+Beware of coding an invariant that strictly checks the balance of a contract.
+
+An attacker can forcibly send wei to any account and this cannot be prevented (not even with a fallback function that does a `throw`).
+
+The attacker can do this by creating a contract, funding it with 1 wei, and invoking
+`selfdestruct(victimAddress)`.  No code is invoked in `victimAddress`, so it
+cannot be prevented.
+
+
+### Remember that on-chain data is public
+
+Many applications require submitted data to be private up until some point in time in order to work. Games (eg. on-chain rock-paper-scissors) and auction mechanisms (eg. sealed-bid second-price auctions) are two major categories of examples. If you are building an application where privacy is an issue, take care to avoid requiring users to publish information too early.
+
+Examples:
+
+* In rock paper scissors, require both players to submit a hash of their intended move first, then require both players to submit their move; if the submitted move does not match the hash throw it out.
+* In an auction, require players to submit a hash of their bid value in an initial phase (along with a deposit greater than their bid value), and then submit their action bid value in the second phase.
+* When developing an application that depends on a random number generator, the order should always be (1) players submit moves, (2) random number generated, (3) players paid out. The method by which random numbers are generated is itself an area of active research; current best-in-class solutions include Bitcoin block headers (verified through http://btcrelay.org), hash-commit-reveal schemes (ie. one party generates a number, publishes its hash to "commit" to the value, and then reveals the value later) and [RANDAO](http://github.com/randao/randao).
+* If you are implementing a frequent batch auction, a hash-commit scheme is also desirable.
+
+### In 2-party or N-party contracts, beware of the possibility that some participants may "drop offline" and not return
+
+Do not make refund or claim processes dependent on a specific party performing a particular action with no other way of getting the funds out. For example, in a rock-paper-scissors game, one common mistake is to not make a payout until both players submit their moves; however, a malicious player can "grief" the other by simply never submitting their move - in fact, if a player sees the other player's revealed move and determiners that they lost, they have no reason to submit their own move at all. This issue may also arise in the context of state channel settlement. When such situations are an issue, (1) provide a way of circumventing non-participating participants, perhaps through a time limit, and (2) consider adding an additional economic incentive for participants to submit information in all of the situations in which they are supposed to do so.
 
 <a name="keep-fallback-functions-simple"></a>
 
@@ -272,23 +299,9 @@ function internalAction() internal {
 
 <a name="beware-division-by-zero"></a>
 
-### Beware division by zero
+### Beware division by zero (Solidity < 0.3.6)
 
-Currently, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not `throw` an exception when a number is divided by zero. You therefore need to check for division by zero manually.
-
-```
-// bad
-function divide(uint x, uint y) returns(uint) {
-    return x / y;
-}
-
-// good
-function divide(uint x, uint y) returns(uint) {
-   if (y == 0) { throw; }
-
-   return x / y;
-}
-```
+Prior to version 0.3.6, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not `throw` an exception when a number is divided by zero. Ensure your running the latest version of Solidity to [throw on divide by zero](https://github.com/ethereum/solidity/pull/888).
 
 <a name="differentiate-functions-events"></a>
 
@@ -549,7 +562,7 @@ contract Auction {
 }
 ```
 
-When it tries to refund the old leader, it throws if the refund fails. This means that a malicious bidder can become the leader, while making sure that any refunds to their address will *always* fail. In this way, they can prevent anyone else from calling the `bid()` function, and stay the leader forever. A natural solution might be to continue even if the refund fails, under the theory that it's their own fault if they can't accept the refund. But this is vulnerable to the [Call Depth Attack](https://github.com/ConsenSys/smart-contract-best-practices/#call-depth-attack)! So instead, you should set up a [pull payment system](https://github.com/ConsenSys/smart-contract-best-practices/#favor-pull-payments-over-push-payments) instead, as described earlier.
+When it tries to refund the old leader, it throws if the refund fails. This means that a malicious bidder can become the leader, while making sure that any refunds to their address will *always* fail. In this way, they can prevent anyone else from calling the `bid()` function, and stay the leader forever. A natural solution might be to continue even if the refund fails, under the theory that it's their own fault if they can't accept the refund. But this is vulnerable to the [Call Depth Attack](https://github.com/ConsenSys/smart-contract-best-practices/#call-depth-attack)! So instead, you should set up a [pull payment system](https://github.com/ConsenSys/smart-contract-best-practices/#favor-pull-over-push-payments) instead, as described earlier.
 
 Another example is when a contract may iterate through an array to pay users (e.g., supporters in a crowdfunding contract). It's common to want to make sure that each payment succeeds. If not, one should throw. The issue is that if one call fails, you are reverting the whole payout system, meaning the loop will never complete. No one gets paid, because one address is forcing an error.
 
@@ -629,7 +642,7 @@ As we discussed in the [General Philosophy](#general-philosophy) section, it is 
 
 The approach we advocate is to "prepare for failure". It is impossible to know in advance whether your code is secure. However, you can architect your contracts in a way that allows them to fail gracefully, and with minimal damage. This section presents a variety of techniques that will help you prepare for failure.
 
-Note: There's always a risk when you add a new component to your system. A badly designed failsafe could itself become a vulnerability - as can the interaction between a number of well designed failsafes. Be thoughtful about each technique you use in your contracts, and consider carefully how they work together to create a robust system.
+Note: There's always a risk when you add a new component to your system. A badly designed fail-safe could itself become a vulnerability - as can the interaction between a number of well designed fail-safes. Be thoughtful about each technique you use in your contracts, and consider carefully how they work together to create a robust system.
 
 ### Upgrading Broken Contracts
 
@@ -729,12 +742,6 @@ Example:
 bool private stopped = false;
 address private owner;
 
-function toggleContractActive() public
-isAdmin() {
-    // You can add an additional modifier that restricts stopping a contract to be based on another action, such as a vote of users
-    stopped = !stopped;
-}
-
 modifier isAdmin() {
     if(msg.sender != owner) {
         throw;
@@ -742,16 +749,22 @@ modifier isAdmin() {
     _
 }
 
+function toggleContractActive() isAdmin public
+{
+    // You can add an additional modifier that restricts stopping a contract to be based on another action, such as a vote of users
+    stopped = !stopped;
+}
+
 modifier stopInEmergency { if (!stopped) _ }
 modifier onlyInEmergency { if (stopped) _ }
 
-function deposit() public
-stopInEmergency() {
+function deposit() stopInEmergency public
+{
     // some code
 }
 
-function withdraw() public
-onlyInEmergency() {
+function withdraw() onlyInEmergency public
+{
     // some code
 }
 ```
@@ -843,6 +856,8 @@ contract TokenWithInvariants {
 }
 ```
 
+<a name="contract-rollout"></a>
+
 ### Contract Rollout
 
 Contracts should have a substantial and prolonged testing period - before substantial money is put at risk.
@@ -861,7 +876,7 @@ During testing, you can force an automatic deprecation by preventing any actions
 
 ```
 modifier isActive() {
-    if (now > SOME_BLOCK_NUMBER) {
+    if (block.number > SOME_BLOCK_NUMBER) {
         throw;
     }
     _
@@ -881,12 +896,49 @@ function withdraw() public {
 
 In the early stages, you can restrict the amount of Ether for any user (or for the entire contract) - reducing the risk.
 
+
+<a name="bounties"></a>
+
+### Bug Bounty Programs
+
+Some tips for running bounty programs:
+
+- Decide which currency will bounties be distributed in (BTC and/or ETH)
+- Decide on an estimated total budget for bounty rewards
+- From the budget, determine three tiers of rewards:
+  - smallest reward you are willing to give out
+  - highest reward that's usually awardable
+  - an extra range to be awarded in case of very severe vulnerabilities
+- Determine who the bounty judges are (3 may be ideal typically)
+- Lead developer should probably be one of the bounty judges
+- When a bug report is received, the lead developer, with advice from judges, should evaluate the severity of the bug
+- Work at this stage should be in a private repo, and the issue filed on Github
+- If it's a bug that should be fixed, in the private repo, a developer should write a test case, which should fail and thus confirm the bug
+- Developer should implement the fix and ensure the test now passes; writing additional tests as needed
+- Show the bounty hunter the fix; merge the fix back to the public repo is one way
+- Determine if bounty hunter has any other feedback about the fix
+- Bounty judges determine the size of the reward, based on their evaluation of both the *likelihood* and *impact* of the bug.
+- Keep bounty participants informed throughout the process, and then strive to avoid delays in sending them their reward
+
+For an example of the three tiers of rewards, see [Ethereum's Bounty Program](https://bounty.ethereum.org):
+
+> The value of rewards paid out will vary depending on severity of impact. Rewards for minor 'harmless' bugs start at 0.05 BTC. Major bugs, for example leading to consensus issues, will be rewarded up to 5 BTC. Much higher rewards are possible (up to 25 BTC) in case of very severe vulnerabilities.
+
+
 ## Security-related Documentation and Procedures
 When launching a contract that will have substantial funds or is required to be mission critical, it is important to include proper documentation. Some documentation related to security includes:
+
+**Specifications and Rollout Plans**
+
+- Specs, diagrams, and other documentation that helps auditors, reviewers, and the community understand what the system is intended to do.
+- Many bugs can be found just from the specifications, and they are the least costly to fix.
+- Rollout plans that include details listed [here](https://github.com/ConsenSys/smart-contract-best-practices#contract-rollout), and target dates.
 
 **Status**
 
 - Where current code is deployed
+- Compiler version, flags used, and steps for verifying the deployed bytecode matches the source code
+- Compiler versions and flags that will be used for the different phases of rollout.
 - Current status of deployed code (including outstanding issues, performance stats, etc.)
 
 **Known Issues**
@@ -924,6 +976,7 @@ When launching a contract that will have substantial funds or is required to be 
 - [solint](https://github.com/weifund/solint) - Another upcoming tool, will provide Solidity linting that helps you enforce consistent conventions and avoid errors in your Solidity smart-contracts.
 
 
+
 ## Future improvements
 - **Editor Security Warnings**: Editors will soon alert for common security errors, not just compilation errors. Browser Solidity is getting these features soon.
 
@@ -931,7 +984,7 @@ When launching a contract that will have substantial funds or is required to be 
 
 ## Smart Contract Security Bibliography
 
-A lot of this document contains code, examples and insights gained from various parts already written by the community. 
+A lot of this document contains code, examples and insights gained from various parts already written by the community.
 Here are some of them.  Feel free to add more.
 
 ##### By Ethereum core developers
@@ -961,6 +1014,7 @@ Here are some of them.  Feel free to add more.
 - https://medium.com/@coriacetic/in-bits-we-trust-4e464b418f0b
 - https://medium.com/@hrishiolickel/why-smart-contracts-fail-undiscovered-bugs-and-what-we-can-do-about-them-119aa2843007
 - https://medium.com/@peterborah/we-need-fault-tolerant-smart-contracts-ec1b56596dbc
+- https://medium.com/zeppelin-blog/zeppelin-framework-proposal-and-development-roadmap-fdfa9a3a32ab
 - https://pdaian.com/blog/chasing-the-dao-attackers-wake
 - http://www.comp.nus.edu.sg/~loiluu/papers/oyente.pdf
 
@@ -971,5 +1025,7 @@ Bill Gleim (07/29/2016 3495fb5)
 -
 
 ## License
+
+Licensed under [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 Licensed under [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-nc-sa/4.0/)

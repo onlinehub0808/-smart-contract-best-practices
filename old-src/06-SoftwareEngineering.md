@@ -5,7 +5,7 @@ As we discussed in the [General Philosophy](#general-philosophy) section, it is 
 
 The approach we advocate is to "prepare for failure". It is impossible to know in advance whether your code is secure. However, you can architect your contracts in a way that allows them to fail gracefully, and with minimal damage. This section presents a variety of techniques that will help you prepare for failure.
 
-Note: There's always a risk when you add a new component to your system. A badly designed failsafe could itself become a vulnerability - as can the interaction between a number of well designed failsafes. Be thoughtful about each technique you use in your contracts, and consider carefully how they work together to create a robust system.
+Note: There's always a risk when you add a new component to your system. A badly designed fail-safe could itself become a vulnerability - as can the interaction between a number of well designed fail-safes. Be thoughtful about each technique you use in your contracts, and consider carefully how they work together to create a robust system.
 
 ### Upgrading Broken Contracts
 
@@ -105,12 +105,6 @@ Example:
 bool private stopped = false;
 address private owner;
 
-function toggleContractActive() public
-isAdmin() {
-    // You can add an additional modifier that restricts stopping a contract to be based on another action, such as a vote of users
-    stopped = !stopped;
-}
-
 modifier isAdmin() {
     if(msg.sender != owner) {
         throw;
@@ -118,16 +112,22 @@ modifier isAdmin() {
     _
 }
 
+function toggleContractActive() isAdmin public
+{
+    // You can add an additional modifier that restricts stopping a contract to be based on another action, such as a vote of users
+    stopped = !stopped;
+}
+
 modifier stopInEmergency { if (!stopped) _ }
 modifier onlyInEmergency { if (stopped) _ }
 
-function deposit() public
-stopInEmergency() {
+function deposit() stopInEmergency public
+{
     // some code
 }
 
-function withdraw() public
-onlyInEmergency() {
+function withdraw() onlyInEmergency public
+{
     // some code
 }
 ```
@@ -219,6 +219,8 @@ contract TokenWithInvariants {
 }
 ```
 
+<a name="contract-rollout"></a>
+
 ### Contract Rollout
 
 Contracts should have a substantial and prolonged testing period - before substantial money is put at risk.
@@ -237,7 +239,7 @@ During testing, you can force an automatic deprecation by preventing any actions
 
 ```
 modifier isActive() {
-    if (now > SOME_BLOCK_NUMBER) {
+    if (block.number > SOME_BLOCK_NUMBER) {
         throw;
     }
     _
@@ -256,3 +258,32 @@ function withdraw() public {
 ##### Restrict amount of Ether per user/contract
 
 In the early stages, you can restrict the amount of Ether for any user (or for the entire contract) - reducing the risk.
+
+
+<a name="bounties"></a>
+
+### Bug Bounty Programs
+
+Some tips for running bounty programs:
+
+- Decide which currency will bounties be distributed in (BTC and/or ETH)
+- Decide on an estimated total budget for bounty rewards
+- From the budget, determine three tiers of rewards:
+  - smallest reward you are willing to give out
+  - highest reward that's usually awardable
+  - an extra range to be awarded in case of very severe vulnerabilities
+- Determine who the bounty judges are (3 may be ideal typically)
+- Lead developer should probably be one of the bounty judges
+- When a bug report is received, the lead developer, with advice from judges, should evaluate the severity of the bug
+- Work at this stage should be in a private repo, and the issue filed on Github
+- If it's a bug that should be fixed, in the private repo, a developer should write a test case, which should fail and thus confirm the bug
+- Developer should implement the fix and ensure the test now passes; writing additional tests as needed
+- Show the bounty hunter the fix; merge the fix back to the public repo is one way
+- Determine if bounty hunter has any other feedback about the fix
+- Bounty judges determine the size of the reward, based on their evaluation of both the *likelihood* and *impact* of the bug.
+- Keep bounty participants informed throughout the process, and then strive to avoid delays in sending them their reward
+
+For an example of the three tiers of rewards, see [Ethereum's Bounty Program](https://bounty.ethereum.org):
+
+> The value of rewards paid out will vary depending on severity of impact. Rewards for minor 'harmless' bugs start at 0.05 BTC. Major bugs, for example leading to consensus issues, will be rewarded up to 5 BTC. Much higher rewards are possible (up to 25 BTC) in case of very severe vulnerabilities.
+

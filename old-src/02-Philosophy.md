@@ -10,14 +10,15 @@ Smart contract programming requires a different engineering mindset than you may
   - Manage the amount of money at risk (rate limiting, maximum usage)
   - Have an effective upgrade path for bugfixes and improvements
 
-- **Roll out carefully**. It is always better to catch bugs before a full production release.
+- [**Rollout carefully**.](https://github.com/ConsenSys/smart-contract-best-practices#contract-rollout) It is always better to catch bugs before a full production release.
   - Test contracts thoroughly, and add tests whenever new attack vectors are discovered
-  - Provide bug bounties starting from alpha testnet releases
+  - Provide [bug bounties](https://github.com/ConsenSys/smart-contract-best-practices#bounties) starting from alpha testnet releases
   - Rollout in phases, with increasing usage and testing in each phase
 
 - **Keep contracts simple**. Complexity increases the likelihood of errors.
   - Ensure the contract logic is simple
   - Modularize code to keep contracts and functions small
+  - Use already-written tools or code where possible (eg. don't roll your own random number generator)
   - Prefer clarity to performance whenever possible
   - Only use the blockchain for the parts of your system that require decentralization
 
