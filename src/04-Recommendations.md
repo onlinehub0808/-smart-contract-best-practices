@@ -133,9 +133,11 @@ function makeUntrustedWithdrawal(uint amount) {
 }
 ```
 
+### Internal Actions
+
 <a name="beware-rounding-with-integer-division"></a>
 
-### Beware rounding with integer division
+#### Beware rounding with integer division
 
 All integer divison rounds down to the nearest integer. If you need more precision, consider using a multiplier, or store both the numerator and denominator.
 
@@ -155,7 +157,7 @@ uint denominator = 2;
 
 <a name="keep-fallback-functions-simple"></a>
 
-### Keep fallback functions simple
+#### Keep fallback functions simple
 
 [Fallback functions](http://solidity.readthedocs.io/en/latest/contracts.html#fallback-function) are called when a contract is sent a message with no arguments (or when no function matches), and only has access to 2,300 gas when called from a `.send()`. If you wish to be able to receive Ether from a `.send()`, the most you can do in a fallback function is log an event. Use a proper function if a computation or more gas is required.
 
@@ -172,7 +174,7 @@ function() { LogDepositReceived(msg.sender); }
 
 <a name="mark-visibility"></a>
 
-### Explicitly mark visibility in functions and state variables
+#### Explicitly mark visibility in functions and state variables
 
 Explicitly label the visibility of functions and state variables. Functions can be specified as being `external`, `public`, `internal` or `private`. For state variables, `external` is not possible. Labeling the visibility explicitly will make it easier to catch incorrect assumptions about who can call the function or access the variable.
 
@@ -197,7 +199,7 @@ function internalAction() internal {
 
 <a name="beware-division-by-zero"></a>
 
-### Beware division by zero
+#### Beware division by zero
 
 Currently, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not `throw` an exception when a number is divided by zero. You therefore need to check for division by zero manually.
 
@@ -217,7 +219,7 @@ function divide(uint x, uint y) returns(uint) {
 
 <a name="differentiate-functions-events"></a>
 
-### Differentiate functions and events
+#### Differentiate functions and events
 
 Favor capitalization and a prefix in front of events (we suggest *Log*), to prevent the risk of confusion between functions and events. For functions, always start with a lowercase letter, except for the constructor.
 
