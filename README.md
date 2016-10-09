@@ -50,33 +50,6 @@ Smart contract programming requires a different engineering mindset than you may
   - Understand that your public functions are public, and may be called maliciously. Your private data is also viewable by anyone.
   - Keep gas costs and the block gas limit in mind.
 
-## Security Notifications
-
-This is a list of resources that will often highlight discovered exploits in Ethereum or Solidity. The official source of security notifications is the Ethereum Blog, but in many cases vulnerabilities will be disclosed and discussed earlier in other locations.
-
-- [Ethereum Blog](https://blog.ethereum.org/): The official Ethereum blog
-  - [Ethereum Blog - Security only](https://blog.ethereum.org/category/security/): All blog posts that are tagged *Security*
-- [Ethereum Gitter](https://gitter.im/orgs/ethereum/rooms) chat rooms
-  - [Solidity](https://gitter.im/ethereum/solidity)
-  - [Go-Ethereum](https://gitter.im/ethereum/go-ethereum)
-  - [CPP-Ethereum](https://gitter.im/ethereum/cpp-ethereum)
-  - [Research](https://gitter.im/ethereum/research)
-- [Reddit](https://www.reddit.com/r/ethereum)
-- [Network Stats](https://ethstats.net/)
-
-It's highly recommended that you *regularly* read all these sources, as exploits they note may impact your contracts.
-
-Additionally, here is a list of Ethereum core developers who may write about security, and see the [bibliography](https://github.com/ConsenSys/smart-contract-best-practices#smart-contract-security-bibliography) for more from the community.
-
-- **Vitalik Buterin**: [Twitter](https://twitter.com/vitalikbuterin), [Github](https://github.com/vbuterin), [Reddit](https://www.reddit.com/user/vbuterin), [Ethereum Blog](https://blog.ethereum.org/author/vitalik-buterin/)
-- **Dr. Christian Reitwiessner**: [Twitter](https://twitter.com/ethchris), [Github](https://github.com/chriseth), [Ethereum Blog](https://blog.ethereum.org/author/christian_r/)
-- **Dr. Gavin Wood**: [Twitter](https://twitter.com/gavofyork), [Blog](http://gavwood.com/), [Github](https://github.com/gavofyork)
-- **Vlad Zamfir**: [Twitter](https://twitter.com/vladzamfir), [Github](https://github.com/vladzamfir), [Ethereum Blog](https://blog.ethereum.org/author/vlad/)
-
-Beyond following core developers, it is critical to participate in the wider blockchain-related security community - as security disclosures or observations will come through a variety of parties.
-
-## Recommendations for Smart Contract Security in Solidity
-
 ### Fundamental Tradeoffs: Simplicity versus Complexity cases
 <a name="fundamental-tradeoffs"></a>
 
@@ -107,6 +80,33 @@ As with the other tradeoffs considered here, security best practices trend away 
 A smart contract system from a software engineering perspective wishes to maximize reuse where reasonable.  There are many ways to reuse contract code in Solidity.  Using proven previously-deployed contracts *which you own* is generally the safest manner to achieve code reuse.
 
 Duplication is frequently relied upon in cases where self-owned previously-deployed contracts are not available.  Efforts such as https://github.com/ConsenSys/live-libs and https://github.com/OpenZeppelin/zeppelin-solidity seek to provide patterns such that secure code can be re-used without duplication.  Any contract security analyses must include any re-used code that has not previously established a level of trust commensurate with the funds at risk in the target smart contract system.
+
+## Security Notifications
+
+This is a list of resources that will often highlight discovered exploits in Ethereum or Solidity. The official source of security notifications is the Ethereum Blog, but in many cases vulnerabilities will be disclosed and discussed earlier in other locations.
+
+- [Ethereum Blog](https://blog.ethereum.org/): The official Ethereum blog
+  - [Ethereum Blog - Security only](https://blog.ethereum.org/category/security/): All blog posts that are tagged *Security*
+- [Ethereum Gitter](https://gitter.im/orgs/ethereum/rooms) chat rooms
+  - [Solidity](https://gitter.im/ethereum/solidity)
+  - [Go-Ethereum](https://gitter.im/ethereum/go-ethereum)
+  - [CPP-Ethereum](https://gitter.im/ethereum/cpp-ethereum)
+  - [Research](https://gitter.im/ethereum/research)
+- [Reddit](https://www.reddit.com/r/ethereum)
+- [Network Stats](https://ethstats.net/)
+
+It's highly recommended that you *regularly* read all these sources, as exploits they note may impact your contracts.
+
+Additionally, here is a list of Ethereum core developers who may write about security, and see the [bibliography](https://github.com/ConsenSys/smart-contract-best-practices#smart-contract-security-bibliography) for more from the community.
+
+- **Vitalik Buterin**: [Twitter](https://twitter.com/vitalikbuterin), [Github](https://github.com/vbuterin), [Reddit](https://www.reddit.com/user/vbuterin), [Ethereum Blog](https://blog.ethereum.org/author/vitalik-buterin/)
+- **Dr. Christian Reitwiessner**: [Twitter](https://twitter.com/ethchris), [Github](https://github.com/chriseth), [Ethereum Blog](https://blog.ethereum.org/author/christian_r/)
+- **Dr. Gavin Wood**: [Twitter](https://twitter.com/gavofyork), [Blog](http://gavwood.com/), [Github](https://github.com/gavofyork)
+- **Vlad Zamfir**: [Twitter](https://twitter.com/vladzamfir), [Github](https://github.com/vladzamfir), [Ethereum Blog](https://blog.ethereum.org/author/vlad/)
+
+Beyond following core developers, it is critical to participate in the wider blockchain-related security community - as security disclosures or observations will come through a variety of parties.
+
+## Recommendations for Smart Contract Security in Solidity
 
 ### External Calls
 
