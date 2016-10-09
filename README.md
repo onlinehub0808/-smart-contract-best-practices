@@ -1021,7 +1021,7 @@ Here are some of them.  Feel free to add more.
 ## Reviewers
 
 The following people have reviewed this document (date and commit they reviewed in parentheses):
-
+Bill Gleim (07/29/2016 3495fb5)
 -
 
 ## License
