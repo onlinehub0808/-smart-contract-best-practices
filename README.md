@@ -355,40 +355,7 @@ function transfer() external {}
 
 ### Call Depth Attack
 
-With the Call Depth Attack, *any* call (even a fully trusted and correct one) can fail. This is because there is a limit on how deep the "call stack" can go. If the attacker does a bunch of recursive calls and brings the stack depth to 1023, then they can call your function and automatically cause all of its subcalls to fail (subcalls include `send()`).
-
-An example based on the previous auction code:
-
-```
-// INSECURE
-contract auction {
-    mapping(address => uint) refunds;
-
-    // [...]
-
-    function withdrawRefund(address recipient) {
-      uint refund = refunds[recipient];
-      refunds[recipient] = 0;
-      recipient.send(refund); // this line is vulnerable to a call depth attack
-    }
-}
-```
-
-The send() can fail if the call depth is too large, causing ether to not be sent. However, the rest of the function would succeed, including the previous line which set the victim's refund balance to 0. The solution is to explicitly check for errors, as discussed previously:
-
-```
-contract auction {
-    mapping(address => uint) refunds;
-
-    // [...]
-
-    function withdrawRefund(address recipient) {
-      uint refund = refunds[recipient];
-      refunds[recipient] = 0;
-      if (!recipient.send(refund)) { throw; } // the transaction will be reverted in case of call depth attack
-    }
-}
-```
+As of the [EIP 150](https://github.com/ethereum/EIPs/issues/150) hardfork, call depth attacks are no longer relevant.  Gas (its exhaustion) is the only variable that can cause a call to fail.
 
 <a name="race-conditions"></a>
 
