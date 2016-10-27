@@ -121,7 +121,7 @@ Calls to untrusted contracts can introduce several unexpected risks or errors. E
 
 When sending Ether, use `someAddress.send()` and avoid `someAddress.call.value()()`.
 
-External calls such as `someAddress.call.value()()` can trigger malicious code. While `send()` also triggers code, it is safe because it only has access to gas stipend of 2,300 gas. Currently, this is only enough to log an event, not enough to launch an attack.
+External calls such as `someAddress.call.value()()` can trigger malicious code. While `send()` also triggers code, it is safe because it only has access to gas stipend of 2,300 gas. Currently, this is only enough to log an event, not enough to launch an attack.  Always check the return value of `send()` even if you know the receiving account.
 
 ```
 // bad
@@ -167,7 +167,7 @@ Whether using *raw calls* or *contract calls*, assume that malicious code will e
 
 #### Favor *pull* over *push* for external calls
 
-External calls can fail accidentally or deliberately. To minimize the damage caused by such failures, it is often better to isolate each external call into its own transaction that can be initiated by the recipient of the call. This is especially relevant for payments, where it is better to let users withdraw funds rather than push funds to them automatically. (This also reduces the chance of [problems with the gas limit](https://github.com/ConsenSys/smart-contract-best-practices/#dos-with-block-gas-limit).)
+External calls can fail accidentally or deliberately. To minimize the damage caused by such failures, it is often better to isolate each external call into its own transaction that can be initiated by the recipient of the call. This is especially relevant for payments, where it is better to let users withdraw funds rather than push funds to them automatically. (This also reduces the chance of [problems with the gas limit](https://github.com/ConsenSys/smart-contract-best-practices/#dos-with-block-gas-limit).)  Avoid combining or multiple `send()` calls in a single transaction.
 
 ```
 // bad
