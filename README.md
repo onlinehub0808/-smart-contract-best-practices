@@ -329,9 +329,9 @@ function internalAction() internal {
 
 <a name="beware-division-by-zero"></a>
 
-### Beware division by zero (Solidity < 0.3.6)
+### Beware division by zero (Solidity < 0.4)
 
-Prior to version 0.3.6, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not `throw` an exception when a number is divided by zero. Ensure your running the latest version of Solidity to [throw on divide by zero](https://github.com/ethereum/solidity/pull/888).
+Prior to version 0.4, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not `throw` an exception when a number is divided by zero. Ensure you're running at least version 0.4.
 
 <a name="differentiate-functions-events"></a>
 
