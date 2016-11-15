@@ -269,6 +269,9 @@ The attacker can do this by creating a contract, funding it with 1 wei, and invo
 `selfdestruct(victimAddress)`.  No code is invoked in `victimAddress`, so it
 cannot be prevented.
 
+### Don't assume contracts are created with zero balance
+
+An attacker can send wei to the address of a contract before it is created.  Contracts should not assume that its initial state contains a zero balance.  See [issue 61](https://github.com/ConsenSys/smart-contract-best-practices/issues/61) for more details.
 
 ### Remember that on-chain data is public
 
