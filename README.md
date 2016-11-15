@@ -2,7 +2,7 @@
 
 Main sections are:
 
-- [**Solidity Security Tips**](https://github.com/ConsenSys/smart-contract-best-practices#solidity-tips)
+- [**Solidity Security Tips**](#solidity-tips)
 - [**Known Attacks**](https://github.com/ConsenSys/smart-contract-best-practices#known-attacks)
 - [**Engineering Techniques**](https://github.com/ConsenSys/smart-contract-best-practices#eng-techniques)
 - [**Bibliography**](https://github.com/ConsenSys/smart-contract-best-practices#bibliography)
