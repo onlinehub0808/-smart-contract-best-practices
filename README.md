@@ -3,13 +3,13 @@
 Main sections are:
 
 - [**Solidity Security Tips**](#solidity-tips)
-- [**Known Attacks**](https://github.com/ConsenSys/smart-contract-best-practices#known-attacks)
-- [**Engineering Techniques**](https://github.com/ConsenSys/smart-contract-best-practices#eng-techniques)
-- [**Bibliography**](https://github.com/ConsenSys/smart-contract-best-practices#bibliography)
+- [**Known Attacks**](#known-attacks)
+- [**Engineering Techniques**](#eng-techniques)
+- [**Bibliography**](#bibliography)
 
 This document is designed to provide a starting *security* baseline for intermediate Solidity programmers.  It additionally includes security philosophies, bug bounty program guidelines, documentation and procedures, and tools.
 
-Pull requests are very welcome, from small fixes, to sections, and if you've written an article or blog post, please add it to the [bibliography.](https://github.com/ConsenSys/smart-contract-best-practices#bibliography).  See our [Contribution Guidelines](CONTRIBUTING.md)
+Pull requests are very welcome, from small fixes, to sections, and if you've written an article or blog post, please add it to the [bibliography.](#bibliography).  See our [Contribution Guidelines](CONTRIBUTING.md)
 
 #### Additional Requested Content
 
@@ -29,9 +29,9 @@ Smart contract programming requires a different engineering mindset than you may
   - Manage the amount of money at risk (rate limiting, maximum usage)
   - Have an effective upgrade path for bugfixes and improvements
 
-- [**Rollout carefully**.](https://github.com/ConsenSys/smart-contract-best-practices#contract-rollout) It is always better to catch bugs before a full production release.
+- [**Rollout carefully**.](#contract-rollout) It is always better to catch bugs before a full production release.
   - Test contracts thoroughly, and add tests whenever new attack vectors are discovered
-  - Provide [bug bounties](https://github.com/ConsenSys/smart-contract-best-practices#bounties) starting from alpha testnet releases
+  - Provide [bug bounties](#bounties) starting from alpha testnet releases
   - Rollout in phases, with increasing usage and testing in each phase
 
 - **Keep contracts simple**. Complexity increases the likelihood of errors.
