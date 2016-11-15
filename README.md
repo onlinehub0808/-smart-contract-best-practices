@@ -7,9 +7,9 @@ Main sections are:
 - [**Engineering Techniques**](#eng-techniques)
 - [**Bibliography**](#bibliography)
 
-This document is designed to provide a starting *security* baseline for intermediate Solidity programmers.  It additionally includes security philosophies, bug bounty program guidelines, documentation and procedures, and tools.
+This document is designed to provide a starting *security* baseline for intermediate Solidity programmers.  It additionally includes *security philosophies; bug bounty program guidelines; documentation and procedures; and tools.*
 
-Pull requests are very welcome, from small fixes, to sections, and if you've written an article or blog post, please add it to the [bibliography.](#bibliography).  See our [Contribution Guidelines](CONTRIBUTING.md)
+Pull requests are very welcome, from small fixes, to sections, and if you've written an article or blog post, please add it to the [bibliography.](#bibliography)  See our [Contribution Guidelines](CONTRIBUTING.md).
 
 #### Additional Requested Content
 
@@ -80,7 +80,7 @@ As with the other tradeoffs considered here, security best practices trend away 
 
 A smart contract system from a software engineering perspective wishes to maximize reuse where reasonable.  There are many ways to reuse contract code in Solidity.  Using proven previously-deployed contracts *which you own* is generally the safest manner to achieve code reuse.
 
-Duplication is frequently relied upon in cases where self-owned previously-deployed contracts are not available.  Efforts such as https://github.com/ConsenSys/live-libs and https://github.com/OpenZeppelin/zeppelin-solidity seek to provide patterns such that secure code can be re-used without duplication.  Any contract security analyses must include any re-used code that has not previously established a level of trust commensurate with the funds at risk in the target smart contract system.
+Duplication is frequently relied upon in cases where self-owned previously-deployed contracts are not available.  Efforts such as [Live Libs](https://github.com/ConsenSys/live-libs) and [Zeppelin Solidity](https://github.com/OpenZeppelin/zeppelin-solidity) seek to provide patterns such that secure code can be re-used without duplication.  Any contract security analyses must include any re-used code that has not previously established a level of trust commensurate with the funds at risk in the target smart contract system.
 
 ## Security Notifications
 
