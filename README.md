@@ -1,14 +1,15 @@
 # Ethereum Contract Security Techniques and Tips
 
-The recent attack on [The DAO](https://github.com/slockit/DAO) highlights the importance of security and proper software engineering of blockchain-based contracts. This document outlines collected security tips and techniques for smart contract development. This material is provided as is - and may not reflect best practice. Pull requests are welcome.
+Main sections are:
 
-**Currently, this document is an early draft - and likely has substantial omissions or errors. This message will be removed in the future once a number of community members have reviewed this document.**
+- [**Solidity Security Tips**](#solidity-tips)
+- [**Known Attacks**](#known-attacks)
+- [**Engineering Techniques**](#eng-techniques)
+- [**Bibliography**](#bibliography)
 
-#### Note for contributors
+This document is designed to provide a starting *security* baseline for intermediate Solidity programmers.  It additionally includes *security philosophies; bug bounty program guidelines; documentation and procedures; and tools.*
 
-This document is designed to provide a starting *security* baseline for intermediate Solidity programmers. It includes security philosophies, code idioms, known attacks, and software engineering techniques for blockchain contract programming - and aims to cover all communities, techniques, and tools that improve smart contract security. At this stage, this document is focused primarily on Solidity, a javascript-like language for Ethereum, but other languages are welcome.
-
-To contribute, see our [Contribution Guidelines](CONTRIBUTING.md).
+Pull requests are very welcome, from small fixes, to sections, and if you've written an article or blog post, please add it to the [bibliography.](#bibliography)  See our [Contribution Guidelines](CONTRIBUTING.md).
 
 #### Additional Requested Content
 
@@ -28,9 +29,9 @@ Smart contract programming requires a different engineering mindset than you may
   - Manage the amount of money at risk (rate limiting, maximum usage)
   - Have an effective upgrade path for bugfixes and improvements
 
-- [**Rollout carefully**.](https://github.com/ConsenSys/smart-contract-best-practices#contract-rollout) It is always better to catch bugs before a full production release.
+- [**Rollout carefully**.](#contract-rollout) It is always better to catch bugs before a full production release.
   - Test contracts thoroughly, and add tests whenever new attack vectors are discovered
-  - Provide [bug bounties](https://github.com/ConsenSys/smart-contract-best-practices#bounties) starting from alpha testnet releases
+  - Provide [bug bounties](#bounties) starting from alpha testnet releases
   - Rollout in phases, with increasing usage and testing in each phase
 
 - **Keep contracts simple**. Complexity increases the likelihood of errors.
@@ -79,7 +80,7 @@ As with the other tradeoffs considered here, security best practices trend away 
 
 A smart contract system from a software engineering perspective wishes to maximize reuse where reasonable.  There are many ways to reuse contract code in Solidity.  Using proven previously-deployed contracts *which you own* is generally the safest manner to achieve code reuse.
 
-Duplication is frequently relied upon in cases where self-owned previously-deployed contracts are not available.  Efforts such as https://github.com/ConsenSys/live-libs and https://github.com/OpenZeppelin/zeppelin-solidity seek to provide patterns such that secure code can be re-used without duplication.  Any contract security analyses must include any re-used code that has not previously established a level of trust commensurate with the funds at risk in the target smart contract system.
+Duplication is frequently relied upon in cases where self-owned previously-deployed contracts are not available.  Efforts such as [Live Libs](https://github.com/ConsenSys/live-libs) and [Zeppelin Solidity](https://github.com/OpenZeppelin/zeppelin-solidity) seek to provide patterns such that secure code can be re-used without duplication.  Any contract security analyses must include any re-used code that has not previously established a level of trust commensurate with the funds at risk in the target smart contract system.
 
 ## Security Notifications
 
@@ -105,6 +106,8 @@ Additionally, here is a list of Ethereum core developers who may write about sec
 - **Vlad Zamfir**: [Twitter](https://twitter.com/vladzamfir), [Github](https://github.com/vladzamfir), [Ethereum Blog](https://blog.ethereum.org/author/vlad/)
 
 Beyond following core developers, it is critical to participate in the wider blockchain-related security community - as security disclosures or observations will come through a variety of parties.
+
+<a name="solidity-tips"></a>
 
 ## Recommendations for Smart Contract Security in Solidity
 
@@ -351,6 +354,8 @@ function transfer() {}
 event LogTransfer() {}
 function transfer() external {}
 ```
+
+<a name="known-attacks"></a>
 
 ## Known Attacks
 
@@ -634,6 +639,8 @@ Since a transaction is in the mempool for a short while, one can know what actio
 ### ~~Call Depth Attack~~
 
 As of the [EIP 150](https://github.com/ethereum/EIPs/issues/150) hardfork, call depth attacks are no longer relevant<sup><a href='http://ethereum.stackexchange.com/questions/9398/how-does-eip-150-change-the-call-depth-attack'>\*</a></sup> (all gas would be consumed well before reaching the 1024 call depth limit).
+
+<a name="eng-techniques"></a>
 
 ## Software Engineering Techniques
 
@@ -980,6 +987,8 @@ When launching a contract that will have substantial funds or is required to be 
 - **Editor Security Warnings**: Editors will soon alert for common security errors, not just compilation errors. Browser Solidity is getting these features soon.
 
 - **New functional languages that compile to EVM bytecode**: Functional languages gives certain guarantees over procedural languages like Solidity, namely immutability within a function and strong compile time checking. This can reduce the risk of errors by providing deterministic behavior. (for more see [this](https://plus.google.com/u/0/events/cmqejp6d43n5cqkdl3iu0582f4k), Curry-Howard correspondence, and linear logic)
+
+<a name="bibliography"></a>
 
 ## Smart Contract Security Bibliography
 
