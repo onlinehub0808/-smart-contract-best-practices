@@ -1,14 +1,15 @@
 # Ethereum Contract Security Techniques and Tips
 
-The recent attack on [The DAO](https://github.com/slockit/DAO) highlights the importance of security and proper software engineering of blockchain-based contracts. This document outlines collected security tips and techniques for smart contract development. This material is provided as is - and may not reflect best practice. Pull requests are welcome.
+Main sections are:
 
-**Currently, this document is an early draft - and likely has substantial omissions or errors. This message will be removed in the future once a number of community members have reviewed this document.**
+- [**Solidity Security Tips**](https://github.com/ConsenSys/smart-contract-best-practices#solidity-tips)
+- [**Known Attacks**](https://github.com/ConsenSys/smart-contract-best-practices#known-attacks)
+- [**Engineering Techniques**](https://github.com/ConsenSys/smart-contract-best-practices#eng-techniques)
+- [**Bibliography**](https://github.com/ConsenSys/smart-contract-best-practices#bibliography)
 
-#### Note for contributors
+This document is designed to provide a starting *security* baseline for intermediate Solidity programmers.  It additionally includes security philosophies, bug bounty program guidelines, documentation and procedures, and tools.
 
-This document is designed to provide a starting *security* baseline for intermediate Solidity programmers. It includes security philosophies, code idioms, known attacks, and software engineering techniques for blockchain contract programming - and aims to cover all communities, techniques, and tools that improve smart contract security. At this stage, this document is focused primarily on Solidity, a javascript-like language for Ethereum, but other languages are welcome.
-
-To contribute, see our [Contribution Guidelines](CONTRIBUTING.md).
+Pull requests are very welcome, from small fixes, to sections, and if you've written an article or blog post, please add it to the [bibliography.](https://github.com/ConsenSys/smart-contract-best-practices#bibliography).  See our [Contribution Guidelines](CONTRIBUTING.md)
 
 #### Additional Requested Content
 
@@ -105,6 +106,8 @@ Additionally, here is a list of Ethereum core developers who may write about sec
 - **Vlad Zamfir**: [Twitter](https://twitter.com/vladzamfir), [Github](https://github.com/vladzamfir), [Ethereum Blog](https://blog.ethereum.org/author/vlad/)
 
 Beyond following core developers, it is critical to participate in the wider blockchain-related security community - as security disclosures or observations will come through a variety of parties.
+
+<a name="solidity-tips"></a>
 
 ## Recommendations for Smart Contract Security in Solidity
 
@@ -351,6 +354,8 @@ function transfer() {}
 event LogTransfer() {}
 function transfer() external {}
 ```
+
+<a name="known-attacks"></a>
 
 ## Known Attacks
 
@@ -634,6 +639,8 @@ Since a transaction is in the mempool for a short while, one can know what actio
 ### ~~Call Depth Attack~~
 
 As of the [EIP 150](https://github.com/ethereum/EIPs/issues/150) hardfork, call depth attacks are no longer relevant<sup><a href='http://ethereum.stackexchange.com/questions/9398/how-does-eip-150-change-the-call-depth-attack'>\*</a></sup> (all gas would be consumed well before reaching the 1024 call depth limit).
+
+<a name="eng-techniques"></a>
 
 ## Software Engineering Techniques
 
@@ -980,6 +987,8 @@ When launching a contract that will have substantial funds or is required to be 
 - **Editor Security Warnings**: Editors will soon alert for common security errors, not just compilation errors. Browser Solidity is getting these features soon.
 
 - **New functional languages that compile to EVM bytecode**: Functional languages gives certain guarantees over procedural languages like Solidity, namely immutability within a function and strong compile time checking. This can reduce the risk of errors by providing deterministic behavior. (for more see [this](https://plus.google.com/u/0/events/cmqejp6d43n5cqkdl3iu0582f4k), Curry-Howard correspondence, and linear logic)
+
+<a name="bibliography"></a>
 
 ## Smart Contract Security Bibliography
 
