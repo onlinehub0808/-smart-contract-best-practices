@@ -975,11 +975,13 @@ When launching a contract that will have substantial funds or is required to be 
 
 ## Security Tools
 
-- [Oyente](http://www.comp.nus.edu.sg/~loiluu/papers/oyente.pdf) - An upcoming tool, will analyze Ethereum code to find common vulnerabilities (e.g., Transaction Order Dependence, no checking for exceptions)
+- [Oyente](https://github.com/ethereum/oyente) - Analyze Ethereum code to find common vulnerabilities, based on this [paper](http://www.comp.nus.edu.sg/~loiluu/papers/oyente.pdf).
+
+- [SolCover](https://github.com/JoinColony/solcover) - Code coverage for Solidity testing.
 
 - [Solgraph](https://github.com/raineorshine/solgraph) - Generates a DOT graph that visualizes function control flow of a Solidity contract and highlights potential security vulnerabilities.
 
-- [solint](https://github.com/weifund/solint) - Another upcoming tool, will provide Solidity linting that helps you enforce consistent conventions and avoid errors in your Solidity smart-contracts.
+- [solint](https://github.com/weifund/solint) - Solidity linting that helps you enforce consistent conventions and avoid errors in your Solidity smart-contracts.
 
 
 
