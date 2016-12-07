@@ -299,13 +299,12 @@ Do not make refund or claim processes dependent on a specific party performing a
 
 ```
 // bad
-function() { balances[msg.sender] += msg.value; }
+function() payable { balances[msg.sender] += msg.value; }
 
 // good
-function() { throw; }
-function deposit() external { balances[msg.sender] += msg.value; }
+function deposit() payable external { balances[msg.sender] += msg.value; }
 
-function() { LogDepositReceived(msg.sender); }
+function() payable { LogDepositReceived(msg.sender); }
 ```
 
 <a name="mark-visibility"></a>
