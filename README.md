@@ -1017,6 +1017,7 @@ Here are some of them.  Feel free to add more.
 - http://vessenes.com/more-ethereum-attacks-race-to-empty-is-the-real-deal
 - https://blog.blockstack.org/simple-contracts-are-better-contracts-what-we-can-learn-from-the-dao-6293214bad3a
 - https://blog.slock.it/deja-vu-dao-smart-contracts-audit-results-d26bc088e32e
+- https://blog.vdice.io/wp-content/uploads/2016/11/vsliceaudit_v1.3.pdf
 - https://eprint.iacr.org/2016/1007.pdf
 - https://github.com/Bunjin/Rouleth/blob/master/Security.md
 - https://github.com/LeastAuthority/ethereum-analyses
