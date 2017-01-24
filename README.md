@@ -129,12 +129,12 @@ When sending Ether be aware of the relative tradeoffs between the use of
     While this method still triggers code execution, the called contract is
     only given a stipend of 2,300 gas which is currently only enough to log an
     event.
-- `someAddress.call.value()()` is will send the provided ether and trigger code
+- `someAddress.call.value()()` will send the provided ether and trigger code
     execution.  The executed code is given all available gas for execution
     making this type of value transfer *unsafe* against reentrancy.
 
 Using `send()` will prevent reentrancy but it does so at the cost of being
-incompatable with any contract who's fallback function requires more than 2,300
+incompatable with any contract whose fallback function requires more than 2,300
 gas.  
 
 One pattern that attempts to balance this trade-off is to implement both
