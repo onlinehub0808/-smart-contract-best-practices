@@ -134,7 +134,7 @@ When sending Ether be aware of the relative tradeoffs between the use of
     making this type of value transfer *unsafe* against reentrancy.
 
 Using `send()` will prevent reentrancy but it does so at the cost of being
-incompatable with any contract whose fallback function requires more than 2,300
+incompatible with any contract whose fallback function requires more than 2,300
 gas.  
 
 One pattern that attempts to balance this trade-off is to implement both
