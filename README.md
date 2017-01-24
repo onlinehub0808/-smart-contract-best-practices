@@ -572,6 +572,8 @@ if (now > startTime + 1 week) { // the now can be manipulated by the miner
 
 ### Integer Overflow and Underflow
 
+Be aware there are around [20 cases for overflow and underflow](https://github.com/ethereum/solidity/issues/796#issuecomment-253578925).
+
 Consider a simple token transfer:
 
 ```
@@ -605,6 +607,7 @@ The same is true for underflow. If a uint is made to be less than zero, it will 
 
 Be careful with the smaller data-types like uint8, uint16, uint24...etc: they can even more easily hit their maximum value.
 
+Be aware there are around [20 cases for overflow and underflow](https://github.com/ethereum/solidity/issues/796#issuecomment-253578925).
 
 <a name="dos-with-unexpected-throw"></a>
 
