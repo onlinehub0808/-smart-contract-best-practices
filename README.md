@@ -556,6 +556,9 @@ Above were examples of race conditions involving the attacker executing maliciou
 
 Since a transaction is in the mempool for a short while, one can know what actions will occur, before it is included in a block. This can be troublesome for things like decentralized markets, where a transaction to buy some tokens can be seen, and a market order implemented before the other transaction gets included. Protecting against this is difficult, as it would come down to the specific contract itself. For example, in markets, it would be better to implement batch auctions (this also protects against high frequency trading concerns). Another way to use a pre-commit scheme (“I’m going to submit the details later”).
 
+<a name="footnote-race-condition-terminology"></a>
+
+<div style='font-size: 80%; display: inline;'>* Some may object to the use of the term <i>race condition</i>, since Ethereum does not currently have true parallelism. However, there is still the fundamental feature of logically distinct processes contending for resources, and the same sorts of pitfalls and potential solutions apply.</div>
 
 <a name="timestamp-dependence"></a>
 
@@ -570,11 +573,6 @@ if (now > startTime + 1 week) { // the now can be manipulated by the miner
 
 }
 ```
-
-<a name="footnote-race-condition-terminology"></a>
-
-<div style='font-size: 80%; display: inline;'>* Some may object to the use of the term <i>race condition</i>, since Ethereum does not currently have true parallelism. However, there is still the fundamental feature of logically distinct processes contending for resources, and the same sorts of pitfalls and potential solutions apply.</div>
-
 
 <a name="integer-overflow-and-underflow"></a>
 
