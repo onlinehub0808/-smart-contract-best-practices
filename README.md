@@ -4,6 +4,11 @@ Main sections are:
 
 - [**Solidity Security Tips**](#solidity-tips)
 - [**Known Attacks**](#known-attacks)
+  - [***Race Conditions***](#race-conditions)
+    - [Reentrancy](#reentrancy)
+    - [Transaction Ordering Dependence](#transaction-ordering-dependence)
+  - [***Gas Related Attacks***](#dos-with-block-gas-limit)
+  - [***Overflow/Underflow***](#integer-overflow-and-underflow)
 - [**Engineering Techniques**](#eng-techniques)
 - [**Bibliography**](#bibliography)
 
@@ -186,7 +191,7 @@ contract auction {
     address highestBidder;
     uint highestBid;
 
-    function bid() {
+    function bid() payable {
         if (msg.value < highestBid) throw;
 
         if (highestBidder != 0) {
@@ -206,7 +211,7 @@ contract auction {
     uint highestBid;
     mapping(address => uint) refunds;
 
-    function bid() external {
+    function bid() payable external {
         if (msg.value < highestBid) throw;
 
         if (highestBidder != 0) {
@@ -372,6 +377,8 @@ function transfer() external {}
 
 One of the major dangers of calling external contracts is that they can take over the control flow, and make changes to your data that the calling function wasn't expecting. This class of bug can take many forms, and both of the major bugs that led to the DAO's collapse were bugs of this sort.
 
+<a name="reentrancy"></a>
+
 #### Reentrancy
 
 The first version of this bug to be noticed involved functions that could be called repeatedly, before the first invocation of the function was finished. This may cause the different invocations of the function to interact in destructive ways.
@@ -489,7 +496,7 @@ Another solution often suggested is a [mutex](https://en.wikipedia.org/wiki/Mutu
 mapping (address => uint) private balances;
 bool private lockBalances;
 
-function deposit() public returns (bool) {
+function deposit() payable public returns (bool) {
     if (!lockBalances) {
         lockBalances = true;
         balances[msg.sender] += msg.value;
@@ -499,7 +506,7 @@ function deposit() public returns (bool) {
     throw;
 }
 
-function withdraw(uint amount) public returns (bool) {
+function withdraw(uint amount) payable public returns (bool) {
     if (!lockBalances && amount > 0 && balances[msg.sender] >= amount) {
         lockBalances = true;
 
@@ -541,9 +548,74 @@ contract StateHolder {
 
 An attacker can call `getLock()`, and then never call `releaseLock()`. If they do this, then the contract will be locked forever, and no further changes will be able to be made. If you use mutexes to protect against race conditions, you will need to carefully ensure that there are no ways for a lock to be claimed and never released. (There are other potential dangers when programming with mutexes, such as deadlocks and livelocks. You should consult the large amount of literature already written on mutexes, if you decide to go this route.)
 
+<a name="transaction-ordering-dependence"></a>
+
+### Transaction-Ordering Dependence (TOD) / Front Loading
+
+Above were examples of race conditions involving the attacker executing malicious code *within a single transaction*. The following are a different type of race condition inherent to Blockchains: the fact that *the order of transactions themselves* (within a block) is easily subject to manipulation. 
+
+Since a transaction is in the mempool for a short while, one can know what actions will occur, before it is included in a block. This can be troublesome for things like decentralized markets, where a transaction to buy some tokens can be seen, and a market order implemented before the other transaction gets included. Protecting against this is difficult, as it would come down to the specific contract itself. For example, in markets, it would be better to implement batch auctions (this also protects against high frequency trading concerns). Another way to use a pre-commit scheme (“I’m going to submit the details later”).
+
+
+<a name="timestamp-dependence"></a>
+
+### Timestamp Dependence
+
+The timestamp of the block can be manipulated by the miner, and so should not be used for critical components of the contract. *Block numbers* and *average block time* can be used to estimate time, but this is not future proof as block times may change (such as the changes expected during Casper).
+
+```
+uint startTime = SOME_START_TIME;
+
+if (now > startTime + 1 week) { // the now can be manipulated by the miner
+
+}
+```
+
 <a name="footnote-race-condition-terminology"></a>
 
 <div style='font-size: 80%; display: inline;'>* Some may object to the use of the term <i>race condition</i>, since Ethereum does not currently have true parallelism. However, there is still the fundamental feature of logically distinct processes contending for resources, and the same sorts of pitfalls and potential solutions apply.</div>
+
+
+<a name="integer-overflow-and-underflow"></a>
+
+### Integer Overflow and Underflow
+
+Be aware there are around [20 cases for overflow and underflow](https://github.com/ethereum/solidity/issues/796#issuecomment-253578925).
+
+Consider a simple token transfer:
+
+```
+mapping (address => uint256) public balanceOf;
+
+// INSECURE
+function transfer(address _to, uint256 _value) {
+    /* Check if sender has balance */
+    if (balanceOf[msg.sender] < _value)
+        throw;
+    /* Add and subtract new balances */
+    balanceOf[msg.sender] -= _value;
+    balanceOf[_to] += _value;
+}
+
+// SECURE
+function transfer(address _to, uint256 _value) {
+    /* Check if sender has balance and for overflows */
+    if (balanceOf[msg.sender] < _value || balanceOf[_to] + _value < balanceOf[_to])
+        throw;
+
+    /* Add and subtract new balances */
+    balanceOf[msg.sender] -= _value;
+    balanceOf[_to] += _value;
+}
+```
+
+If a balance reaches the maximum uint value (2^256) it will circle back to zero. This checks for that condition. This may or may not be relevant, depending on the implementation. Think about whether or not the uint value has an opportunity to approach such a large number. Think about how the uint variable changes state, and who has authority to make such changes. If any user can call functions which update the uint value, it's more vulnerable to attack. If only an admin has access to change the variable's state, you might be safe. If a user can increment by only 1 at a time, you are probably also safe because there is no feasible way to reach this limit.
+
+The same is true for underflow. If a uint is made to be less than zero, it will cause an underflow and get set to its maximum value. 
+
+Be careful with the smaller data-types like uint8, uint16, uint24...etc: they can even more easily hit their maximum value.
+
+Be aware there are around [20 cases for overflow and underflow](https://github.com/ethereum/solidity/issues/796#issuecomment-253578925).
 
 <a name="dos-with-unexpected-throw"></a>
 
@@ -557,7 +629,7 @@ contract Auction {
     address currentLeader;
     uint highestBid;
 
-    function bid() {
+    function bid() payable {
         if (msg.value <= highestBid) { throw; }
 
         if (!currentLeader.send(highestBid)) { throw; } // Refund the old leader, and throw if it fails
@@ -620,26 +692,6 @@ function payOut() {
 ```
 
 You will need to make sure that nothing bad will happen if other transactions are processed while waiting for the next iteration of the `payOut()` function. So only use this pattern if absolutely necessary.
-
-<a name="timestamp-dependence"></a>
-
-### Timestamp Dependence
-
-The timestamp of the block can be manipulated by the miner, and so should not be used for critical components of the contract. *Block numbers* and *average block time* can be used to estimate time, but this is not future proof as block times may change (such as the changes expected during Casper).
-
-```
-uint startTime = SOME_START_TIME;
-
-if (now > startTime + 1 week) { // the now can be manipulated by the miner
-
-}
-```
-
-<a name="transaction-ordering-dependence"></a>
-
-### Transaction-Ordering Dependence (TOD)
-
-Since a transaction is in the mempool for a short while, one can know what actions will occur, before it is included in a block. This can be troublesome for things like decentralized markets, where a transaction to buy some tokens can be seen, and a market order implemented before the other transaction gets included. Protecting against this is difficult, as it would come down to the specific contract itself. For example, in markets, it would be better to implement batch auctions (this also protects against high frequency trading concerns). Another way to use a pre-commit scheme (“I’m going to submit the details later”).
 
 <a name="call-depth-attack"></a>
 
