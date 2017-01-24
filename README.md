@@ -118,25 +118,33 @@ Beyond following core developers, it is critical to participate in the wider blo
 
 Calls to untrusted contracts can introduce several unexpected risks or errors. External calls may execute malicious code in that contract _or_ any other contract that it depends upon. As such, every external call should be treated as a potential security risk, and removed if possible. When it is not possible to remove external calls, use the recommendations in the rest of this section to minimize the danger.
 
-<a name="avoid-call-value"></a>
+<a name="send-vs-call-value"></a>
 
-#### Use `send()`, avoid `call.value()`
+#### Be aware of the tradeoffs between `send()` and `call.value()()`
 
-When sending Ether, use `someAddress.send()` and avoid `someAddress.call.value()()`.
+When sending Ether be aware of the relative tradeoffs between the use of
+`someAddress.send()` and `someAddress.call.value()()`.
 
-External calls such as `someAddress.call.value()()` can trigger malicious code. While `send()` also triggers code, it is safe because it only has access to gas stipend of 2,300 gas. Currently, this is only enough to log an event, not enough to launch an attack.  Always check the return value of `send()` even if you know the receiving account.
+- `someAddress.send()` is considered *safe* against [reentrancy](#reentrancy).
+    While this method still triggers code execution, the called contract is
+    only given a stipend of 2,300 gas which is currently only enough to log an
+    event.
+- `someAddress.call.value()()` will send the provided ether and trigger code
+    execution.  The executed code is given all available gas for execution
+    making this type of value transfer *unsafe* against reentrancy.
 
-```
-// bad
-if(!someAddress.call.value(100)()) {
-    // Some failure code
-}
+Using `send()` will prevent reentrancy but it does so at the cost of being
+incompatible with any contract whose fallback function requires more than 2,300
+gas.  
 
-// good
-if(!someAddress.send(100)) {
-    // Some failure code
-}
-```
+One pattern that attempts to balance this trade-off is to implement both
+a [*push* and *pull*](#favor-pull-over-push-payments) mechanism, using `send()`
+for the *push* component and `call.value()()` for the *pull* component.
+
+It is worth pointing out that exclusive use of `send()` for value transfers
+does not itself make a contract safe against reentrancy, but only makes those
+specific value transfers safe against reentrancy.
+
 
 <a name="handle-external-errors"></a>
 
@@ -381,7 +389,7 @@ function withdrawBalance() public {
 
 Since the user's balance is not set to 0 until the very end of the function, the second (and later) invocations will still succeed, and will withdraw the balance over and over again. A very similar bug was one of the vulnerabilities in the DAO attack.
 
-In the example given, the best way to avoid the problem is to [use `send()` instead of `call.value()()`](https://github.com/ConsenSys/smart-contract-best-practices#use-send-avoid-callvalue). This will prevent any external code from being executed.
+In the example given, the best way to avoid the problem is to [use `send()` instead of `call.value()()`](https://github.com/ConsenSys/smart-contract-best-practices#send-vs-call-value). This will prevent any external code from being executed.
 
 However, if you can't remove the external call, the next simplest way to prevent this attack is to make sure you don't call an external function until you've done all the internal work you need to do:
 
