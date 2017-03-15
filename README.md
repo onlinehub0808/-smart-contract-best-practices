@@ -1,14 +1,20 @@
 # Ethereum Contract Security Techniques and Tips
 
-The recent attack on [The DAO](https://github.com/slockit/DAO) highlights the importance of security and proper software engineering of blockchain-based contracts. This document outlines collected security tips and techniques for smart contract development. This material is provided as is - and may not reflect best practice. Pull requests are welcome.
+Main sections are:
 
-**Currently, this document is an early draft - and likely has substantial omissions or errors. This message will be removed in the future once a number of community members have reviewed this document.**
+- [**Solidity Security Tips**](#solidity-tips)
+- [**Known Attacks**](#known-attacks)
+  - [***Race Conditions***](#race-conditions)
+    - [Reentrancy](#reentrancy)
+    - [Transaction Ordering Dependence](#transaction-ordering-dependence)
+  - [***Gas Related Attacks***](#dos-with-block-gas-limit)
+  - [***Overflow/Underflow***](#integer-overflow-and-underflow)
+- [**Engineering Techniques**](#eng-techniques)
+- [**Bibliography**](#bibliography)
 
-#### Note for contributors
+This document is designed to provide a starting *security* baseline for intermediate Solidity programmers.  It additionally includes *security philosophies; bug bounty program guidelines; documentation and procedures; and tools.*
 
-This document is designed to provide a starting *security* baseline for intermediate Solidity programmers. It includes security philosophies, code idioms, known attacks, and software engineering techniques for blockchain contract programming - and aims to cover all communities, techniques, and tools that improve smart contract security. At this stage, this document is focused primarily on Solidity, a javascript-like language for Ethereum, but other languages are welcome.
-
-To contribute, see our [Contribution Guidelines](CONTRIBUTING.md).
+Pull requests are very welcome, from small fixes, to sections, and if you've written an article or blog post, please add it to the [bibliography.](#bibliography)  See our [Contribution Guidelines](CONTRIBUTING.md).
 
 #### Additional Requested Content
 
@@ -28,9 +34,9 @@ Smart contract programming requires a different engineering mindset than you may
   - Manage the amount of money at risk (rate limiting, maximum usage)
   - Have an effective upgrade path for bugfixes and improvements
 
-- [**Rollout carefully**.](https://github.com/ConsenSys/smart-contract-best-practices#contract-rollout) It is always better to catch bugs before a full production release.
+- [**Rollout carefully**.](#contract-rollout) It is always better to catch bugs before a full production release.
   - Test contracts thoroughly, and add tests whenever new attack vectors are discovered
-  - Provide [bug bounties](https://github.com/ConsenSys/smart-contract-best-practices#bounties) starting from alpha testnet releases
+  - Provide [bug bounties](#bounties) starting from alpha testnet releases
   - Rollout in phases, with increasing usage and testing in each phase
 
 - **Keep contracts simple**. Complexity increases the likelihood of errors.
@@ -49,6 +55,37 @@ Smart contract programming requires a different engineering mindset than you may
   - Be extremely careful about external contract calls, which may execute malicious code and change control flow.
   - Understand that your public functions are public, and may be called maliciously. Your private data is also viewable by anyone.
   - Keep gas costs and the block gas limit in mind.
+
+### Fundamental Tradeoffs: Simplicity versus Complexity cases
+<a name="fundamental-tradeoffs"></a>
+
+There are multiple fundamental tradeoffs to consider when assessing the structure and security of a smart contract system.  The general recommendation for any smart contract system is to identify the proper balance for these fundamental tradeoffs.
+
+An ideal smart contract system from a software engineering bias is modular, reuses code instead of duplicating it, and supports upgradeable components.  An ideal smart contract system from a secure architecture bias may share this mindset, especially in the case of more complex smart contract systems.
+
+However, there are important exceptions where security and software engineering best practices may not be aligned.  In each case, the proper balance is obtained by identifying the optimal mix of properties along contract system dimensions such as:
+
+- Rigid versus Upgradeable 
+- Monolithic versus Modular
+- Duplication versus Reuse
+
+#### Rigid versus Upgradeable
+
+While multiple resources, including this one, emphasize malleability characteristics such as Killable, Upgradeable or Modifiable patterns there is a *fundamental tradeoff* between malleability and security.  
+
+Malleability patterns by definition add complexity and potential attack surfaces.  Simplicity is particularly effective over complexity in cases where the smart contract system performs a very limited set of functionality for a pre-defined limited period of time, for example a governance-free finite-time-frame token-sale contract system.
+
+#### Monolithic versus Modular
+
+A monolithic self-contained contract keeps all knowledge locally identifiable and readable.  While there are few smart contract systems held in high regard that exist as monoliths, there is an argument to be made for extreme locality of data and flow - for example, in the case of optimizing code review efficiency.
+
+As with the other tradeoffs considered here, security best practices trend away from software engineering best practices in simple short-lived contracts and trend towared software engineering best practices in the case of more complex perpetual contract systems.
+
+#### Duplication versus Reuse
+
+A smart contract system from a software engineering perspective wishes to maximize reuse where reasonable.  There are many ways to reuse contract code in Solidity.  Using proven previously-deployed contracts *which you own* is generally the safest manner to achieve code reuse.
+
+Duplication is frequently relied upon in cases where self-owned previously-deployed contracts are not available.  Efforts such as [Live Libs](https://github.com/ConsenSys/live-libs) and [Zeppelin Solidity](https://github.com/OpenZeppelin/zeppelin-solidity) seek to provide patterns such that secure code can be re-used without duplication.  Any contract security analyses must include any re-used code that has not previously established a level of trust commensurate with the funds at risk in the target smart contract system.
 
 ## Security Notifications
 
@@ -75,8 +112,9 @@ Additionally, here is a list of Ethereum core developers who may write about sec
 
 Beyond following core developers, it is critical to participate in the wider blockchain-related security community - as security disclosures or observations will come through a variety of parties.
 
-## Recommendations for Smart Contract Security in Solidity
+<a name="solidity-tips"></a>
 
+## Recommendations for Smart Contract Security in Solidity
 
 ### External Calls
 
@@ -85,25 +123,33 @@ Beyond following core developers, it is critical to participate in the wider blo
 
 Calls to untrusted contracts can introduce several unexpected risks or errors. External calls may execute malicious code in that contract _or_ any other contract that it depends upon. As such, every external call should be treated as a potential security risk, and removed if possible. When it is not possible to remove external calls, use the recommendations in the rest of this section to minimize the danger.
 
-<a name="avoid-call-value"></a>
+<a name="send-vs-call-value"></a>
 
-#### Use `send()`, avoid `call.value()`
+#### Be aware of the tradeoffs between `send()` and `call.value()()`
 
-When sending Ether, use `someAddress.send()` and avoid `someAddress.call.value()()`.
+When sending Ether be aware of the relative tradeoffs between the use of
+`someAddress.send()` and `someAddress.call.value()()`.
 
-External calls such as `someAddress.call.value()()` can trigger malicious code. While `send()` also triggers code, it is safe because it only has access to gas stipend of 2,300 gas. Currently, this is only enough to log an event, not enough to launch an attack.
+- `someAddress.send()` is considered *safe* against [reentrancy](#reentrancy).
+    While this method still triggers code execution, the called contract is
+    only given a stipend of 2,300 gas which is currently only enough to log an
+    event.
+- `someAddress.call.value()()` will send the provided ether and trigger code
+    execution.  The executed code is given all available gas for execution
+    making this type of value transfer *unsafe* against reentrancy.
 
-```
-// bad
-if(!someAddress.call.value(100)()) {
-    // Some failure code
-}
+Using `send()` will prevent reentrancy but it does so at the cost of being
+incompatible with any contract whose fallback function requires more than 2,300
+gas.  
 
-// good
-if(!someAddress.send(100)) {
-    // Some failure code
-}
-```
+One pattern that attempts to balance this trade-off is to implement both
+a [*push* and *pull*](#favor-pull-over-push-payments) mechanism, using `send()`
+for the *push* component and `call.value()()` for the *pull* component.
+
+It is worth pointing out that exclusive use of `send()` for value transfers
+does not itself make a contract safe against reentrancy, but only makes those
+specific value transfers safe against reentrancy.
+
 
 <a name="handle-external-errors"></a>
 
@@ -111,7 +157,7 @@ if(!someAddress.send(100)) {
 
 Solidity offers low-level call methods that work on raw addresses: `address.call()`, `address.callcode()`, `address.delegatecall()`, and `address.send`. These low-level methods never throw an exception, but will return `false` if the call encounters an exception. On the other hand, *contract calls* (e.g., `ExternalContract.doSomething()`) will automatically propagate a throw (for example, `ExternalContract.doSomething()` will also `throw` if `doSomething()` throws).
 
-If you choose to use the low-level call methods, make sure to handle the possibility that the call will fail, by checking the return value. Note that the [Call Depth Attack](https://github.com/ConsenSys/smart-contract-best-practices/#call-depth-attack) can cause *any* call to fail, even if the external contract's code is working and non-malicious.
+If you choose to use the low-level call methods, make sure to handle the possibility that the call will fail, by checking the return value.
 
 ```
 // bad
@@ -137,7 +183,7 @@ Whether using *raw calls* or *contract calls*, assume that malicious code will e
 
 #### Favor *pull* over *push* for external calls
 
-As we've seen, external calls can fail for a number of reasons, including external errors and malicious [Call Depth Attacks](https://github.com/ConsenSys/smart-contract-best-practices/#call-depth-attack). To minimize the damage caused by such failures, it is often better to isolate each external call into its own transaction that can be initiated by the recipient of the call. This is especially relevant for payments, where it is better to let users withdraw funds rather than push funds to them automatically. (This also reduces the chance of [problems with the gas limit](https://github.com/ConsenSys/smart-contract-best-practices/#dos-with-block-gas-limit).)
+External calls can fail accidentally or deliberately. To minimize the damage caused by such failures, it is often better to isolate each external call into its own transaction that can be initiated by the recipient of the call. This is especially relevant for payments, where it is better to let users withdraw funds rather than push funds to them automatically. (This also reduces the chance of [problems with the gas limit](https://github.com/ConsenSys/smart-contract-best-practices/#dos-with-block-gas-limit).)  Avoid combining or multiple `send()` calls in a single transaction.
 
 ```
 // bad
@@ -145,7 +191,7 @@ contract auction {
     address highestBidder;
     uint highestBid;
 
-    function bid() {
+    function bid() payable {
         if (msg.value < highestBid) throw;
 
         if (highestBidder != 0) {
@@ -165,7 +211,7 @@ contract auction {
     uint highestBid;
     mapping(address => uint) refunds;
 
-    function bid() external {
+    function bid() payable external {
         if (msg.value < highestBid) throw;
 
         if (highestBidder != 0) {
@@ -239,6 +285,9 @@ The attacker can do this by creating a contract, funding it with 1 wei, and invo
 `selfdestruct(victimAddress)`.  No code is invoked in `victimAddress`, so it
 cannot be prevented.
 
+### Don't assume contracts are created with zero balance
+
+An attacker can send wei to the address of a contract before it is created.  Contracts should not assume that its initial state contains a zero balance.  See [issue 61](https://github.com/ConsenSys/smart-contract-best-practices/issues/61) for more details.
 
 ### Remember that on-chain data is public
 
@@ -263,13 +312,12 @@ Do not make refund or claim processes dependent on a specific party performing a
 
 ```
 // bad
-function() { balances[msg.sender] += msg.value; }
+function() payable { balances[msg.sender] += msg.value; }
 
 // good
-function() { throw; }
-function deposit() external { balances[msg.sender] += msg.value; }
+function deposit() payable external { balances[msg.sender] += msg.value; }
 
-function() { LogDepositReceived(msg.sender); }
+function() payable { LogDepositReceived(msg.sender); }
 ```
 
 <a name="mark-visibility"></a>
@@ -299,9 +347,9 @@ function internalAction() internal {
 
 <a name="beware-division-by-zero"></a>
 
-### Beware division by zero (Solidity < 0.3.6)
+### Beware division by zero (Solidity < 0.4)
 
-Prior to version 0.3.6, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not `throw` an exception when a number is divided by zero. Ensure your running the latest version of Solidity to [throw on divide by zero](https://github.com/ethereum/solidity/pull/888).
+Prior to version 0.4, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not `throw` an exception when a number is divided by zero. Ensure you're running at least version 0.4.
 
 <a name="differentiate-functions-events"></a>
 
@@ -319,52 +367,17 @@ event LogTransfer() {}
 function transfer() external {}
 ```
 
+<a name="known-attacks"></a>
+
 ## Known Attacks
-
-<a name="call-depth-attack"></a>
-
-### Call Depth Attack
-
-With the Call Depth Attack, *any* call (even a fully trusted and correct one) can fail. This is because there is a limit on how deep the "call stack" can go. If the attacker does a bunch of recursive calls and brings the stack depth to 1023, then they can call your function and automatically cause all of its subcalls to fail (subcalls include `send()`).
-
-An example based on the previous auction code:
-
-```
-// INSECURE
-contract auction {
-    mapping(address => uint) refunds;
-
-    // [...]
-
-    function withdrawRefund(address recipient) {
-      uint refund = refunds[recipient];
-      refunds[recipient] = 0;
-      recipient.send(refund); // this line is vulnerable to a call depth attack
-    }
-}
-```
-
-The send() can fail if the call depth is too large, causing ether to not be sent. However, the rest of the function would succeed, including the previous line which set the victim's refund balance to 0. The solution is to explicitly check for errors, as discussed previously:
-
-```
-contract auction {
-    mapping(address => uint) refunds;
-
-    // [...]
-
-    function withdrawRefund(address recipient) {
-      uint refund = refunds[recipient];
-      refunds[recipient] = 0;
-      if (!recipient.send(refund)) { throw; } // the transaction will be reverted in case of call depth attack
-    }
-}
-```
 
 <a name="race-conditions"></a>
 
 ### Race Conditions<sup><a href='#footnote-race-condition-terminology'>\*</a></sup>
 
 One of the major dangers of calling external contracts is that they can take over the control flow, and make changes to your data that the calling function wasn't expecting. This class of bug can take many forms, and both of the major bugs that led to the DAO's collapse were bugs of this sort.
+
+<a name="reentrancy"></a>
 
 #### Reentrancy
 
@@ -383,7 +396,7 @@ function withdrawBalance() public {
 
 Since the user's balance is not set to 0 until the very end of the function, the second (and later) invocations will still succeed, and will withdraw the balance over and over again. A very similar bug was one of the vulnerabilities in the DAO attack.
 
-In the example given, the best way to avoid the problem is to [use `send()` instead of `call.value()()`](https://github.com/ConsenSys/smart-contract-best-practices#use-send-avoid-callvalue). This will prevent any external code from being executed.
+In the example given, the best way to avoid the problem is to [use `send()` instead of `call.value()()`](https://github.com/ConsenSys/smart-contract-best-practices#send-vs-call-value). This will prevent any external code from being executed.
 
 However, if you can't remove the external call, the next simplest way to prevent this attack is to make sure you don't call an external function until you've done all the internal work you need to do:
 
@@ -483,7 +496,7 @@ Another solution often suggested is a [mutex](https://en.wikipedia.org/wiki/Mutu
 mapping (address => uint) private balances;
 bool private lockBalances;
 
-function deposit() public returns (bool) {
+function deposit() payable public returns (bool) {
     if (!lockBalances) {
         lockBalances = true;
         balances[msg.sender] += msg.value;
@@ -493,7 +506,7 @@ function deposit() public returns (bool) {
     throw;
 }
 
-function withdraw(uint amount) public returns (bool) {
+function withdraw(uint amount) payable public returns (bool) {
     if (!lockBalances && amount > 0 && balances[msg.sender] >= amount) {
         lockBalances = true;
 
@@ -539,6 +552,69 @@ An attacker can call `getLock()`, and then never call `releaseLock()`. If they d
 
 <div style='font-size: 80%; display: inline;'>* Some may object to the use of the term <i>race condition</i>, since Ethereum does not currently have true parallelism. However, there is still the fundamental feature of logically distinct processes contending for resources, and the same sorts of pitfalls and potential solutions apply.</div>
 
+<a name="transaction-ordering-dependence"></a>
+
+### Transaction-Ordering Dependence (TOD) / Front Loading
+
+Above were examples of race conditions involving the attacker executing malicious code *within a single transaction*. The following are a different type of race condition inherent to Blockchains: the fact that *the order of transactions themselves* (within a block) is easily subject to manipulation. 
+
+Since a transaction is in the mempool for a short while, one can know what actions will occur, before it is included in a block. This can be troublesome for things like decentralized markets, where a transaction to buy some tokens can be seen, and a market order implemented before the other transaction gets included. Protecting against this is difficult, as it would come down to the specific contract itself. For example, in markets, it would be better to implement batch auctions (this also protects against high frequency trading concerns). Another way to use a pre-commit scheme (“I’m going to submit the details later”).
+
+<a name="timestamp-dependence"></a>
+
+### Timestamp Dependence
+
+The timestamp of the block can be manipulated by the miner, and so should not be used for critical components of the contract. *Block numbers* and *average block time* can be used to estimate time, but this is not future proof as block times may change (such as the changes expected during Casper).
+
+```
+uint startTime = SOME_START_TIME;
+
+if (now > startTime + 1 week) { // the now can be manipulated by the miner
+
+}
+```
+
+<a name="integer-overflow-and-underflow"></a>
+
+### Integer Overflow and Underflow
+
+Be aware there are around [20 cases for overflow and underflow](https://github.com/ethereum/solidity/issues/796#issuecomment-253578925).
+
+Consider a simple token transfer:
+
+```
+mapping (address => uint256) public balanceOf;
+
+// INSECURE
+function transfer(address _to, uint256 _value) {
+    /* Check if sender has balance */
+    if (balanceOf[msg.sender] < _value)
+        throw;
+    /* Add and subtract new balances */
+    balanceOf[msg.sender] -= _value;
+    balanceOf[_to] += _value;
+}
+
+// SECURE
+function transfer(address _to, uint256 _value) {
+    /* Check if sender has balance and for overflows */
+    if (balanceOf[msg.sender] < _value || balanceOf[_to] + _value < balanceOf[_to])
+        throw;
+
+    /* Add and subtract new balances */
+    balanceOf[msg.sender] -= _value;
+    balanceOf[_to] += _value;
+}
+```
+
+If a balance reaches the maximum uint value (2^256) it will circle back to zero. This checks for that condition. This may or may not be relevant, depending on the implementation. Think about whether or not the uint value has an opportunity to approach such a large number. Think about how the uint variable changes state, and who has authority to make such changes. If any user can call functions which update the uint value, it's more vulnerable to attack. If only an admin has access to change the variable's state, you might be safe. If a user can increment by only 1 at a time, you are probably also safe because there is no feasible way to reach this limit.
+
+The same is true for underflow. If a uint is made to be less than zero, it will cause an underflow and get set to its maximum value. 
+
+Be careful with the smaller data-types like uint8, uint16, uint24...etc: they can even more easily hit their maximum value.
+
+Be aware there are around [20 cases for overflow and underflow](https://github.com/ethereum/solidity/issues/796#issuecomment-253578925).
+
 <a name="dos-with-unexpected-throw"></a>
 
 ### DoS with (Unexpected) Throw
@@ -551,7 +627,7 @@ contract Auction {
     address currentLeader;
     uint highestBid;
 
-    function bid() {
+    function bid() payable {
         if (msg.value <= highestBid) { throw; }
 
         if (!currentLeader.send(highestBid)) { throw; } // Refund the old leader, and throw if it fails
@@ -562,7 +638,7 @@ contract Auction {
 }
 ```
 
-When it tries to refund the old leader, it throws if the refund fails. This means that a malicious bidder can become the leader, while making sure that any refunds to their address will *always* fail. In this way, they can prevent anyone else from calling the `bid()` function, and stay the leader forever. A natural solution might be to continue even if the refund fails, under the theory that it's their own fault if they can't accept the refund. But this is vulnerable to the [Call Depth Attack](https://github.com/ConsenSys/smart-contract-best-practices/#call-depth-attack)! So instead, you should set up a [pull payment system](https://github.com/ConsenSys/smart-contract-best-practices/#favor-pull-over-push-payments) instead, as described earlier.
+When it tries to refund the old leader, it throws if the refund fails. This means that a malicious bidder can become the leader, while making sure that any refunds to their address will *always* fail. In this way, they can prevent anyone else from calling the `bid()` function, and stay the leader forever. A recommendation is to set up a [pull payment system](https://github.com/ConsenSys/smart-contract-best-practices/#favor-pull-over-push-payments) instead, as described earlier.
 
 Another example is when a contract may iterate through an array to pay users (e.g., supporters in a crowdfunding contract). It's common to want to make sure that each payment succeeds. If not, one should throw. The issue is that if one call fails, you are reverting the whole payout system, meaning the loop will never complete. No one gets paid, because one address is forcing an error.
 
@@ -613,28 +689,15 @@ function payOut() {
 }
 ```
 
-Note that this is vulnerable to the [Call Depth Attack](#call-depth-attack), however. And you will need to make sure that nothing bad will happen if other transactions are processed while waiting for the next iteration of the `payOut()` function. So only use this pattern if absolutely necessary.
+You will need to make sure that nothing bad will happen if other transactions are processed while waiting for the next iteration of the `payOut()` function. So only use this pattern if absolutely necessary.
 
-<a name="timestamp-dependence"></a>
+<a name="call-depth-attack"></a>
 
-### Timestamp Dependence
+### ~~Call Depth Attack~~
 
-The timestamp of the block can be manipulated by the miner, and so should not be used for critical components of the contract. *Block numbers* and *average block time* can be used to estimate time, but this is not future proof as block times may change (such as the changes expected during Casper).
+As of the [EIP 150](https://github.com/ethereum/EIPs/issues/150) hardfork, call depth attacks are no longer relevant<sup><a href='http://ethereum.stackexchange.com/questions/9398/how-does-eip-150-change-the-call-depth-attack'>\*</a></sup> (all gas would be consumed well before reaching the 1024 call depth limit).
 
-```
-uint startTime = SOME_START_TIME;
-
-if (now > startTime + 1 week) { // the now can be manipulated by the miner
-
-}
-```
-
-<a name="transaction-ordering-dependence"></a>
-
-### Transaction-Ordering Dependence (TOD)
-
-Since a transaction is in the mempool for a short while, one can know what actions will occur, before it is included in a block. This can be troublesome for things like decentralized markets, where a transaction to buy some tokens can be seen, and a market order implemented before the other transaction gets included. Protecting against this is difficult, as it would come down to the specific contract itself. For example, in markets, it would be better to implement batch auctions (this also protects against high frequency trading concerns). Another way to use a pre-commit scheme (“I’m going to submit the details later”).
-
+<a name="eng-techniques"></a>
 
 ## Software Engineering Techniques
 
@@ -969,11 +1032,13 @@ When launching a contract that will have substantial funds or is required to be 
 
 ## Security Tools
 
-- [Oyente](http://www.comp.nus.edu.sg/~loiluu/papers/oyente.pdf) - An upcoming tool, will analyze Ethereum code to find common vulnerabilities (e.g., Transaction Order Dependence, no checking for exceptions)
+- [Oyente](https://github.com/ethereum/oyente) - Analyze Ethereum code to find common vulnerabilities, based on this [paper](http://www.comp.nus.edu.sg/~loiluu/papers/oyente.pdf).
+
+- [SolCover](https://github.com/JoinColony/solcover) - Code coverage for Solidity testing.
 
 - [Solgraph](https://github.com/raineorshine/solgraph) - Generates a DOT graph that visualizes function control flow of a Solidity contract and highlights potential security vulnerabilities.
 
-- [solint](https://github.com/weifund/solint) - Another upcoming tool, will provide Solidity linting that helps you enforce consistent conventions and avoid errors in your Solidity smart-contracts.
+- [solint](https://github.com/weifund/solint) - Solidity linting that helps you enforce consistent conventions and avoid errors in your Solidity smart-contracts.
 
 
 
@@ -981,6 +1046,8 @@ When launching a contract that will have substantial funds or is required to be 
 - **Editor Security Warnings**: Editors will soon alert for common security errors, not just compilation errors. Browser Solidity is getting these features soon.
 
 - **New functional languages that compile to EVM bytecode**: Functional languages gives certain guarantees over procedural languages like Solidity, namely immutability within a function and strong compile time checking. This can reduce the risk of errors by providing deterministic behavior. (for more see [this](https://plus.google.com/u/0/events/cmqejp6d43n5cqkdl3iu0582f4k), Curry-Howard correspondence, and linear logic)
+
+<a name="bibliography"></a>
 
 ## Smart Contract Security Bibliography
 
@@ -1008,6 +1075,8 @@ Here are some of them.  Feel free to add more.
 - http://vessenes.com/more-ethereum-attacks-race-to-empty-is-the-real-deal
 - https://blog.blockstack.org/simple-contracts-are-better-contracts-what-we-can-learn-from-the-dao-6293214bad3a
 - https://blog.slock.it/deja-vu-dao-smart-contracts-audit-results-d26bc088e32e
+- https://blog.vdice.io/wp-content/uploads/2016/11/vsliceaudit_v1.3.pdf
+- https://eprint.iacr.org/2016/1007.pdf
 - https://github.com/Bunjin/Rouleth/blob/master/Security.md
 - https://github.com/LeastAuthority/ethereum-analyses
 - https://medium.com/@ConsenSys/assert-guards-towards-automated-code-bounties-safe-smart-contract-coding-on-ethereum-8e74364b795c
