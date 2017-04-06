@@ -564,12 +564,16 @@ Since a transaction is in the mempool for a short while, one can know what actio
 
 ### Timestamp Dependence
 
-The timestamp of the block can be manipulated by the miner, and so should not be used for critical components of the contract. *Block numbers* and *average block time* can be used to estimate time, but this is not future proof as block times may change (such as the changes expected during Casper).
+Be aware that the timestamp of the block can be manipulated by the miner, and all direct and indirect uses of the timestamp should be considered. *Block numbers* and *average block time* can be used to estimate time, but this is not future proof as block times may change (such as the changes expected during Casper).
 
 ```
-uint startTime = SOME_START_TIME;
+uint someVariable = now + 1;
 
-if (now > startTime + 1 week) { // the now can be manipulated by the miner
+if (now % 2 == 0) { // the now can be manipulated by the miner
+
+}
+
+if ((someVariable - 100) % 2 == 0) { // someVariable can be manipulated by the miner
 
 }
 ```
