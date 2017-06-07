@@ -151,6 +151,7 @@ It is worth pointing out that exclusive use of `send()` or `transfer()` for valu
 does not itself make a contract safe against reentrancy, but only makes those
 specific value transfers safe against reentrancy.
 
+
 <a name="handle-external-errors"></a>
 
 #### Handle errors in external calls
@@ -351,6 +352,7 @@ function internalAction() internal {
     // internal code
 }
 ```
+
 
 <a name="beware-division-by-zero"></a>
 
