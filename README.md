@@ -303,11 +303,11 @@ Examples:
 
 ### Use assert and require properly
 
-In Solidity 0.4.10 `assert()` and `require()` were introduced. `require(condition)` is meant to be used for input validation, which should be done on any user input, and throws if condition is false. `assert(condition)` also throws if condition is false but should be used only for internal errors or to check if your contract has reached an invalid state. By following this paradigm it allows one to use a formal analysis tool, that verifies that the invalid opcode can never be reached, for the absense of errors assuming valid inputs. 
+In Solidity 0.4.10 `assert()` and `require()` were introduced. `require(condition)` is meant to be used for input validation, which should be done on any user input, and throws if condition is false. `assert(condition)` also throws if condition is false but should be used only for internal errors or to check if your contract has reached an invalid state. By following this paradigm it allows one to use a formal analysis tool, that verifies that the invalid opcode can never be reached, for the absence of errors assuming valid inputs. 
 
 ### Be aware of the tradeoffs between abstract contracts and interfaces
 
-Both interfaces and abstract contracts provide one with a customizable and re-usable approach for smart contracts. Interfaces, which were introduced in Solidity 0.4.11, are similar to abstract contracts but cannot have any functions implemented. Interfaces also have limitations such as not being able to access storage or inhereit from other interfaces which generally makes abstract contracts more practical. Although, Interfaces are certainly useful for designing contracts prior to implementation. Additionally, it is important to keep in mind that if a contract inherits from an abstract contract it must implement all non-implemented functions via overriding or it will be abstract as well. 
+Both interfaces and abstract contracts provide one with a customizable and re-usable approach for smart contracts. Interfaces, which were introduced in Solidity 0.4.11, are similar to abstract contracts but cannot have any functions implemented. Interfaces also have limitations such as not being able to access storage or inherit  from other interfaces which generally makes abstract contracts more practical. Although, Interfaces are certainly useful for designing contracts prior to implementation. Additionally, it is important to keep in mind that if a contract inherits from an abstract contract it must implement all non-implemented functions via overriding or it will be abstract as well. 
 
 ### In 2-party or N-party contracts, beware of the possibility that some participants may "drop offline" and not return
 
