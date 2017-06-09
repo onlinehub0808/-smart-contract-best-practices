@@ -303,7 +303,7 @@ Examples:
 
 ### Use assert and require properly
 
-In Solidity 0.4.10 `assert()` and `require()` were introduced. `require(condition)` is meant to be used for input validation, which should be done on any user input, and throws if condition is false. `assert(condition)` also throws if condition is false but should be used only for internal errors or to check if your contract has reached an invalid state. By following this paradigm it allows one to use a formal analysis tool, that verifies that the invalid opcode can never be reached, for the absence of errors assuming valid inputs. 
+In Solidity 0.4.10 `assert()` and `require()` were introduced. `require(condition)` is meant to be used for input validation, which should be done on any user input, and throws if condition is false. `assert(condition)` also throws if condition is false but should be used only for internal errors or to check if your contract has reached an invalid state. By following this paradigm it would become possible to use a formal analysis tool, that verifies that the invalid opcode can never be reached, for the absence of errors assuming valid inputs. 
 
 ### Be aware of the tradeoffs between abstract contracts and interfaces
 
