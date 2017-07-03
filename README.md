@@ -748,7 +748,7 @@ contract SomeRegister {
         if (msg.sender != owner) {
             throw;
         }
-        _
+        _;
     }
 
     function changeBackend(address newBackend) public
@@ -784,7 +784,7 @@ contract Relay {
         if (msg.sender != owner) {
             throw;
         }
-        _
+        _;
     }
 
     function Relay(address initAddr) {
@@ -822,7 +822,7 @@ modifier isAdmin() {
     if(msg.sender != owner) {
         throw;
     }
-    _
+    _;
 }
 
 function toggleContractActive() isAdmin public
@@ -831,8 +831,8 @@ function toggleContractActive() isAdmin public
     stopped = !stopped;
 }
 
-modifier stopInEmergency { if (!stopped) _ }
-modifier onlyInEmergency { if (stopped) _ }
+modifier stopInEmergency { if (!stopped) _; }
+modifier onlyInEmergency { if (stopped) _; }
 
 function deposit() stopInEmergency public
 {
@@ -904,7 +904,7 @@ contract TokenWithInvariants {
     uint public totalSupply;
 
     modifier checkInvariants {
-        _
+        _;
         if (this.balance < totalSupply) throw;
     }
 
@@ -955,7 +955,7 @@ modifier isActive() {
     if (block.number > SOME_BLOCK_NUMBER) {
         throw;
     }
-    _
+    _;
 }
 
 function deposit() public
