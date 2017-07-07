@@ -1,5 +1,8 @@
 # Ethereum Contract Security Techniques and Tips
 
+[![Join the chat at https://gitter.im/ConsenSys/smart-contract-best-practices](https://badges.gitter.im/ConsenSys/smart-contract-best-practices.svg)](https://gitter.im/ConsenSys/smart-contract-best-practices?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+
 Main sections are:
 
 - [**Solidity Security Tips**](#solidity-tips)
