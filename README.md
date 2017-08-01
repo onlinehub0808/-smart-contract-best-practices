@@ -336,7 +336,7 @@ function() payable { LogDepositReceived(msg.sender); }
 
 ### Explicitly mark visibility in functions and state variables
 
-Explicitly label the visibility of functions and state variables. Functions can be specified as being `external`, `public`, `internal` or `private`. For state variables, `external` is not possible. Labeling the visibility explicitly will make it easier to catch incorrect assumptions about who can call the function or access the variable.
+Explicitly label the visibility of functions and state variables. Functions can be specified as being `external`, `public`, `internal` or `private`. Please understand the differences between them, for example `external` may be sufficient instead of `public`. For state variables, `external` is not possible. Labeling the visibility explicitly will make it easier to catch incorrect assumptions about who can call the function or access the variable.
 
 ```
 // bad
@@ -347,7 +347,7 @@ function transfer() { // the default is public
 
 // good
 uint private y;
-function transfer() public {
+function transfer() external {
     // public code
 }
 
