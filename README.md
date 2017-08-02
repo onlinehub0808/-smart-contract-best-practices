@@ -341,14 +341,18 @@ Explicitly label the visibility of functions and state variables. Functions can 
 ```
 // bad
 uint x; // the default is private for state variables, but it should be made explicit
-function transfer() { // the default is public
+function buy() { // the default is public
     // public code
 }
 
 // good
 uint private y;
-function transfer() external {
-    // public code
+function buy() external {
+    // only callable externally
+}
+
+function utility() public {
+    // callable externally, as well as internally: changing this code requires thinking about both cases.
 }
 
 function internalAction() internal {
