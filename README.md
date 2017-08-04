@@ -279,6 +279,8 @@ uint numerator = 5;
 uint denominator = 2;
 ```
 
+<a name="ether-forcibly-sent"></a>
+
 ### Remember that Ether can be forcibly sent to an account
 
 Beware of coding an invariant that strictly checks the balance of a contract.
@@ -932,13 +934,13 @@ contract TokenWithInvariants {
 
     modifier checkInvariants {
         _;
-        if (this.balance < totalSupply) throw;
+        assert(this.balance >= totalSupply);
     }
 
-    function deposit(uint amount) public checkInvariants {
+    function deposit() public payable checkInvariants {
         // intentionally vulnerable
-        balanceOf[msg.sender] += amount;
-        totalSupply += amount;
+        balanceOf[msg.sender] += msg.value;
+        totalSupply += msg.value;
     }
 
     function transfer(address to, uint value) public checkInvariants {
@@ -958,6 +960,8 @@ contract TokenWithInvariants {
     }
 }
 ```
+
+Note that the assertion is *not* a strict equality of the balance because the contract can be [forcibly sent ether](#ether-forcibly-sent) without going through the `deposit()` function!
 
 <a name="contract-rollout"></a>
 
