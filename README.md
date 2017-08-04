@@ -306,9 +306,9 @@ Examples:
 * When developing an application that depends on a random number generator, the order should always be (1) players submit moves, (2) random number generated, (3) players paid out. The method by which random numbers are generated is itself an area of active research; current best-in-class solutions include Bitcoin block headers (verified through http://btcrelay.org), hash-commit-reveal schemes (ie. one party generates a number, publishes its hash to "commit" to the value, and then reveals the value later) and [RANDAO](http://github.com/randao/randao).
 * If you are implementing a frequent batch auction, a hash-commit scheme is also desirable.
 
-### Use assert and require properly
+### Use `assert` and `require` properly
 
-In Solidity 0.4.10 `assert()` and `require()` were introduced. `require(condition)` is meant to be used for input validation, which should be done on any user input, and throws if condition is false. `assert(condition)` also throws if condition is false but should be used only for internal errors or to check if your contract has reached an invalid state. By following this paradigm it would become possible to use a formal analysis tool, that verifies that the invalid opcode can never be reached, for the absence of errors assuming valid inputs. 
+In Solidity 0.4.10 `assert()` and `require()` were introduced. `require(condition)` is meant to be used for input validation, which should be done on any user input, and throws if condition is false. `assert(condition)` also throws if condition is false but should be used only for invariants: internal errors or to check if your contract has reached an invalid state. Following this paradigm allows formal analysis tools to verify that the invalid opcode can never be reached: meaning no invariants in the code are violated and that the code is formally verified.
 
 ### Be aware of the tradeoffs between abstract contracts and interfaces
 
