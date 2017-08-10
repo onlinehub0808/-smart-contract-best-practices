@@ -4,7 +4,7 @@ We welcome all contributions - send a pull request or open an issue. When possib
 
 ### Layout and Compilation
 
-All files are in the `src` folder; they are compiled to the main `README.md` by running `make`
+We aren't using the old-src folder anymore. You should directly edit the README.md instead.
 
 ### Audience
 
