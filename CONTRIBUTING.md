@@ -2,9 +2,11 @@
 
 We welcome all contributions - send a pull request or open an issue. When possible, send different pull requests by section/topic.
 
+Feel free to peruse the [open issues](../issues) for ideas which need to be expanded on a bit here.
+
 ### Layout and Compilation
 
-We aren't using the old-src folder anymore. You should directly edit the README.md instead.
+We aren't using the `old-src` folder anymore. You should directly edit the README.md instead.
 
 ### Audience
 
