@@ -259,6 +259,55 @@ function makeUntrustedWithdrawal(uint amount) {
 }
 ```
 
+<a name="enforce-invariants-with-assert"></a>
+
+### Enforce invariants with `assert()`
+
+An assert guard triggers when an assertion fails - such as an invariant property changing. For example, the token to ether issuance ratio, in a token issuance contract, may be fixed. You can verify that this is the case at all times with an `assert()`. Assert guards should often be combined with other techniques, such as pausing the contract and allowing upgrades. (Otherwise you may end up stuck, with an assertion that is always failing.)
+
+The following example reverts transactions if the ratio of ether to total number of tokens changes:
+
+```
+contract TokenWithInvariants {
+    mapping(address => uint) public balanceOf;
+    uint public totalSupply;
+
+    modifier checkInvariants {
+        _;
+        assert(this.balance >= totalSupply);
+    }
+
+    function deposit() public payable checkInvariants {
+        // intentionally vulnerable
+        balanceOf[msg.sender] += msg.value;
+        totalSupply += msg.value;
+    }
+
+    function transfer(address to, uint value) public checkInvariants {
+        if (balanceOf[msg.sender] >= value) {
+            balanceOf[to] += value;
+            balanceOf[msg.sender] -= value;
+        }
+    }
+
+    function withdraw() public checkInvariants {
+        // intentionally vulnerable
+        uint balance = balanceOf[msg.sender];
+        if (msg.sender.call.value(balance)()) {
+            totalSupply -= balance;
+            balanceOf[msg.sender] = 0;
+        }
+    }
+}
+```
+
+Note that the assertion is *not* a strict equality of the balance because the contract can be [forcibly sent ether](#ether-forcibly-sent) without going through the `deposit()` function!
+
+
+### Use `assert()` and `require()` properly
+
+In Solidity 0.4.10 `assert()` and `require()` were introduced. `require(condition)` is meant to be used for input validation, which should be done on any user input, and throws if condition is false. `assert(condition)` also throws if condition is false but should be used only for invariants: internal errors or to check if your contract has reached an invalid state. Following this paradigm allows formal analysis tools to verify that the invalid opcode can never be reached: meaning no invariants in the code are violated and that the code is formally verified.
+
 <a name="beware-rounding-with-integer-division"></a>
 
 ### Beware rounding with integer division
@@ -305,10 +354,6 @@ Examples:
 * In an auction, require players to submit a hash of their bid value in an initial phase (along with a deposit greater than their bid value), and then submit their action bid value in the second phase.
 * When developing an application that depends on a random number generator, the order should always be (1) players submit moves, (2) random number generated, (3) players paid out. The method by which random numbers are generated is itself an area of active research; current best-in-class solutions include Bitcoin block headers (verified through http://btcrelay.org), hash-commit-reveal schemes (ie. one party generates a number, publishes its hash to "commit" to the value, and then reveals the value later) and [RANDAO](http://github.com/randao/randao).
 * If you are implementing a frequent batch auction, a hash-commit scheme is also desirable.
-
-### Use `assert` and `require` properly
-
-In Solidity 0.4.10 `assert()` and `require()` were introduced. `require(condition)` is meant to be used for input validation, which should be done on any user input, and throws if condition is false. `assert(condition)` also throws if condition is false but should be used only for invariants: internal errors or to check if your contract has reached an invalid state. Following this paradigm allows formal analysis tools to verify that the invalid opcode can never be reached: meaning no invariants in the code are violated and that the code is formally verified.
 
 ### Be aware of the tradeoffs between abstract contracts and interfaces
 
@@ -920,48 +965,6 @@ function withdraw() public {
 Rate limiting halts or requires approval for substantial changes. For example, a depositor may only be allowed to withdraw a certain amount or percentage of total deposits over a certain time period (e.g., max 100 ether over 1 day) - additional withdrawals in that time period may fail or require some sort of special approval. Or the rate limit could be at the contract level, with only a certain amount of tokens issued by the contract over a time period.
 
 [Example](https://gist.github.com/PeterBorah/110c331dca7d23236f80e69c83a9d58c#file-circuitbreaker-sol)
-
-### Assert Guards
-
-An assert guard triggers when an assertion fails - such as an invariant property changing. For example, the token to ether issuance ratio, in a token issuance contract, may be fixed. You can verify that this is the case at all times with an assertion. Assert guards should often be combined with other techniques, such as pausing the contract and allowing upgrades. (Otherwise you may end up stuck, with an assertion that is always failing.)
-
-The following example reverts transactions if the ratio of ether to total number of tokens changes:
-
-```
-contract TokenWithInvariants {
-    mapping(address => uint) public balanceOf;
-    uint public totalSupply;
-
-    modifier checkInvariants {
-        _;
-        assert(this.balance >= totalSupply);
-    }
-
-    function deposit() public payable checkInvariants {
-        // intentionally vulnerable
-        balanceOf[msg.sender] += msg.value;
-        totalSupply += msg.value;
-    }
-
-    function transfer(address to, uint value) public checkInvariants {
-        if (balanceOf[msg.sender] >= value) {
-            balanceOf[to] += value;
-            balanceOf[msg.sender] -= value;
-        }
-    }
-
-    function withdraw() public checkInvariants {
-        // intentionally vulnerable
-        uint balance = balanceOf[msg.sender];
-        if (msg.sender.call.value(balance)()) {
-            totalSupply -= balance;
-            balanceOf[msg.sender] = 0;
-        }
-    }
-}
-```
-
-Note that the assertion is *not* a strict equality of the balance because the contract can be [forcibly sent ether](#ether-forcibly-sent) without going through the `deposit()` function!
 
 <a name="contract-rollout"></a>
 
