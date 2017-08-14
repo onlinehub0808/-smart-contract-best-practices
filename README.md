@@ -592,7 +592,7 @@ An attacker can call `getLock()`, and then never call `releaseLock()`. If they d
 
 <a name="transaction-ordering-dependence"></a>
 
-### Transaction-Ordering Dependence (TOD) / Front Loading
+### Transaction-Ordering Dependence (TOD) / Front Running
 
 Above were examples of race conditions involving the attacker executing malicious code *within a single transaction*. The following are a different type of race condition inherent to Blockchains: the fact that *the order of transactions themselves* (within a block) is easily subject to manipulation. 
 
