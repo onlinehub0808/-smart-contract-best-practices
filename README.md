@@ -1087,6 +1087,7 @@ When launching a contract that will have substantial funds or is required to be 
 
 - [solint](https://github.com/weifund/solint) - Solidity linting that helps you enforce consistent conventions and avoid errors in your Solidity smart-contracts.
 
+- [Solium](https://github.com/duaraghav8/Solium) - Yet another Solidity linting.
 
 
 ## Future improvements
