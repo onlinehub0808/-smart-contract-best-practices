@@ -1079,7 +1079,7 @@ When launching a contract that will have substantial funds or is required to be 
 
 ## Security Tools
 
-- [Oyente](https://github.com/ethereum/oyente) - Analyze Ethereum code to find common vulnerabilities, based on this [paper](http://www.comp.nus.edu.sg/~loiluu/papers/oyente.pdf).
+- [Oyente](https://github.com/melonproject/oyente) - Analyze Ethereum code to find common vulnerabilities, based on this [paper](http://www.comp.nus.edu.sg/~loiluu/papers/oyente.pdf).
 
 - [solidity-coverage](https://github.com/sc-forks/solidity-coverage) - Code coverage for Solidity testing.
 
