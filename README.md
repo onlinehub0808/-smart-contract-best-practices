@@ -265,38 +265,17 @@ function makeUntrustedWithdrawal(uint amount) {
 
 An assert guard triggers when an assertion fails - such as an invariant property changing. For example, the token to ether issuance ratio, in a token issuance contract, may be fixed. You can verify that this is the case at all times with an `assert()`. Assert guards should often be combined with other techniques, such as pausing the contract and allowing upgrades. (Otherwise you may end up stuck, with an assertion that is always failing.)
 
-The following example reverts transactions if the ratio of ether to total number of tokens changes:
+Example:
 
 ```
-contract TokenWithInvariants {
+contract Token {
     mapping(address => uint) public balanceOf;
     uint public totalSupply;
 
-    modifier checkInvariants {
-        _;
-        assert(this.balance >= totalSupply);
-    }
-
-    function deposit() public payable checkInvariants {
-        // intentionally vulnerable
+    function deposit() public payable {
         balanceOf[msg.sender] += msg.value;
         totalSupply += msg.value;
-    }
-
-    function transfer(address to, uint value) public checkInvariants {
-        if (balanceOf[msg.sender] >= value) {
-            balanceOf[to] += value;
-            balanceOf[msg.sender] -= value;
-        }
-    }
-
-    function withdraw() public checkInvariants {
-        // intentionally vulnerable
-        uint balance = balanceOf[msg.sender];
-        if (msg.sender.call.value(balance)()) {
-            totalSupply -= balance;
-            balanceOf[msg.sender] = 0;
-        }
+        assert(this.balance >= totalSupply);
     }
 }
 ```
