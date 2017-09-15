@@ -12,8 +12,8 @@
   - [***竞态***](#race-conditions)
     - [***可重入***](#reentrancy)
     - [***交易顺序依赖***](#transaction-ordering-dependence)
-  - [***针对Gas的攻击***](#dos-with-block-gas-limit)
-  - [***整数上溢/整数下溢***](#integer-overflow-and-underflow)
+  - [***针对Gas的攻击***](#dos-with-block-gas-limit)
+  -  [***整数上溢/整数下溢***](#integer-overflow-and-underflow)
 - [**软件工程开发技巧**](#eng-techniques)
 - [**参考文献**](#bibliography)
 
@@ -76,7 +76,7 @@
 
 在很多文档或者开发指南中，包括该指南，都会强调延展性比如：可终止，可升级或可更改的特性，不过对于智能合约来说，延展性和安全之间是个*基本权衡*。
 
-延展性会增加程序复杂性和潜在的攻击面。对于那些只在特定的时间段内提供有限的功能的智能合约，简单性比复杂性显得更加高效，比如无管治功能，有限短期内使用的代币发行的智能合约系统(governance-fee、finite-time-frame、token-sale)。
+延展性会增加程序复杂性和潜在的攻击面。对于那些只在特定的时间段内提供有限的功能的智能合约，简单性比复杂性显得更加高效，比如无管治功能，有限短期内使用的代币发行的智能合约系统(governance-fee,finite-time-frame token-sale contracts)。
 
 #### 庞大 vs 模块化
 
@@ -129,16 +129,16 @@
 
 #### 仔细权衡“send()”、“transfer()”、以及“call.value()”
 
-当发送Ether时，需要仔细权衡“someAddress.send()”、“someAddress.transfer()”、和“someAddress.call.value()()”之间的差别。
+当转账Ether时，需要仔细权衡“someAddress.send()”、“someAddress.transfer()”、和“someAddress.call.value()()”之间的差别。
 
 -  `x.transfer(y)`和`if (!x.send(y)) throw;`是等价的。send是transfer的底层实现，建议尽可能直接使用transfer。
 - `someAddress.send()`和`someAddress.transfer()` 能保证[可重入](#reentrancy) **安全** 。
-    尽管这些智能合约方法可以被触发执行，但补贴给智能合约的2,300 gas仅仅只够捕获一个event。
-- `someAddress.call.value()()` 将会发送指定数量的Ether并且触发对应代码的执行。执行的代码被给予了账户所有可用的gas，通过这种方式发起的交易对于可重入来说是 **不安全**的。
+    尽管这些外部智能合约的函数可以被触发执行，但补贴给外部智能合约的2,300 gas，意味着仅仅只够记录一个event到日志中。
+- `someAddress.call.value()()` 将会发送指定数量的Ether并且触发对应代码的执行。被调用的外部智能合约代码将享有所有剩余的gas，通过这种方式转账是很容易有可重入漏洞的，非常 **不安全**。
 
-使用`send()` 或`transfer()` 可以通过制定gas值来预防可重入， 但是这样做可能会导致在和合约调用fallback函数时出现问题，由于gas可能不足，而合约的fallback函数执行至少需要2,300 gas消耗。（*译者注：原文中描述的并不详细，我觉得这里把其中的原理说出来要好些*）
+使用`send()` 或`transfer()` 可以通过制定gas值来预防可重入， 但是这样做可能会导致在和合约调用fallback函数时出现问题，由于gas可能不足，而合约的fallback函数执行至少需要2,300 gas消耗。
 
-一种被称为[*push* 和*pull*](#favor-pull-over-push-payments)的 机制试图来平衡两者， 在 *push* 部分使用`send()` 或`transfer()`，在*pull* 部分使用`call.value()()`。（*译者注：在需要对以太坊执行`write`操作时使用`send()` 或`transfer()`，`read`操作使用`call.value()()`）
+一种被称为[*push* 和*pull*](#favor-pull-over-push-payments)的 机制试图来平衡两者， 在 *push* 部分使用`send()` 或`transfer()`，在*pull* 部分使用`call.value()()`。（*译者注：在需要对外未知地址转账Ether时使用`send()` 或`transfer()`，已知明确内部无恶意代码的地址转账Ether使用`call.value()()`）
 
 需要注意的是使用`send()` 或`transfer()` 进行转账并不能保证该智能合约本身重入安全，它仅仅只保证了这次转账操作时重入安全的。
 
@@ -146,7 +146,7 @@
 
 #### 处理外部调用错误
 
-Solidity提供了一系列在raw address上执行操作的底层方法，比如： `address.call()`，`address.callcode()`， `address.delegatecall()`和`address.send`。这些底层方法不会抛出异常，只是会在遇到错误时返回false。另一方面， *contract calls* （比如，`ExternalContract.doSomething()`)）会自动传递异常，（比如，`doSomething()`抛出异常，那么`ExternalContract.doSomething()` 同样会进行`throw`） )。
+Solidity提供了一系列在raw address上执行操作的底层方法，比如： `address.call()`，`address.callcode()`， `address.delegatecall()`和`address.send`。这些底层方法不会抛出异常(throw)，只是会在遇到错误时返回false。另一方面， *contract calls* （比如，`ExternalContract.doSomething()`)）会自动传递异常，（比如，`doSomething()`抛出异常，那么`ExternalContract.doSomething()` 同样会进行`throw`） )。
 
 如果你选择使用底层方法，一定要检查返回值来对可能的错误进行处理。
 
@@ -173,7 +173,7 @@ ExternalContract(someAddress).deposit.value(100);
 
 #### 对于外部合约优先使用*pull* 而不是*push*
 
-外部调用可能会有意或无意的失败。为了最小化这些外部调用失败带来的损失，通常好的做法是将外部调用隔离到其内部的交易中，调用发起方只负责初始化外部调用。这种做法对付款操作尤为重要，比如让用户自己撤回资产而不是直接发送给他们。（*译者注：事先设置需要付给某一方的资产的值，表明接收方可以从当前账户撤回资金的额度，然后由接收方调用当前合约提现函数完成转账*）。（这种方法同时也避免了造成 [gas limit相关问题](https://github.com/ConsenSys/smart-contract-best-practices/#dos-with-block-gas-limit)。）
+外部调用可能会有意或无意的失败。为了最小化这些外部调用失败带来的损失，通常好的做法是将外部调用函数与其余代码隔离，最终是由收款发起方负责发起调用该函数。这种做法对付款操作尤为重要，比如让用户自己撤回资产而不是直接发送给他们。（*译者注：事先设置需要付给某一方的资产的值，表明接收方可以从当前账户撤回资金的额度，然后由接收方调用当前合约提现函数完成转账*）。（这种方法同时也避免了造成 [gas limit相关问题](https://github.com/ConsenSys/smart-contract-best-practices/#dos-with-block-gas-limit)。）
 
 ```sh
 // bad
@@ -309,13 +309,13 @@ uint denominator = 2;
 例如：
 
 * 在游戏石头剪刀布中，需要参与游戏的双方提交他们“行动计划”的hash值，然后需要双方随后提交他们的行动计划；如果双方的“行动计划”和先前提交的hash值对不上则抛出异常。
-* 在拍卖中，要求玩家在初始阶段提交其所出价格的哈希值（以及超过其出价的保证金），然后在第二阶段提交他们所出价格的资金。
+* 在拍卖中，要求玩家在初始阶段提交其所出价格的hash值（以及超过其出价的保证金），然后在第二阶段提交他们所出价格的资金。
 * 当开发一个依赖随机数生成器的应用时，正确的顺序应当是（1）玩家提交行动计划，（2）生成随机数，（3）玩家支付。产生随机数是一个值得研究的领域；当前最优的解决方案包括比特币区块头（通过http://btcrelay.org验证），hash-commit-reveal方案（比如，一方产生number后，将其散列值提交作为对这个number的“提交”，然后在随后再暴露这个number本身）和 [RANDAO](http://github.com/randao/randao)。
 * 如果你正在实现频繁的批量拍卖，那么hash-commit机制也是个不错的选择。
 
 ### 权衡Abstract合约和Interfaces
 
-Interfaces和Abstract合约都是用来使智能合约能更好的被定制和重用。Interfaces是在Solidity 0.4.11中被引入的，和Abstract合约很像但是不能定义方法只能申明。Interfaces存在一些限制比如不能够访问storage或者从其他Interfaces那继承，通常这些使Abstract合约更实用。尽管如此，Interfaces在实现智能合约之前的设计智能合约阶段仍然有很大用处。另外，需要注意的是如果一个智能合约从另一个Abstract合约继承而来那么它必须实现所有Abstract合约内的申明的函数，否则它也会成为一个Abstract合约。
+Interfaces和Abstract合约都是用来使智能合约能更好的被定制和重用。Interfaces是在Solidity 0.4.11中被引入的，和Abstract合约很像但是不能定义方法只能申明。Interfaces存在一些限制比如不能够访问storage或者从其他Interfaces那继承，通常这些使Abstract合约更实用。尽管如此，Interfaces在实现智能合约之前的设计智能合约阶段仍然有很大用处。另外，需要注意的是如果一个智能合约从另一个Abstract合约继承而来那么它必须实现所有Abstract合约内的申明并未实现的函数，否则它也会成为一个Abstract合约。
 
 ### 在双方或多方参与的智能合约中，参与者可能会“脱机离线”后不再返回
 
@@ -383,7 +383,7 @@ pragma solidity 0.4.4;
 
 （*译者注：这当然也会付出兼容性的代价*）
 
-### 小心除零 (Solidity < 0.4)
+### 小心分母为零 (Solidity < 0.4)
 
 早于0.4版本, 当一个数尝试除以零时，Solidity [返回zero](https://github.com/ethereum/solidity/issues/670) 并没有 `throw` 一个异常。确保你使用的Solidity版本至少为 0.4。
 
@@ -391,7 +391,7 @@ pragma solidity 0.4.4;
 
 ### 区分函数和事件
 
-为了防止函数和事件（Event）产生混淆，声明一个事件使用大写并加入前缀（我们建议**LOG**）。对于函数， 始终以小写字母开头，构造函数除外。
+为了防止函数和事件（Event）产生混淆，命名一个事件使用大写并加入前缀（我们建议**LOG**）。对于函数， 始终以小写字母开头，构造函数除外。
 
 ```sh
 // bad
