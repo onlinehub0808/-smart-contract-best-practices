@@ -2,7 +2,6 @@
 
 [![Join the chat at https://gitter.im/ConsenSys/smart-contract-best-practices](https://badges.gitter.im/ConsenSys/smart-contract-best-practices.svg)](https://gitter.im/ConsenSys/smart-contract-best-practices?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-
 Main sections are:
 
 - [**Solidity Security Tips**](#solidity-tips)
@@ -68,13 +67,13 @@ An ideal smart contract system from a software engineering bias is modular, reus
 
 However, there are important exceptions where security and software engineering best practices may not be aligned.  In each case, the proper balance is obtained by identifying the optimal mix of properties along contract system dimensions such as:
 
-- Rigid versus Upgradeable 
+- Rigid versus Upgradeable
 - Monolithic versus Modular
 - Duplication versus Reuse
 
 #### Rigid versus Upgradeable
 
-While multiple resources, including this one, emphasize malleability characteristics such as Killable, Upgradeable or Modifiable patterns there is a *fundamental tradeoff* between malleability and security.  
+While multiple resources, including this one, emphasize malleability characteristics such as Killable, Upgradeable or Modifiable patterns there is a *fundamental tradeoff* between malleability and security.
 
 Malleability patterns by definition add complexity and potential attack surfaces.  Simplicity is particularly effective over complexity in cases where the smart contract system performs a very limited set of functionality for a pre-defined limited period of time, for example a governance-free finite-time-frame token-sale contract system.
 
@@ -133,7 +132,7 @@ Calls to untrusted contracts can introduce several unexpected risks or errors. E
 When sending Ether be aware of the relative tradeoffs between the use of
 `someAddress.send()`, `someAddress.transfer()`, and `someAddress.call.value()()`.
 
-- `x.transfer(y)` is equivalent to `if (!x.send(y)) throw;` Send is the low level counterpart of transfer, and it's advisable to use      transfer when possible.
+- `x.transfer(y)` is equivalent to `require(x.send(y));` Send is the low level counterpart of transfer, and it's advisable to use transfer when possible.
 - `someAddress.send()`and `someAddress.transfer()` are considered *safe* against [reentrancy](#reentrancy).
     While these methods still trigger code execution, the called contract is
     only given a stipend of 2,300 gas which is currently only enough to log an
@@ -144,7 +143,7 @@ When sending Ether be aware of the relative tradeoffs between the use of
 
 Using `send()` or `transfer()` will prevent reentrancy but it does so at the cost of being
 incompatible with any contract whose fallback function requires more than 2,300
-gas.  
+gas.
 
 One pattern that attempts to balance this trade-off is to implement both
 a [*push* and *pull*](#favor-pull-over-push-payments) mechanism, using `send()` or `transfer()`
@@ -196,12 +195,10 @@ contract auction {
     uint highestBid;
 
     function bid() payable {
-        if (msg.value < highestBid) throw;
+        require(msg.value >= highestBid);
 
         if (highestBidder != 0) {
-            if (!highestBidder.send(highestBid)) { // if this call consistently fails, no one else can bid
-                throw;
-            }
+            require(highestBidder.send(highestBid)) // if this call consistently fails, no one else can bid
         }
 
        highestBidder = msg.sender;
@@ -216,7 +213,7 @@ contract auction {
     mapping(address => uint) refunds;
 
     function bid() payable external {
-        if (msg.value < highestBid) throw;
+        require(msg.value >= highestBid);
 
         if (highestBidder != 0) {
             refunds[highestBidder] += highestBid; // record the refund that this user can claim
@@ -229,8 +226,7 @@ contract auction {
     function withdrawRefund() external {
         uint refund = refunds[msg.sender];
         refunds[msg.sender] = 0;
-        if (!msg.sender.send(refund)) {
-            refunds[msg.sender] = refund; // reverting state because send failed
+        require(msg.sender.send(refund)); // revert state if send fails
         }
     }
 }
@@ -285,13 +281,13 @@ Note that the assertion is *not* a strict equality of the balance because the co
 
 ### Use `assert()` and `require()` properly
 
-In Solidity 0.4.10 `assert()` and `require()` were introduced. `require(condition)` is meant to be used for input validation, which should be done on any user input, and throws if condition is false. `assert(condition)` also throws if condition is false but should be used only for invariants: internal errors or to check if your contract has reached an invalid state. Following this paradigm allows formal analysis tools to verify that the invalid opcode can never be reached: meaning no invariants in the code are violated and that the code is formally verified.
+In Solidity 0.4.10 `assert()` and `require()` were introduced. `require(condition)` is meant to be used for input validation, which should be done on any user input, and reverts if condition is false. `assert(condition)` also reverts if condition is false but should be used only for invariants: internal errors or to check if your contract has reached an invalid state. Following this paradigm allows formal analysis tools to verify that the invalid opcode can never be reached: meaning no invariants in the code are violated and that the code is formally verified.
 
 <a name="beware-rounding-with-integer-division"></a>
 
 ### Beware rounding with integer division
 
-All integer divison rounds down to the nearest integer. If you need more precision, consider using a multiplier, or store both the numerator and denominator.
+All integer division rounds down to the nearest integer. If you need more precision, consider using a multiplier, or store both the numerator and denominator.
 
 (In the future, Solidity will have a fixed-point type, which will make this easier.)
 
@@ -313,7 +309,7 @@ uint denominator = 2;
 
 Beware of coding an invariant that strictly checks the balance of a contract.
 
-An attacker can forcibly send wei to any account and this cannot be prevented (not even with a fallback function that does a `throw`).
+An attacker can forcibly send wei to any account and this cannot be prevented (not even with a fallback function that does a `revert()`).
 
 The attacker can do this by creating a contract, funding it with 1 wei, and invoking
 `selfdestruct(victimAddress)`.  No code is invoked in `victimAddress`, so it
@@ -336,7 +332,7 @@ Examples:
 
 ### Be aware of the tradeoffs between abstract contracts and interfaces
 
-Both interfaces and abstract contracts provide one with a customizable and re-usable approach for smart contracts. Interfaces, which were introduced in Solidity 0.4.11, are similar to abstract contracts but cannot have any functions implemented. Interfaces also have limitations such as not being able to access storage or inherit from other interfaces which generally makes abstract contracts more practical. Although, Interfaces are certainly useful for designing contracts prior to implementation. Additionally, it is important to keep in mind that if a contract inherits from an abstract contract it must implement all non-implemented functions via overriding or it will be abstract as well. 
+Both interfaces and abstract contracts provide one with a customizable and re-usable approach for smart contracts. Interfaces, which were introduced in Solidity 0.4.11, are similar to abstract contracts but cannot have any functions implemented. Interfaces also have limitations such as not being able to access storage or inherit from other interfaces which generally makes abstract contracts more practical. Although, Interfaces are certainly useful for designing contracts prior to implementation. Additionally, it is important to keep in mind that if a contract inherits from an abstract contract it must implement all non-implemented functions via overriding or it will be abstract as well.
 
 ### In 2-party or N-party contracts, beware of the possibility that some participants may "drop offline" and not return
 
@@ -451,7 +447,7 @@ mapping (address => uint) private userBalances;
 
 function withdrawBalance() public {
     uint amountToWithdraw = userBalances[msg.sender];
-    if (!(msg.sender.call.value(amountToWithdraw)())) { throw; } // At this point, the caller's code is executed, and can call withdrawBalance again
+    require(msg.sender.call.value(amountToWithdraw)()); // At this point, the caller's code is executed, and can call withdrawBalance again
     userBalances[msg.sender] = 0;
 }
 ```
@@ -468,7 +464,7 @@ mapping (address => uint) private userBalances;
 function withdrawBalance() public {
     uint amountToWithdraw = userBalances[msg.sender];
     userBalances[msg.sender] = 0;
-    if (!(msg.sender.call.value(amountToWithdraw)())) { throw; } // The user's balance is already 0, so future invocations won't withdraw anything
+    require(msg.sender.call.value(amountToWithdraw)()); // The user's balance is already 0, so future invocations won't withdraw anything
 }
 ```
 
@@ -491,7 +487,7 @@ function transfer(address to, uint amount) {
 
 function withdrawBalance() public {
     uint amountToWithdraw = userBalances[msg.sender];
-    if (!(msg.sender.call.value(amountToWithdraw)())) { throw; } // At this point, the caller's code is executed, and can call transfer()
+    require(msg.sender.call.value(amountToWithdraw)()); // At this point, the caller's code is executed, and can call transfer()
     userBalances[msg.sender] = 0;
 }
 ```
@@ -515,11 +511,11 @@ mapping (address => uint) private rewardsForA;
 function withdraw(address recipient) public {
     uint amountToWithdraw = userBalances[recipient];
     rewardsForA[recipient] = 0;
-    if (!(recipient.call.value(amountToWithdraw)())) { throw; }
+    require(recipient.call.value(amountToWithdraw)());
 }
 
 function getFirstWithdrawalBonus(address recipient) public {
-    if (claimedBonus[recipient]) { throw; } // Each recipient should only be able to claim the bonus once
+    require(!claimedBonus[recipient]); // Each recipient should only be able to claim the bonus once
 
     rewardsForA[recipient] += 100;
     withdraw(recipient); // At this point, the caller will be able to execute getFirstWithdrawalBonus again.
@@ -537,11 +533,11 @@ mapping (address => uint) private rewardsForA;
 function untrustedWithdraw(address recipient) public {
     uint amountToWithdraw = userBalances[recipient];
     rewardsForA[recipient] = 0;
-    if (!(recipient.call.value(amountToWithdraw)())) { throw; }
+    require(recipient.call.value(amountToWithdraw)());
 }
 
 function untrustedGetFirstWithdrawalBonus(address recipient) public {
-    if (claimedBonus[recipient]) { throw; } // Each recipient should only be able to claim the bonus once
+    require(claimedBonus[recipient]); // Each recipient should only be able to claim the bonus once
 
     claimedBonus[recipient] = true;
     rewardsForA[recipient] += 100;
@@ -565,7 +561,7 @@ function deposit() payable public returns (bool) {
         lockBalances = false;
         return true;
     }
-    throw;
+    revert();
 }
 
 function withdraw(uint amount) payable public returns (bool) {
@@ -580,7 +576,7 @@ function withdraw(uint amount) payable public returns (bool) {
         return true;
     }
 
-    throw;
+    revert();
 }
 ```
 
@@ -593,7 +589,7 @@ contract StateHolder {
     address private lockHolder;
 
     function getLock() {
-        if (lockHolder != 0) { throw; }
+        require(lockHolder == 0);
         lockHolder = msg.sender;
     }
 
@@ -602,7 +598,7 @@ contract StateHolder {
     }
 
     function set(uint newState) {
-        if (msg.sender != lockHolder) { throw; }
+        require(msg.sender == lockHolder);
         n = newState;
     }
 }
@@ -618,7 +614,7 @@ An attacker can call `getLock()`, and then never call `releaseLock()`. If they d
 
 ### Transaction-Ordering Dependence (TOD) / Front Running
 
-Above were examples of race conditions involving the attacker executing malicious code *within a single transaction*. The following are a different type of race condition inherent to Blockchains: the fact that *the order of transactions themselves* (within a block) is easily subject to manipulation. 
+Above were examples of race conditions involving the attacker executing malicious code *within a single transaction*. The following are a different type of race condition inherent to Blockchains: the fact that *the order of transactions themselves* (within a block) is easily subject to manipulation.
 
 Since a transaction is in the mempool for a short while, one can know what actions will occur, before it is included in a block. This can be troublesome for things like decentralized markets, where a transaction to buy some tokens can be seen, and a market order implemented before the other transaction gets included. Protecting against this is difficult, as it would come down to the specific contract itself. For example, in markets, it would be better to implement batch auctions (this also protects against high frequency trading concerns). Another way to use a pre-commit scheme (“I’m going to submit the details later”).
 
@@ -654,8 +650,7 @@ mapping (address => uint256) public balanceOf;
 // INSECURE
 function transfer(address _to, uint256 _value) {
     /* Check if sender has balance */
-    if (balanceOf[msg.sender] < _value)
-        throw;
+    require(balanceOf[msg.sender] > _value);
     /* Add and subtract new balances */
     balanceOf[msg.sender] -= _value;
     balanceOf[_to] += _value;
@@ -664,8 +659,7 @@ function transfer(address _to, uint256 _value) {
 // SECURE
 function transfer(address _to, uint256 _value) {
     /* Check if sender has balance and for overflows */
-    if (balanceOf[msg.sender] < _value || balanceOf[_to] + _value < balanceOf[_to])
-        throw;
+    require(balanceOf[msg.sender] >= _value && balanceOf[_to] + _value >= balanceOf[_to]);
 
     /* Add and subtract new balances */
     balanceOf[msg.sender] -= _value;
@@ -675,15 +669,15 @@ function transfer(address _to, uint256 _value) {
 
 If a balance reaches the maximum uint value (2^256) it will circle back to zero. This checks for that condition. This may or may not be relevant, depending on the implementation. Think about whether or not the uint value has an opportunity to approach such a large number. Think about how the uint variable changes state, and who has authority to make such changes. If any user can call functions which update the uint value, it's more vulnerable to attack. If only an admin has access to change the variable's state, you might be safe. If a user can increment by only 1 at a time, you are probably also safe because there is no feasible way to reach this limit.
 
-The same is true for underflow. If a uint is made to be less than zero, it will cause an underflow and get set to its maximum value. 
+The same is true for underflow. If a uint is made to be less than zero, it will cause an underflow and get set to its maximum value.
 
 Be careful with the smaller data-types like uint8, uint16, uint24...etc: they can even more easily hit their maximum value.
 
 Be aware there are around [20 cases for overflow and underflow](https://github.com/ethereum/solidity/issues/796#issuecomment-253578925).
 
-<a name="dos-with-unexpected-throw"></a>
+<a name="dos-with-unexpected-revert"></a>
 
-### DoS with (Unexpected) Throw
+### DoS with (Unexpected) revert
 
 Consider a simple auction contract:
 
@@ -694,9 +688,9 @@ contract Auction {
     uint highestBid;
 
     function bid() payable {
-        if (msg.value <= highestBid) { throw; }
+        require(msg.value > highestBid);
 
-        if (!currentLeader.send(highestBid)) { throw; } // Refund the old leader, and throw if it fails
+        require(currentLeader.send(highestBid)); // Refund the old leader, if it fails then revert
 
         currentLeader = msg.sender;
         highestBid = msg.value;
@@ -704,9 +698,9 @@ contract Auction {
 }
 ```
 
-When it tries to refund the old leader, it throws if the refund fails. This means that a malicious bidder can become the leader, while making sure that any refunds to their address will *always* fail. In this way, they can prevent anyone else from calling the `bid()` function, and stay the leader forever. A recommendation is to set up a [pull payment system](https://github.com/ConsenSys/smart-contract-best-practices/#favor-pull-over-push-payments) instead, as described earlier.
+When it tries to refund the old leader, it reverts if the refund fails. This means that a malicious bidder can become the leader, while making sure that any refunds to their address will *always* fail. In this way, they can prevent anyone else from calling the `bid()` function, and stay the leader forever. A recommendation is to set up a [pull payment system](https://github.com/ConsenSys/smart-contract-best-practices/#favor-pull-over-push-payments) instead, as described earlier.
 
-Another example is when a contract may iterate through an array to pay users (e.g., supporters in a crowdfunding contract). It's common to want to make sure that each payment succeeds. If not, one should throw. The issue is that if one call fails, you are reverting the whole payout system, meaning the loop will never complete. No one gets paid, because one address is forcing an error.
+Another example is when a contract may iterate through an array to pay users (e.g., supporters in a crowdfunding contract). It's common to want to make sure that each payment succeeds. If not, one should revert. The issue is that if one call fails, you are reverting the whole payout system, meaning the loop will never complete. No one gets paid, because one address is forcing an error.
 
 
 ```
@@ -716,9 +710,7 @@ mapping (address => uint) public refunds;
 // bad
 function refundAll() public {
     for(uint x; x < refundAddresses.length; x++) { // arbitrary length iteration based on how many addresses participated
-        if(refundAddresses[x].send(refunds[refundAddresses[x]])) {
-            throw; // doubly bad, now a single failure on send will hold up all funds
-        }
+        require(refundAddresses[x].send(refunds[refundAddresses[x]])) // doubly bad, now a single failure on send will hold up all funds
     }
 }
 ```
@@ -798,9 +790,7 @@ contract SomeRegister {
     }
 
     modifier onlyOwner() {
-        if (msg.sender != owner) {
-            throw;
-        }
+        require(msg.sender == owner)
         _;
     }
 
@@ -834,9 +824,7 @@ contract Relay {
     address public owner;
 
     modifier onlyOwner() {
-        if (msg.sender != owner) {
-            throw;
-        }
+        require(msg.sender == owner);
         _;
     }
 
@@ -852,7 +840,7 @@ contract Relay {
     }
 
     function() {
-        if(!currentVersion.delegatecall(msg.data)) throw;
+        require(currentVersion.delegatecall(msg.data));
     }
 }
 ```
@@ -872,9 +860,7 @@ bool private stopped = false;
 address private owner;
 
 modifier isAdmin() {
-    if(msg.sender != owner) {
-        throw;
-    }
+    require(msg.sender == owner);
     _;
 }
 
@@ -932,9 +918,7 @@ function withdraw() public {
         uint amountToWithdraw = requestedWithdrawals[msg.sender].amount;
         requestedWithdrawals[msg.sender].amount = 0;
 
-        if(!msg.sender.send(amountToWithdraw)) {
-            throw;
-        }
+        require(msg.sender.send(amountToWithdraw));
     }
 }
 ```
@@ -965,9 +949,7 @@ During testing, you can force an automatic deprecation by preventing any actions
 
 ```
 modifier isActive() {
-    if (block.number > SOME_BLOCK_NUMBER) {
-        throw;
-    }
+    require(block.number <= SOME_BLOCK_NUMBER);
     _;
 }
 
