@@ -3,6 +3,7 @@
 [![Join the chat at https://gitter.im/ConsenSys/smart-contract-best-practices](https://badges.gitter.im/ConsenSys/smart-contract-best-practices.svg)](https://gitter.im/ConsenSys/smart-contract-best-practices?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 
+<<<<<<< Updated upstream
 Main sections are:
 
 - [**Solidity Security Tips**](#solidity-tips)
@@ -14,6 +15,24 @@ Main sections are:
   - [***Overflow/Underflow***](#integer-overflow-and-underflow)
 - [**Engineering Techniques**](#eng-techniques)
 - [**Bibliography**](#bibliography)
+=======
+<!-- TOC depthFrom:2 depthTo:2 withLinks:1 updateOnSave:1 orderedList:0 -->
+
+- [General Philosophy](#general-philosophy)
+- [Security Notifications](#security-notifications)
+- [Recommendations for Smart Contract Security in Solidity](#recommendations-for-smart-contract-security-in-solidity)
+- [Known Attacks](#known-attacks)
+- [Software Engineering Techniques](#software-engineering-techniques)
+- [Security-related Documentation and Procedures](#security-related-documentation-and-procedures)
+- [Security Tools](#security-tools)
+- [Linters](#linters)
+- [Future improvements](#future-improvements)
+- [Smart Contract Security Bibliography](#smart-contract-security-bibliography)
+- [Reviewers](#reviewers)
+- [License](#license)
+
+<!-- /TOC -->
+>>>>>>> Stashed changes
 
 This document is designed to provide a starting *security* baseline for intermediate Solidity programmers.  It additionally includes *security philosophies; bug bounty program guidelines; documentation and procedures; and tools.*
 
