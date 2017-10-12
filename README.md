@@ -980,7 +980,7 @@ In the early stages, you can restrict the amount of Ether for any user (or for t
 
 Some tips for running bounty programs:
 
-- Decide which currency will bounties be distributed in (BTC and/or ETH)
+- Decide which currency bounties will be distributed in (BTC and/or ETH)
 - Decide on an estimated total budget for bounty rewards
 - From the budget, determine three tiers of rewards:
   - smallest reward you are willing to give out
