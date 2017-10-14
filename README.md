@@ -1083,8 +1083,10 @@ When launching a contract that will have substantial funds or is required to be 
 - [Oyente](https://github.com/melonproject/oyente) - Analyze Ethereum code to find common vulnerabilities, based on this [paper](http://www.comp.nus.edu.sg/~loiluu/papers/oyente.pdf).
 - [solidity-coverage](https://github.com/sc-forks/solidity-coverage) - Code coverage for Solidity testing.
 - [Solgraph](https://github.com/raineorshine/solgraph) - Generates a DOT graph that visualizes function control flow of a Solidity contract and highlights potential security vulnerabilities.
+- [Mythril](https://github.com/b-mueller/mythril/) - Reversing and bug hunting framework for the Ethereum blockchain
 
-## Linters
+
+### Linters
 
 Linters improve code quality by enforcing rules for style and composition, making code easier to read and review.
 
@@ -1095,6 +1097,7 @@ Linters improve code quality by enforcing rules for style and composition, makin
 
 
 ## Future improvements
+
 - **Editor Security Warnings**: Editors will soon alert for common security errors, not just compilation errors. Browser Solidity is getting these features soon.
 
 - **New functional languages that compile to EVM bytecode**: Functional languages gives certain guarantees over procedural languages like Solidity, namely immutability within a function and strong compile time checking. This can reduce the risk of errors by providing deterministic behavior. (for more see [this](https://plus.google.com/u/0/events/cmqejp6d43n5cqkdl3iu0582f4k), Curry-Howard correspondence, and linear logic)
@@ -1142,9 +1145,9 @@ Here are some of them.  Feel free to add more.
 ## Reviewers
 
 The following people have reviewed this document (date and commit they reviewed in parentheses):
-Bill Gleim (07/29/2016 3495fb5)
-Bill Gleim (03/15/2017 0244f4e)
--
+
+* Bill Gleim (07/29/2016 3495fb5)
+* Bill Gleim (03/15/2017 0244f4e)
 
 ## License
 
