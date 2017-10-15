@@ -1,0 +1,29 @@
+# Refer to https://github.com/mkdocs/mkdocs/blob/master/mkdocs.yml for a working example
+site_name: Ethereum Smart Contract Best Practices
+site_url: https://github.com/ConsenSys/smart-contract-best-practices
+site_description: 
+site_author: MkDocs Team
+
+repo_url: https://github.com/mkdocs/mkdocs/
+
+pages:
+- Home: README.md
+# - User Guide:
+#     - Writing Your Docs: user-guide/writing-your-docs.md
+#     - Styling Your Docs: user-guide/styling-your-docs.md
+#     - Configuration: user-guide/configuration.md
+#     - Deploying Your Docs: user-guide/deploying-your-docs.md
+#     - Custom Themes: user-guide/custom-themes.md
+#     - Plugins: user-guide/plugins.md
+- About:
+    - Contributing: about/CONTRIBUTING.md
+    - License: about/LICENSE
+
+# extra_css:
+#     - css/extra.css
+
+markdown_extensions:
+    # - toc:
+    #     permalink: 
+    # - admonition
+    # - def_list
