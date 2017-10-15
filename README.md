@@ -56,7 +56,7 @@
 
 This document is designed to provide a starting *security* baseline for intermediate Solidity programmers.  It additionally includes *security philosophies; bug bounty program guidelines; documentation and procedures; and tools.*
 
-Pull requests are very welcome, from small fixes to sections, and if you've written an article or blog post, please add it to the [bibliography.](#bibliography)  See our [Contribution Guidelines](CONTRIBUTING.md).
+Pull requests are very welcome, from small fixes to sections, and if you've written an article or blog post, please add it to the [bibliography.](#bibliography)  See our [Contribution Guidelines](about/CONTRIBUTING.md).
 
 #### Additional Requested Content
 
