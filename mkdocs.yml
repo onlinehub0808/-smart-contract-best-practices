@@ -17,7 +17,7 @@ pages:
 #     - Plugins: user-guide/plugins.md
 - About:
     - Contributing: about/CONTRIBUTING.md
-    - License: about/LICENSE
+    - License: about/LICENSE.md
 
 # extra_css:
 #     - css/extra.css
