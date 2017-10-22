@@ -198,7 +198,7 @@ specific value transfers safe against reentrancy.
 
 #### Handle errors in external calls
 
-Solidity offers low-level call methods that work on raw addresses: `address.call()`, `address.callcode()`, `address.delegatecall()`, and `address.send`. These low-level methods never throw an exception, but will return `false` if the call encounters an exception. On the other hand, *contract calls* (e.g., `ExternalContract.doSomething()`) will automatically propagate a throw (for example, `ExternalContract.doSomething()` will also `throw` if `doSomething()` throws).
+Solidity offers low-level call methods that work on raw addresses: `address.call()`, `address.callcode()`, `address.delegatecall()`, and `address.send()`. These low-level methods never throw an exception, but will return `false` if the call encounters an exception. On the other hand, *contract calls* (e.g., `ExternalContract.doSomething()`) will automatically propagate a throw (for example, `ExternalContract.doSomething()` will also `throw` if `doSomething()` throws).
 
 If you choose to use the low-level call methods, make sure to handle the possibility that the call will fail, by checking the return value.
 
@@ -238,7 +238,7 @@ contract auction {
         require(msg.value >= highestBid);
 
         if (highestBidder != 0) {
-            require(highestBidder.send(highestBid)) // if this call consistently fails, no one else can bid
+            highestBidder.transfer(highestBid); // if this call consistently fails, no one else can bid
         }
 
        highestBidder = msg.sender;
@@ -266,8 +266,7 @@ contract auction {
     function withdrawRefund() external {
         uint refund = refunds[msg.sender];
         refunds[msg.sender] = 0;
-        require(msg.sender.send(refund)); // revert state if send fails
-        }
+        msg.sender.transfer(refund);
     }
 }
 ```
@@ -563,7 +562,7 @@ function getFirstWithdrawalBonus(address recipient) public {
 }
 ```
 
-Even though `getFirstWithdrawalBonus()` doesn't directly call an external contract, the call in `withdraw()` is enough to make it vulnerable to a race condition. you therefore need to treat `withdraw()` as if it were also untrusted.
+Even though `getFirstWithdrawalBonus()` doesn't directly call an external contract, the call in `withdraw()` is enough to make it vulnerable to a race condition. You therefore need to treat `withdraw()` as if it were also untrusted.
 
 ```
 mapping (address => uint) private userBalances;
@@ -595,28 +594,23 @@ mapping (address => uint) private balances;
 bool private lockBalances;
 
 function deposit() payable public returns (bool) {
-    if (!lockBalances) {
-        lockBalances = true;
-        balances[msg.sender] += msg.value;
-        lockBalances = false;
-        return true;
-    }
-    revert();
+    require(!lockBalances);
+    lockBalances = true;
+    balances[msg.sender] += msg.value;
+    lockBalances = false;
+    return true;
 }
 
 function withdraw(uint amount) payable public returns (bool) {
-    if (!lockBalances && amount > 0 && balances[msg.sender] >= amount) {
-        lockBalances = true;
+    require(!lockBalances && amount > 0 && balances[msg.sender] >= amount);
+    lockBalances = true;
 
-        if (msg.sender.call(amount)()) { // Normally insecure, but the mutex saves it
-          balances[msg.sender] -= amount;
-        }
-
-        lockBalances = false;
-        return true;
+    if (msg.sender.call(amount)()) { // Normally insecure, but the mutex saves it
+      balances[msg.sender] -= amount;
     }
 
-    revert();
+    lockBalances = false;
+    return true;
 }
 ```
 
@@ -904,8 +898,7 @@ modifier isAdmin() {
     _;
 }
 
-function toggleContractActive() isAdmin public
-{
+function toggleContractActive() isAdmin public {
     // You can add an additional modifier that restricts stopping a contract to be based on another action, such as a vote of users
     stopped = !stopped;
 }
@@ -913,13 +906,11 @@ function toggleContractActive() isAdmin public
 modifier stopInEmergency { if (!stopped) _; }
 modifier onlyInEmergency { if (stopped) _; }
 
-function deposit() stopInEmergency public
-{
+function deposit() stopInEmergency public {
     // some code
 }
 
-function withdraw() onlyInEmergency public
-{
+function withdraw() onlyInEmergency public {
     // some code
 }
 ```
@@ -993,8 +984,7 @@ modifier isActive() {
     _;
 }
 
-function deposit() public
-isActive() {
+function deposit() public isActive {
     // some code
 }
 
