@@ -333,11 +333,19 @@ All integer division rounds down to the nearest integer. If you need more precis
 ```
 // bad
 uint x = 5 / 2; // Result is 2, all integer divison rounds DOWN to the nearest integer
+```
 
+Using a multiplier prevents rounding down, this multiplier needs to be accounted for when working with x in the future:
+
+```
 // good
 uint multiplier = 10;
 uint x = (5 * multiplier) / 2;
+```
 
+Storing the numerator and denominator means you can calculate the result of `numerator/denominator` off-chain:
+```
+// good
 uint numerator = 5;
 uint denominator = 2;
 ```
