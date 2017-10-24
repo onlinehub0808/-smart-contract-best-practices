@@ -2,7 +2,7 @@
 
 We welcome all contributions - send a pull request or open an issue. When possible, send different pull requests by section/topic.
 
-Feel free to peruse the [open issues](../issues) for ideas which need to be expanded on a bit here.
+Feel free to peruse the [open issues](../issues) for ideas which should be added or expanded on.
 
 ### Layout and Compilation
 

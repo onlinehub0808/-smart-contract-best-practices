@@ -1,6 +1,5 @@
 The following is a list of known attacks which you should be aware of, and defend against when writing smart contracts.
 
-
 ### Race Conditions<sup><a href='#footnote-race-condition-terminology'>\*</a></sup>
 
 One of the major dangers of calling external contracts is that they can take over the control flow, and make changes to your data that the calling function wasn't expecting. This class of bug can take many forms, and both of the major bugs that led to the DAO's collapse were bugs of this sort.

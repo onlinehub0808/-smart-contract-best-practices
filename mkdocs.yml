@@ -22,6 +22,11 @@ pages:
     - Contributing: about/contributing.md
 
 theme: 'material'
+extra_css:
+  - 'stylesheets/extra.css'
+site_favicon: 'images/favicon.ico'
+
+
 
 markdown_extensions:
   - markdown.extensions.admonition
