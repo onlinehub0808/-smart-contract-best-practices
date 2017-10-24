@@ -2,6 +2,12 @@ We welcome all contributions - send a pull request or open an issue. When possib
 
 Feel free to peruse the [open issues](https://github.com/ConsenSys/smart-contract-best-practices/issues) for ideas which need to be expanded on a bit here.
 
+## Editing and Submitting changes
+
+1. Fork the repo
+2. Make changes to the markdown files in the [docs directory](../tree/master/docs) of the master branch
+3. Submit a Pull Request
+
 ## Audience
 
 Write for an intermediate Ethereum developer, they know the basics of Solidity programming and have coded a number of contracts
