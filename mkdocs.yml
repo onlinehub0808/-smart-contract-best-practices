@@ -2,28 +2,43 @@
 site_name: Ethereum Smart Contract Best Practices
 site_url: https://github.com/ConsenSys/smart-contract-best-practices
 site_description: 
-site_author: MkDocs Team
-
-repo_url: https://github.com/mkdocs/mkdocs/
+site_author: ConsenSys
+repo_url: https://github.com/ConsenSys/smart-contract-best-practices
 
 pages:
-- Home: README.md
-# - User Guide:
-#     - Writing Your Docs: user-guide/writing-your-docs.md
-#     - Styling Your Docs: user-guide/styling-your-docs.md
-#     - Configuration: user-guide/configuration.md
-#     - Deploying Your Docs: user-guide/deploying-your-docs.md
-#     - Custom Themes: user-guide/custom-themes.md
-#     - Plugins: user-guide/plugins.md
-- About:
-    - Contributing: about/CONTRIBUTING.md
-    - License: about/LICENSE
+  - Home: index.md
+  - General Philosophy: general_philosophy.md
+  - Recommendations for Smart Contract Security in Solidity: recommendations.md
+  - Known Attacks: known_attacks.md
+  - Software Engineering Techniques: software_engineering.md
+  - Documentation and Procedures: documentation_procedures.md
+  - Security Tools: security_tools.md
+  - Security Notifications: security_notifications.md
+  - Future improvements: future_improvements.md
+  - Smart Contract Security Bibliography: bibliography.md
+  - About:
+    - Reviewers: about/reviewers.md
+    - License: about/license.md
+    - Contributing: about/contributing.md
 
-# extra_css:
-#     - css/extra.css
+theme: 'material'
 
 markdown_extensions:
-    # - toc:
-    #     permalink: 
-    # - admonition
-    # - def_list
+  - markdown.extensions.admonition
+  - markdown.extensions.def_list
+  - markdown.extensions.footnotes
+  - markdown.extensions.meta
+  - markdown.extensions.toc(permalink=true)
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.arithmatex
+  - pymdownx.betterem(smart_enable=all)
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tasklist(custom_checkbox=true)
+  - pymdownx.tilde
