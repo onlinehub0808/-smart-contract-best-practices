@@ -1,2 +1,8 @@
 .DS_Store
 .tmp
+
+# virtualenv directory
+/venv
+
+# build directory
+/site

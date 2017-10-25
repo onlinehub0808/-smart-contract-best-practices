@@ -1,0 +1,287 @@
+This page demonstrates a number of solidity patterns which should generally be followed when writing smart contracts.
+
+### External Calls
+
+#### Avoid external calls when possible
+
+Calls to untrusted contracts can introduce several unexpected risks or errors. External calls may execute malicious code in that contract _or_ any other contract that it depends upon. As such, every external call should be treated as a potential security risk and removed if possible. When it is not possible to remove external calls, use the recommendations in the rest of this section to minimize the danger.
+
+#### Be aware of the tradeoffs between `send()`, `transfer()`, and `call.value()()`
+
+When sending Ether be aware of the relative tradeoffs between the use of
+`someAddress.send()`, `someAddress.transfer()`, and `someAddress.call.value()()`.
+
+- `x.transfer(y)` is equivalent to `require(x.send(y));` Send is the low level counterpart of transfer, and it's advisable to use transfer when possible.
+- `someAddress.send()`and `someAddress.transfer()` are considered *safe* against [reentrancy](#reentrancy).
+    While these methods still trigger code execution, the called contract is
+    only given a stipend of 2,300 gas which is currently only enough to log an
+    event.
+- `someAddress.call.value()()` will send the provided ether and trigger code
+    execution.  The executed code is given all available gas for execution
+    making this type of value transfer *unsafe* against reentrancy.
+
+Using `send()` or `transfer()` will prevent reentrancy but it does so at the cost of being
+incompatible with any contract whose fallback function requires more than 2,300
+gas.
+
+One pattern that attempts to balance this trade-off is to implement both
+a [*push* and *pull*](#favor-pull-over-push-payments) mechanism, using `send()` or `transfer()`
+for the *push* component and `call.value()()` for the *pull* component.
+
+It is worth pointing out that exclusive use of `send()` or `transfer()` for value transfers
+does not itself make a contract safe against reentrancy but only makes those
+specific value transfers safe against reentrancy.
+
+
+#### Handle errors in external calls
+
+Solidity offers low-level call methods that work on raw addresses: `address.call()`, `address.callcode()`, `address.delegatecall()`, and `address.send()`. These low-level methods never throw an exception, but will return `false` if the call encounters an exception. On the other hand, *contract calls* (e.g., `ExternalContract.doSomething()`) will automatically propagate a throw (for example, `ExternalContract.doSomething()` will also `throw` if `doSomething()` throws).
+
+If you choose to use the low-level call methods, make sure to handle the possibility that the call will fail, by checking the return value.
+
+```sol
+// bad
+someAddress.send(55);
+someAddress.call.value(55)(); // this is doubly dangerous, as it will forward all remaining gas and doesn't check for result
+someAddress.call.value(100)(bytes4(sha3("deposit()"))); // if deposit throws an exception, the raw call() will only return false and transaction will NOT be reverted
+
+// good
+if(!someAddress.send(55)) {
+    // Some failure code
+}
+
+ExternalContract(someAddress).deposit.value(100);
+```
+
+
+#### Don't make control flow assumptions after external calls
+
+Whether using *raw calls* or *contract calls*, assume that malicious code will execute if `ExternalContract` is untrusted. Even if `ExternalContract` is not malicious, malicious code can be executed by any contracts *it* calls. One particular danger is malicious code may hijack the control flow, leading to race conditions. (See [Race Conditions](https://github.com/ConsenSys/smart-contract-best-practices/#race-conditions) for a fuller discussion of this problem).
+
+#### Favor *pull* over *push* for external calls
+
+External calls can fail accidentally or deliberately. To minimize the damage caused by such failures, it is often better to isolate each external call into its own transaction that can be initiated by the recipient of the call. This is especially relevant for payments, where it is better to let users withdraw funds rather than push funds to them automatically. (This also reduces the chance of [problems with the gas limit](https://github.com/ConsenSys/smart-contract-best-practices/#dos-with-block-gas-limit).)  Avoid combining multiple `send()` calls in a single transaction.
+
+```sol
+// bad
+contract auction {
+    address highestBidder;
+    uint highestBid;
+
+    function bid() payable {
+        require(msg.value >= highestBid);
+
+        if (highestBidder != 0) {
+            highestBidder.transfer(highestBid); // if this call consistently fails, no one else can bid
+        }
+
+       highestBidder = msg.sender;
+       highestBid = msg.value;
+    }
+}
+
+// good
+contract auction {
+    address highestBidder;
+    uint highestBid;
+    mapping(address => uint) refunds;
+
+    function bid() payable external {
+        require(msg.value >= highestBid);
+
+        if (highestBidder != 0) {
+            refunds[highestBidder] += highestBid; // record the refund that this user can claim
+        }
+
+        highestBidder = msg.sender;
+        highestBid = msg.value;
+    }
+
+    function withdrawRefund() external {
+        uint refund = refunds[msg.sender];
+        refunds[msg.sender] = 0;
+        msg.sender.transfer(refund);
+    }
+}
+```
+
+#### Mark untrusted contracts
+
+When interacting with external contracts, name your variables, methods, and contract interfaces in a way that makes it clear that interacting with them is potentially unsafe. This applies to your own functions that call external contracts.
+
+```sol
+// bad
+Bank.withdraw(100); // Unclear whether trusted or untrusted
+
+function makeWithdrawal(uint amount) { // Isn't clear that this function is potentially unsafe
+    Bank.withdraw(amount);
+}
+
+// good
+UntrustedBank.withdraw(100); // untrusted external call
+TrustedBank.withdraw(100); // external but trusted bank contract maintained by XYZ Corp
+
+function makeUntrustedWithdrawal(uint amount) {
+    UntrustedBank.withdraw(amount);
+}
+```
+
+### Enforce invariants with `assert()`
+
+An assert guard triggers when an assertion fails - such as an invariant property changing. For example, the token to ether issuance ratio, in a token issuance contract, may be fixed. You can verify that this is the case at all times with an `assert()`. Assert guards should often be combined with other techniques, such as pausing the contract and allowing upgrades. (Otherwise, you may end up stuck, with an assertion that is always failing.)
+
+Example:
+
+```sol
+contract Token {
+    mapping(address => uint) public balanceOf;
+    uint public totalSupply;
+
+    function deposit() public payable {
+        balanceOf[msg.sender] += msg.value;
+        totalSupply += msg.value;
+        assert(this.balance >= totalSupply);
+    }
+}
+```
+
+Note that the assertion is *not* a strict equality of the balance because the contract can be [forcibly sent ether](#ether-forcibly-sent) without going through the `deposit()` function!
+
+
+### Use `assert()` and `require()` properly
+
+In Solidity 0.4.10 `assert()` and `require()` were introduced. `require(condition)` is meant to be used for input validation, which should be done on any user input, and reverts if the condition is false. `assert(condition)` also reverts if the condition is false but should be used only for invariants: internal errors or to check if your contract has reached an invalid state. Following this paradigm allows formal analysis tools to verify that the invalid opcode can never be reached: meaning no invariants in the code are violated and that the code is formally verified.
+
+### Beware rounding with integer division
+
+All integer division rounds down to the nearest integer. If you need more precision, consider using a multiplier, or store both the numerator and denominator.
+
+(In the future, Solidity will have a fixed-point type, which will make this easier.)
+
+```sol
+// bad
+uint x = 5 / 2; // Result is 2, all integer divison rounds DOWN to the nearest integer
+```
+
+Using a multiplier prevents rounding down, this multiplier needs to be accounted for when working with x in the future:
+
+```sol
+// good
+uint multiplier = 10;
+uint x = (5 * multiplier) / 2;
+```
+
+Storing the numerator and denominator means you can calculate the result of `numerator/denominator` off-chain:
+```sol
+// good
+uint numerator = 5;
+uint denominator = 2;
+```
+
+### Remember that Ether can be forcibly sent to an account
+
+Beware of coding an invariant that strictly checks the balance of a contract.
+
+An attacker can forcibly send wei to any account and this cannot be prevented (not even with a fallback function that does a `revert()`).
+
+The attacker can do this by creating a contract, funding it with 1 wei, and invoking
+`selfdestruct(victimAddress)`.  No code is invoked in `victimAddress`, so it
+cannot be prevented.
+
+### Don't assume contracts are created with zero balance
+
+An attacker can send wei to the address of a contract before it is created.  Contracts should not assume that its initial state contains a zero balance.  See [issue 61](https://github.com/ConsenSys/smart-contract-best-practices/issues/61) for more details.
+
+### Remember that on-chain data is public
+
+Many applications require submitted data to be private up until some point in time in order to work. Games (eg. on-chain rock-paper-scissors) and auction mechanisms (eg. sealed-bid second-price auctions) are two major categories of examples. If you are building an application where privacy is an issue, take care to avoid requiring users to publish information too early.
+
+Examples:
+
+* In rock paper scissors, require both players to submit a hash of their intended move first, then require both players to submit their move; if the submitted move does not match the hash throw it out.
+* In an auction, require players to submit a hash of their bid value in an initial phase (along with a deposit greater than their bid value), and then submit their action bid value in the second phase.
+* When developing an application that depends on a random number generator, the order should always be (1) players submit moves, (2) random number generated, (3) players paid out. The method by which random numbers are generated is itself an area of active research; current best-in-class solutions include Bitcoin block headers (verified through http://btcrelay.org), hash-commit-reveal schemes (ie. one party generates a number, publishes its hash to "commit" to the value, and then reveals the value later) and [RANDAO](http://github.com/randao/randao).
+* If you are implementing a frequent batch auction, a hash-commit scheme is also desirable.
+
+### Be aware of the tradeoffs between abstract contracts and interfaces
+
+Both interfaces and abstract contracts provide one with a customizable and re-usable approach for smart contracts. Interfaces, which were introduced in Solidity 0.4.11, are similar to abstract contracts but cannot have any functions implemented. Interfaces also have limitations such as not being able to access storage or inherit from other interfaces which generally makes abstract contracts more practical. Although, Interfaces are certainly useful for designing contracts prior to implementation. Additionally, it is important to keep in mind that if a contract inherits from an abstract contract it must implement all non-implemented functions via overriding or it will be abstract as well.
+
+### In 2-party or N-party contracts, beware of the possibility that some participants may "drop offline" and not return
+
+Do not make refund or claim processes dependent on a specific party performing a particular action with no other way of getting the funds out. For example, in a rock-paper-scissors game, one common mistake is to not make a payout until both players submit their moves; however, a malicious player can "grief" the other by simply never submitting their move - in fact, if a player sees the other player's revealed move and determines that they lost, they have no reason to submit their own move at all. This issue may also arise in the context of state channel settlement. When such situations are an issue, (1) provide a way of circumventing non-participating participants, perhaps through a time limit, and (2) consider adding an additional economic incentive for participants to submit information in all of the situations in which they are supposed to do so.
+
+### Keep fallback functions simple
+
+[Fallback functions](http://solidity.readthedocs.io/en/latest/contracts.html#fallback-function) are called when a contract is sent a message with no arguments (or when no function matches), and only has access to 2,300 gas when called from a `.send()` or `.transfer()`. If you wish to be able to receive Ether from a `.send()` or `.transfer()`, the most you can do in a fallback function is log an event. Use a proper function if a computation or more gas is required.
+
+```sol
+// bad
+function() payable { balances[msg.sender] += msg.value; }
+
+// good
+function deposit() payable external { balances[msg.sender] += msg.value; }
+
+function() payable { LogDepositReceived(msg.sender); }
+```
+
+### Explicitly mark visibility in functions and state variables
+
+Explicitly label the visibility of functions and state variables. Functions can be specified as being `external`, `public`, `internal` or `private`. Please understand the differences between them, for example, `external` may be sufficient instead of `public`. For state variables, `external` is not possible. Labeling the visibility explicitly will make it easier to catch incorrect assumptions about who can call the function or access the variable.
+
+```sol
+// bad
+uint x; // the default is private for state variables, but it should be made explicit
+function buy() { // the default is public
+    // public code
+}
+
+// good
+uint private y;
+function buy() external {
+    // only callable externally
+}
+
+function utility() public {
+    // callable externally, as well as internally: changing this code requires thinking about both cases.
+}
+
+function internalAction() internal {
+    // internal code
+}
+```
+
+### Lock pragmas to specific compiler version
+
+Contracts should be deployed with the same compiler version and flags that they have been tested the most with. Locking the pragma helps ensure that contracts do not accidentally get deployed using, for example, the latest compiler which may have higher risks of undiscovered bugs. Contracts may also be deployed by others and the pragma indicates the compiler version intended by the original authors.
+
+```sol
+// bad
+pragma solidity ^0.4.4;
+
+
+// good
+pragma solidity 0.4.4;
+```
+
+### Beware division by zero (Solidity < 0.4)
+
+Prior to version 0.4, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not `throw` an exception when a number is divided by zero. Ensure you're running at least version 0.4.
+
+### Differentiate functions and events
+
+Favor capitalization and a prefix in front of events (we suggest *Log*), to prevent the risk of confusion between functions and events. For functions, always start with a lowercase letter, except for the constructor.
+
+```sol
+// bad
+event Transfer() {}
+function transfer() {}
+
+// good
+event LogTransfer() {}
+function transfer() external {}
+```
+
+### Prefer newer Solidity constructs
+
+Prefer constructs/aliases such as `selfdestruct` (over `suicide`) and `keccak256` (over `sha3`).  Patterns like `require(msg.sender.send(1 ether))` can also be simplified to using `transfer()`, as in `msg.sender.transfer(1 ether)`.
