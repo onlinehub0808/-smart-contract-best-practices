@@ -4,6 +4,15 @@ Visit the documentation site: https://consensys.github.io/smart-contract-best-pr
 
 Read the docs in Chinese: https://github.com/ConsenSys/smart-contract-best-practices/blob/master/README-zh.md
 
+## Contributions are welcome!
+
+Feel free to submit a pull request, with anything from small fixes, to full new sections. If you are writing new content, please reference the [contributing](https://consensys.github.io/smart-contract-best-practices/about/contributing) page for guidance on style. 
+
+See the [issues](https://github.com/ConsenSys/smart-contract-best-practices/issues) for topics that need to be covered or updated. If you have an idea you'd like to discuss, please chat with us in [Gitter](https://gitter.im/ConsenSys/smart-contract-best-practices).
+
+If you've written an article or blog post, please add it to the [bibliography](./bibliography).  
+
+
 ## Building the documentation site
 
 ```
