@@ -2,6 +2,10 @@ This page demonstrates a number of solidity patterns which should generally be f
 
 ### External Calls
 
+#### Use caution when making external calls
+
+Calls to untrusted contracts can introduce several unexpected risks or errors. External calls may execute malicious code in that contract _or_ any other contract that it depends upon. As such, every external call should be treated as a potential security risk. When it is not possible, or undesirable to remove external calls, use the recommendations in the rest of this section to minimize the danger.
+
 #### Mark untrusted contracts
 
 When interacting with external contracts, name your variables, methods, and contract interfaces in a way that makes it clear that interacting with them is potentially unsafe. This applies to your own functions that call external contracts.
@@ -23,9 +27,6 @@ function makeUntrustedWithdrawal(uint amount) {
 }
 ```
 
-#### Use caution when making external calls
-
-Calls to untrusted contracts can introduce several unexpected risks or errors. External calls may execute malicious code in that contract _or_ any other contract that it depends upon. As such, every external call should be treated as a potential security risk. When it is not possible to remove external calls, use the recommendations in the rest of this section to minimize the danger.
 
 #### Don't make control flow assumptions after external calls
 
