@@ -104,7 +104,7 @@ function untrustedWithdraw(address recipient) public {
 }
 
 function untrustedGetFirstWithdrawalBonus(address recipient) public {
-    require(claimedBonus[recipient]); // Each recipient should only be able to claim the bonus once
+    require(!claimedBonus[recipient]); // Each recipient should only be able to claim the bonus once
 
     claimedBonus[recipient] = true;
     rewardsForA[recipient] += 100;
