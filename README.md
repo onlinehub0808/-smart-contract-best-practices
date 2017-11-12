@@ -6,7 +6,7 @@ Read the docs in Chinese: https://github.com/ConsenSys/smart-contract-best-pract
 
 ## Contributions are welcome!
 
-Feel free to submit a pull request, with anything from small fixes, to full new sections. If you are writing new content, please reference the [contributing](./about/contributing) page for guidance on style. 
+Feel free to submit a pull request, with anything from small fixes, to full new sections. If you are writing new content, please reference the [contributing](./docs/about/contributing.md) page for guidance on style. 
 
 See the [issues](https://github.com/ConsenSys/smart-contract-best-practices/issues) for topics that need to be covered or updated. If you have an idea you'd like to discuss, please chat with us in [Gitter](https://gitter.im/ConsenSys/smart-contract-best-practices).
 
