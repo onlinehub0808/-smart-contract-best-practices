@@ -264,10 +264,6 @@ pragma solidity ^0.4.4;
 pragma solidity 0.4.4;
 ```
 
-### Beware division by zero (Solidity < 0.4)
-
-Prior to version 0.4, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not `throw` an exception when a number is divided by zero. Ensure you're running at least version 0.4.
-
 ### Differentiate functions and events
 
 Favor capitalization and a prefix in front of events (we suggest *Log*), to prevent the risk of confusion between functions and events. For functions, always start with a lowercase letter, except for the constructor.
@@ -304,3 +300,10 @@ contract ExampleContract is PretendingToRevert {
 
 Contract users (and auditors) should be aware of the full smart contract source code of any application they intend to use. 
 
+### Deprecated/historical recommendations
+
+These are recommendations which are no longer relevant due to changes in the protocol or improvements to solidity. They are recorded here for posterity and awareness. 
+
+### Beware division by zero (Solidity < 0.4)
+
+Prior to version 0.4, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not `throw` an exception when a number is divided by zero. Ensure you're running at least version 0.4.
