@@ -5,7 +5,7 @@ Feel free to peruse the [open issues](https://github.com/ConsenSys/smart-contrac
 ## Editing and Submitting changes
 
 1. Fork the repo
-2. Make changes to the markdown files in the [docs directory](../tree/master/docs) of the master branch
+2. Make changes to the markdown files in the [docs directory](../../../../tree/master/docs) of the master branch
 3. Submit a Pull Request
 
 ## Audience
