@@ -307,24 +307,6 @@ You will need to make sure that nothing bad will happen if other transactions ar
 
 As of the [EIP 150](https://github.com/ethereum/EIPs/issues/150) hardfork, call depth attacks are no longer relevant<sup><a href='http://ethereum.stackexchange.com/questions/9398/how-does-eip-150-change-the-call-depth-attack'>\*</a></sup> (all gas would be consumed well before reaching the 1024 call depth limit).
 
-### Built-in Shadowing
-
-It is currently possible to [shadow](https://en.wikipedia.org/wiki/Variable_shadowing) built-in globals in Solidity. This allows contracts to override the functionality of built-ins such as `msg` and `revert()`. Although this [is intended](https://github.com/ethereum/solidity/issues/1249), it can mislead users of a contract as to the contract's true behavior.
-
-```sol
-contract PretendingToRevert {
-    function revert() internal constant {}
-}
-
-contract ExampleContract is PretendingToRevert {
-    function somethingBad() public {
-        revert();
-    }
-}
-```
-
-Contract users (and auditors) should be aware of the full smart contract source code of any application they intend to use. 
-
 ### Forcibly Sending Ether to a Contract
 
 It is possible to forcibly send Ether to a contract without triggering its fallback function. This is an important consideration when placing important logic in the fallback function or making calculations based on a contract's balance. Take the following example:
