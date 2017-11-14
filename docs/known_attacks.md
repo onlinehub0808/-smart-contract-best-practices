@@ -288,7 +288,8 @@ struct Payee {
     address addr;
     uint256 value;
 }
-Payee payees[];
+
+Payee[] payees;
 uint256 nextPayeeIndex;
 
 function payOut() {
