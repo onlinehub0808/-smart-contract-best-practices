@@ -2,27 +2,54 @@ This page demonstrates a number of solidity patterns which should generally be f
 
 ### External Calls
 
-#### Avoid external calls when possible
+#### Use caution when making external calls
 
-Calls to untrusted contracts can introduce several unexpected risks or errors. External calls may execute malicious code in that contract _or_ any other contract that it depends upon. As such, every external call should be treated as a potential security risk and removed if possible. When it is not possible to remove external calls, use the recommendations in the rest of this section to minimize the danger.
+Calls to untrusted contracts can introduce several unexpected risks or errors. External calls may execute malicious code in that contract _or_ any other contract that it depends upon. As such, every external call should be treated as a potential security risk. When it is not possible, or undesirable to remove external calls, use the recommendations in the rest of this section to minimize the danger.
+
+#### Mark untrusted contracts
+
+When interacting with external contracts, name your variables, methods, and contract interfaces in a way that makes it clear that interacting with them is potentially unsafe. This applies to your own functions that call external contracts.
+
+```sol
+// bad
+Bank.withdraw(100); // Unclear whether trusted or untrusted
+
+function makeWithdrawal(uint amount) { // Isn't clear that this function is potentially unsafe
+    Bank.withdraw(amount);
+}
+
+// good
+UntrustedBank.withdraw(100); // untrusted external call
+TrustedBank.withdraw(100); // external but trusted bank contract maintained by XYZ Corp
+
+function makeUntrustedWithdrawal(uint amount) {
+    UntrustedBank.withdraw(amount);
+}
+```
+
+
+#### Don't make control flow assumptions after external calls
+
+Whether using *raw calls* (of the form `someAddress.call()`) or *contract calls* (of the form `ExternalContract.someMethod()`), assume that malicious code will execute unless the untrusted. Even if `ExternalContract` is not malicious, malicious code can be executed by any contracts *it* calls. 
+
+One particular danger is malicious code may hijack the control flow, leading to race conditions. (See [Race Conditions](https://github.com/ConsenSys/smart-contract-best-practices/#race-conditions) for a fuller discussion of this problem).
+
+If you are making a call to an untrusted external contract, *avoid state changes after the call*.
 
 #### Be aware of the tradeoffs between `send()`, `transfer()`, and `call.value()()`
 
-When sending Ether be aware of the relative tradeoffs between the use of
+When sending ether be aware of the relative tradeoffs between the use of
 `someAddress.send()`, `someAddress.transfer()`, and `someAddress.call.value()()`.
 
-- `x.transfer(y)` is equivalent to `require(x.send(y));` Send is the low level counterpart of transfer, and it's advisable to use transfer when possible.
 - `someAddress.send()`and `someAddress.transfer()` are considered *safe* against [reentrancy](#reentrancy).
     While these methods still trigger code execution, the called contract is
     only given a stipend of 2,300 gas which is currently only enough to log an
     event.
-- `someAddress.call.value()()` will send the provided ether and trigger code
-    execution.  The executed code is given all available gas for execution
-    making this type of value transfer *unsafe* against reentrancy.
+- `x.transfer(y)` is equivalent to `require(x.send(y));`, it will automatically revert if the send fails.
+- `someAddress.call.value(y)()` will send the provided ether and trigger code execution.  
+    The executed code is given all available gas for execution making this type of value transfer *unsafe* against reentrancy.
 
-Using `send()` or `transfer()` will prevent reentrancy but it does so at the cost of being
-incompatible with any contract whose fallback function requires more than 2,300
-gas.
+Using `send()` or `transfer()` will prevent reentrancy but it does so at the cost of being incompatible with any contract whose fallback function requires more than 2,300 gas. It is also possible to use `someAddress.call.value(ethAmount).gas(gasAmount)()` to forward a custom amount of gas.
 
 One pattern that attempts to balance this trade-off is to implement both
 a [*push* and *pull*](#favor-pull-over-push-payments) mechanism, using `send()` or `transfer()`
@@ -53,10 +80,6 @@ if(!someAddress.send(55)) {
 ExternalContract(someAddress).deposit.value(100);
 ```
 
-
-#### Don't make control flow assumptions after external calls
-
-Whether using *raw calls* or *contract calls*, assume that malicious code will execute if `ExternalContract` is untrusted. Even if `ExternalContract` is not malicious, malicious code can be executed by any contracts *it* calls. One particular danger is malicious code may hijack the control flow, leading to race conditions. (See [Race Conditions](https://github.com/ConsenSys/smart-contract-best-practices/#race-conditions) for a fuller discussion of this problem).
 
 #### Favor *pull* over *push* for external calls
 
@@ -102,27 +125,6 @@ contract auction {
         refunds[msg.sender] = 0;
         msg.sender.transfer(refund);
     }
-}
-```
-
-#### Mark untrusted contracts
-
-When interacting with external contracts, name your variables, methods, and contract interfaces in a way that makes it clear that interacting with them is potentially unsafe. This applies to your own functions that call external contracts.
-
-```sol
-// bad
-Bank.withdraw(100); // Unclear whether trusted or untrusted
-
-function makeWithdrawal(uint amount) { // Isn't clear that this function is potentially unsafe
-    Bank.withdraw(amount);
-}
-
-// good
-UntrustedBank.withdraw(100); // untrusted external call
-TrustedBank.withdraw(100); // external but trusted bank contract maintained by XYZ Corp
-
-function makeUntrustedWithdrawal(uint amount) {
-    UntrustedBank.withdraw(amount);
 }
 ```
 
