@@ -147,7 +147,7 @@ If the user tries to call `withdraw()` again before the first call finishes, the
 ```sol
 // INSECURE
 contract StateHolder {
-    uint private n;
+    uint public n;
     address private lockHolder;
 
     function getLock() {
@@ -156,6 +156,7 @@ contract StateHolder {
     }
 
     function releaseLock() {
+        require(msg.sender == lockHolder);
         lockHolder = 0;
     }
 
