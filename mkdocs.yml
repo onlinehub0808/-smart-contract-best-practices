@@ -25,9 +25,6 @@ theme: material
 extra_css:
   - 'stylesheets/extra.css'
 
-
-
-
 markdown_extensions:
   - markdown.extensions.admonition
   - markdown.extensions.def_list
