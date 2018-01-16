@@ -278,6 +278,10 @@ pragma solidity ^0.4.4;
 pragma solidity 0.4.4;
 ```
 
+### Exception
+
+Pragma statements can be allowed to float when a contract is intended for consumption by other developers, as in the case with contracts in a library or EthPM package. Otherwise, the developer would need to manually update the pragma in order to compile locally. 
+
 ## Differentiate functions and events
 
 Favor capitalization and a prefix in front of events (we suggest *Log*), to prevent the risk of confusion between functions and events. For functions, always start with a lowercase letter, except for the constructor.
