@@ -21,9 +21,7 @@ pages:
     - License: about/license.md
     - Contributing: about/contributing.md
 
-theme: 
-  name: 'material'
-  favicon: 'images/favicon.ico'
+theme: material
 extra_css:
   - 'stylesheets/extra.css'
 
