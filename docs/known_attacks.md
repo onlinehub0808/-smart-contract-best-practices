@@ -180,41 +180,7 @@ Above were examples of race conditions involving the attacker executing maliciou
 Since a transaction is in the mempool for a short while, one can know what actions will occur, before it is included in a block. This can be troublesome for things like decentralized markets, where a transaction to buy some tokens can be seen, and a market order implemented before the other transaction gets included. Protecting against this is difficult, as it would come down to the specific contract itself. For example, in markets, it would be better to implement batch auctions (this also protects against high frequency trading concerns). Another way to use a pre-commit scheme (“I’m going to submit the details later”).
 
 ## Timestamp Dependence
-There are three main considerations when using a timestamp to execute a critical function in a contract, especially when actions involve fund transfer.
-
-### *Gameable*
-Be aware that the timestamp of the block can be manipulated by a miner. Consider this [smart contract](https://etherscan.io/address/0xcac337492149bdb66b088bf5914bedfbf78ccc18#code)
-```sol
-    
-uint256 constant private salt =  block.timestamp;
-    
-function random(uint Max) constant private returns (uint256 result){
- //get the best seed for randomness
-    uint256 x = salt * 100/Max;
-    uint256 y = salt * block.number/(salt % 5) ;
-    uint256 seed = block.number/3 + (salt % 300) + Last_Payout + y; 
-    uint256 h = uint256(block.blockhash(seed)); 
-    
-        return uint256((h / x)) % Max + 1; //random number between 1 and Max
-    }
-```
-When the smart contract uses the timestamp to seed a random number, the miner can actually post a timestamp within 12minutes of the block being validating, effectively allowing the miner to precompute an option more favorable to their chances in the lottery. Timestamps are not random and should not be used in that context.
-
-### *12-minute Rule*
-A general rule of thumb in evaluating timestamp usage is:
-#### If the contract function can tolerate a 12-minute drift in time, it use safe to use `block.timestamp`
-What this basically means, is that if the scale of your time-dependent event can vary by 12-minutes and maintain integrity, it is safe to use a timestamp. This includes things like ending of auctions, registration periods, etc. 
-
-### *Caution using `block.number` as a timestamp*
-When a contract creates an `auction_complete` modifier to signify the end of a token sale such as [so]((https://github.com/SpankChain/old-sc_auction/blob/master/contracts/Auction.sol))
-```sol
-modifier auction_complete {
-    require(auctionEndBlock <= block.number     ||
-          currentAuctionState == AuctionState.success || 
-          currentAuctionState == AuctionState.cancel)
-        _;}
-```
-`block.number` and *[average block time](https://etherscan.io/chart/blocktime)* can be used to estimate time as well, but this is not future proof as block times may change (such as the changes expected during Casper). In a sale spanning days, the 12-minute rule allows one to construct a more reliable estimate of time. 
+Be aware that the timestamp of the block can be manipulated by the miner, and all direct and indirect uses of the timestamp should be considered.
 
 ## Integer Overflow and Underflow
 
