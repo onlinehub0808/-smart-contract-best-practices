@@ -182,6 +182,8 @@ Since a transaction is in the mempool for a short while, one can know what actio
 ## Timestamp Dependence
 Be aware that the timestamp of the block can be manipulated by the miner, and all direct and indirect uses of the timestamp should be considered.
 
+See the [Recommendations](./recommendations/#timestamp-dependence) section for design considerations related to Timestamp Dependence.
+
 ## Integer Overflow and Underflow
 
 Consider a simple token transfer:

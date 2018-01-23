@@ -367,32 +367,40 @@ Besides the issue with authorization, there is a chance that `tx.origin` will be
 It's also worth mentioning that by using `tx.origin` you're limiting interoperability between contracts because the contract that uses tx.origin cannot be used by another contract as a contract can't be the `tx.origin`.
 
 ## Timestamp Dependence
+
 There are three main considerations when using a timestamp to execute a critical function in a contract, especially when actions involve fund transfer.
 
-### *Gameability*
-Be aware that the timestamp of the block can be manipulated by a miner. Consider this [smart contract](https://etherscan.io/address/0xcac337492149bdb66b088bf5914bedfbf78ccc18#code)
+### Gameability
+
+Be aware that the timestamp of the block can be manipulated by a miner. Consider this [contract](https://etherscan.io/address/0xcac337492149bdb66b088bf5914bedfbf78ccc18#code):
+
 ```sol
     
 uint256 constant private salt =  block.timestamp;
     
 function random(uint Max) constant private returns (uint256 result){
- //get the best seed for randomness
+    //get the best seed for randomness
     uint256 x = salt * 100/Max;
     uint256 y = salt * block.number/(salt % 5) ;
     uint256 seed = block.number/3 + (salt % 300) + Last_Payout + y; 
     uint256 h = uint256(block.blockhash(seed)); 
     
-        return uint256((h / x)) % Max + 1; //random number between 1 and Max
-    }
+    return uint256((h / x)) % Max + 1; //random number between 1 and Max
+}
 ```
-When the contract uses the timestamp to seed a random number, the miner can actually post a timestamp within 12 minutes of the block being validating, effectively allowing the miner to precompute an option more favorable to their chances in the lottery. Timestamps are not random and should not be used in that context.
 
-### *12-minute Rule*
-A general rule of thumb in evaluating timestamp usage is:
-#### If the contract function can tolerate a 12-minute drift in time, it use safe to use `block.timestamp`
-If the scale of your time-dependent event can vary by 12-minutes and maintain integrity, it is safe to use a timestamp. This includes things like ending of auctions, registration periods, etc. 
+When the contract uses the timestamp to seed a random number, the miner can actually post a timestamp within 12 minutes of the block being validated, effectively allowing the miner to precompute an option more favorable to their chances in the lottery. Timestamps are not random and should not be used in that context.
 
-### *Caution using `block.number` as a timestamp*
+### 12-minute Rule
+
+When evaluating timestamp usage, a general rule of thumb is:
+
+**If the contract function can tolerate a 12-minute drift in time, it use safe to use `block.timestamp`**
+
+If the occurence of a time-dependent event can vary by 12-minutes and maintain integrity, it is safe to use a timestamp. This includes the ending time of an auction, start and finish of registration periods, etc. 
+
+### Caution using `block.number` as a timestamp
+
 When a contract creates an `auction_complete` modifier to signify the end of a token sale such as [so]((https://github.com/SpankChain/old-sc_auction/blob/master/contracts/Auction.sol))
 ```sol
 modifier auction_complete {
