@@ -180,20 +180,9 @@ Above were examples of race conditions involving the attacker executing maliciou
 Since a transaction is in the mempool for a short while, one can know what actions will occur, before it is included in a block. This can be troublesome for things like decentralized markets, where a transaction to buy some tokens can be seen, and a market order implemented before the other transaction gets included. Protecting against this is difficult, as it would come down to the specific contract itself. For example, in markets, it would be better to implement batch auctions (this also protects against high frequency trading concerns). Another way to use a pre-commit scheme (“I’m going to submit the details later”).
 
 ## Timestamp Dependence
+Be aware that the timestamp of the block can be manipulated by the miner, and all direct and indirect uses of the timestamp should be considered.
 
-Be aware that the timestamp of the block can be manipulated by the miner, and all direct and indirect uses of the timestamp should be considered. *Block numbers* and *average block time* can be used to estimate time, but this is not future proof as block times may change (such as the changes expected during Casper).
-
-```sol
-uint someVariable = now + 1;
-
-if (now % 2 == 0) { // the now can be manipulated by the miner
-
-}
-
-if ((someVariable - 100) % 2 == 0) { // someVariable can be manipulated by the miner
-
-}
-```
+See the [Recommendations](./recommendations/#timestamp-dependence) section for design considerations related to Timestamp Dependence.
 
 ## Integer Overflow and Underflow
 
