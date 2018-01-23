@@ -205,7 +205,7 @@ A general rule of thumb in evaluating timestamp usage is:
 #### If the contract function can tolerate a 12-minute drift in time, it use safe to use `block.timestamp`
 What this basically means, is that if the scale of your time-dependent event can vary by 12-minutes and maintain integrity, it is safe to use a timestamp. This includes things like ending of auctions, registration periods, etc. 
 
-### *Caution using `block.number` as timestamp*
+### *Caution using `block.number` as a timestamp*
 When a contract creates an `auction_complete` modifier to signify the end of a token sale such as [so]((https://github.com/SpankChain/old-sc_auction/blob/master/contracts/Auction.sol))
 ```sol
 modifier auction_complete {
