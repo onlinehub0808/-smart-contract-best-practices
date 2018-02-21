@@ -408,7 +408,7 @@ modifier auction_complete {
 ```
 `block.number` and *[average block time](https://etherscan.io/chart/blocktime)* can be used to estimate time as well, but this is not future proof as block times may change (such as [fork reorganisations](https://blog.ethereum.org/2015/08/08/chain-reorganisation-depth-expectations/) and the [difficulty bomb](https://github.com/ethereum/EIPs/issues/649)). In a sale spanning days, the 12-minute rule allows one to construct a more reliable estimate of time. 
 
-## C3 Linearization in [Polymorphic Contracts](https://pdaian.com/blog/solidity-anti-patterns-fun-with-inheritance-dag-abuse/)
+## [Contract Inheritance](https://pdaian.com/blog/solidity-anti-patterns-fun-with-inheritance-dag-abuse/) Caution
 
 Solidity is a language that supports polymorphic inheritance, and specifically uses [C3 Linearization](https://en.wikipedia.org/wiki/C3_linearization) to obtain the order of inheritance. 
 
@@ -446,7 +446,6 @@ But, through C3 Linearization, the inheritance graph looks like
 This will cause unintended consequences When `validPurchase` is invoked. Solidity's [dynamic dispatch](https://en.wikipedia.org/wiki/Dynamic_dispatch), will check from the most derived class, `MDTCrowdsale`. It will then move to invoke `WhiteListedCrowdsale`'s validPurchase. When it invokes its `super.validPurchase()`, Solidity derives from `CappedCrowdsale`, not `Crowdsale` leading to a boolean expression that allows whitelist-ers to bypass the token cap. To mitigate this risk, swapping the order of the derived contracts closes this loophole, but shows the hidden dangers of inheritance. While it brings about abstraction and modular libraries, inheritance also can shadow functions, reorder boolean expressions, and confuse programmers into creating exploitable contracts.
 
 Solidity [does not currently support](https://github.com/ethereum/solidity/issues/2116) warnings for functions overwritten through multiple inheritance, so a use of a static analyzer and dependency graph is critical when dealing with polymorphic contracts and their unintended consequences.
-
 
 
 ## Deprecated/historical recommendations
