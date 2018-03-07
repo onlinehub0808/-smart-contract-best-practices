@@ -1,7 +1,7 @@
 # Refer to https://github.com/mkdocs/mkdocs/blob/master/mkdocs.yml for a working example
 site_name: Ethereum Smart Contract Best Practices
 site_url: https://github.com/ConsenSys/smart-contract-best-practices
-site_description: 
+site_description:
 site_author: ConsenSys
 repo_url: https://github.com/ConsenSys/smart-contract-best-practices
 
@@ -21,7 +21,9 @@ pages:
     - License: about/license.md
     - Contributing: about/contributing.md
 
-theme: material
+theme:
+  name: 'material'
+  custom_dir: 'theme'
 extra_css:
   - 'stylesheets/extra.css'
 
