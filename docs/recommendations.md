@@ -408,7 +408,7 @@ modifier auction_complete {
 ```
 `block.number` and *[average block time](https://etherscan.io/chart/blocktime)* can be used to estimate time as well, but this is not future proof as block times may change (such as [fork reorganisations](https://blog.ethereum.org/2015/08/08/chain-reorganisation-depth-expectations/) and the [difficulty bomb](https://github.com/ethereum/EIPs/issues/649)). In a sale spanning days, the 12-minute rule allows one to construct a more reliable estimate of time. 
 
-## [Multiple Inheritance](https://pdaian.com/blog/solidity-anti-patterns-fun-with-inheritance-dag-abuse/) Caution
+## Multiple Inheritance Caution
 
 When utilizing multiple inheritance in Solidity, it is important to understand how the compiler composes the inheritance graph.
 ```sol
