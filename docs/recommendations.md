@@ -410,43 +410,41 @@ modifier auction_complete {
 
 ## [Multiple Inheritance](https://pdaian.com/blog/solidity-anti-patterns-fun-with-inheritance-dag-abuse/) Caution
 
-When declaring a polymorphic contract like `A is B,C,D { ...} `, Solidity will inherit right to left, and must be considered when desigi
-
-Consider this [example](https://github.com/Arachnid/uscc/blob/master/submissions-2017/philipdaian/MDTCrowdsale.sol):
-
-Consider a construction of a crowdsale. `MDTCrowdsale` is a polymorphic smart contract that inherits the properties of a `CappedCrowdsale`, which sets the cap on the number of tokens available for purchase, and `WhitelistedCrowdsale`, which assures only accredited investors will be able to purchase tokens.
- To find out whether a user is allowed to participate in a crowdsale, `validPurchase` expresses whether or not conditions have been met, and is an internal function from the base `Crowdsale` contract.
+When utilizing multiple inheritance in Solidity, it is important to understand how the compiler composes the inheritance graph.
 ```sol
-pragma solidity ^0.4.13;
-
-import "./crowdsale/CappedCrowdsale.sol";
-import "./crowdsale/WhitelistedCrowdsale.sol";
-
-contract MDTCrowdsale is CappedCrowdsale, WhitelistedCrowdsale {
-    
-    function MDTCrowdsale() 
-        CappedCrowdsale(50000000000000000000000)
-        Crowdsale(block.number, block.number + 100000, 1, msg.sender) { 
-            //Wallet is the contract creator, to whom funds will be sent
-            addToWhitelist(msg.sender);
-            addToWhitelist(0x0d5bda9db5dd36278c6a40683960ba58cac0149b);
-            addToWhitelist(0x1b6ddc637c24305b354d7c337f9126f68aad4886);
+contract Final {
+    uint public a;
+    function Final(uint f) public {
+        a = f;
     }
-    
+}
+
+contract B is Final {
+    function B(uint f) Final(f) public {
+    }
+}
+
+contract C is Final {
+    function C(uint f) Final(f) public {
+        
+    }
+}
+
+contract A is B, C {
+    function A() public B(3) C(5) {
+        
+    }
 }
 ```
-At first glance, one would assume that this contract would work as intended. `MDTCrowdsale` will derive two independent functionalities (capping the sale and creating a whitelist of buyers), of which both derive from `Crowdsale`. 
+When A is deployed, the compiler will *linearize* the inheritance from left to right, as:
 
-> `CappedCrowdsale` :arrow_left: `MDTCrowdsale` :arrow_right: `WhitelistedCrowdsale`
+### C :arrow_right: B :arrow_right: A
 
-But, through C3 Linearization, the inheritance graph looks like
+The value to a is 5, because the most derived contract C overrides both Final, A, and B. This may seem obvious, but imagine scenarios where C is able to shadow functions, reorder boolean clauses, and cause the developer to write exploitable contracts
 
->`Crowdsale` :arrow_left: `CappedCrowdsale` :arrow_left: `WhitelistedCrowdsale` :arrow_left: `MDTCrowdsale`
+For more on security and inheritance, check out this [article](https://pdaian.com/blog/solidity-anti-patterns-fun-with-inheritance-dag-abuse/)
 
-This will cause unintended consequences When `validPurchase` is invoked. Solidity's [dynamic dispatch](https://en.wikipedia.org/wiki/Dynamic_dispatch), will check from the most derived class, `MDTCrowdsale`. It will then move to invoke `WhiteListedCrowdsale`'s validPurchase. When it invokes its `super.validPurchase()`, Solidity derives from `CappedCrowdsale`, not `Crowdsale` leading to a boolean expression that allows whitelist-ers to bypass the token cap. To mitigate this risk, swapping the order of the derived contracts closes this loophole, but shows the hidden dangers of inheritance. While it brings about abstraction and modular libraries, inheritance also can shadow functions, reorder boolean expressions, and confuse programmers into creating exploitable contracts.
-
-Solidity [does not currently support](https://github.com/ethereum/solidity/issues/2116) warnings for functions overwritten through multiple inheritance, so a use of a static analyzer and dependency graph is critical when dealing with polymorphic contracts and their unintended consequences.
-
+To help contribute, Solidity's Github has a [project](https://github.com/ethereum/solidity/projects/9#card-8027020) with all inheritance-related issues.
 
 ## Deprecated/historical recommendations
 
