@@ -411,8 +411,8 @@ modifier auction_complete {
 ## Multiple Inheritance Caution
 
 When utilizing multiple inheritance in Solidity, it is important to understand how the compiler composes the inheritance graph.
+
 ```sol
-pragma solidity ^0.4.19;
 
 contract Final {
     uint public a;
@@ -449,7 +449,7 @@ contract A is B, C {
 ```
 When A is deployed, the compiler will *linearize* the inheritance from left to right, as:
 
-### C :arrow_right: B :arrow_right: A
+**C -> B -> A**
 
 The consequence of the linearization will yield a `fee` value of 5, since C is the most derived contract. This may seem obvious, but imagine scenarios where C is able to shadow crucial functions, reorder boolean clauses, and cause the developer to write exploitable contracts. Static analysis currently does not raise issue with overshadowed functions, so it must be manually inspected.
 
