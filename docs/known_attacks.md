@@ -219,6 +219,43 @@ Be careful with the smaller data-types like uint8, uint16, uint24...etc: they ca
 
 Be aware there are around [20 cases for overflow and underflow](https://github.com/ethereum/solidity/issues/796#issuecomment-253578925).
 
+### Underflow in Depth: Storage Manipulation
+ [Doug Hoyte's USCC Submission](https://github.com/Arachnid/uscc/tree/master/submissions-2017/doughoyte), , an honorable [mention](http://u.solidity.cc/). This entry is interesting because it raises the following concerns of how C-like underflow affects Solidity storage. Here is a simplified version:
+ ```sol
+contract UnderflowManipulation {
+    address public owner;
+    uint256 public manipulateMe = 10;
+    function UnderflowManipulation() {
+        owner = msg.sender;
+    }
+    
+    uint[] public bonusCodes;
+    
+    function pushBonusCode(uint code) {
+        bonusCodes.push(code);
+    }
+    
+    function popBonusCode()  {
+        require(bonusCodes.length >=0);
+        bonusCodes.length--;
+    }
+    
+    function modifyBonusCode(uint index, uint update)  {
+        require(index < bonusCodes.length);
+        bonusCodes[index] = update;
+    }
+    
+}
+ ```
+ In general, the variable `manipulateMe`'s location cannot be influenced without going through the `keccak256`, which is infeasible. However, since dynamic arrays are stored sequentially, if a malicious actor wanted to change `manipulateMe` all they would need to do is:
+ * `popBonusCode` to underflow (the require statement is a tautology because Solidity doesn't have a [pop method](https://github.com/ethereum/solidity/pull/3743))
+ * Compute the index of `manipulateMe`
+ * Modify and update `manipulateMe`'s value using `modifyBonusCode`
+
+ In practice, this array would be immediately pointed out as fishy, but buried under more complex smart contract architecture, it can arbitrarily allow malicious changes to constant variables.
+
+When considering use of a dynamic array, a container data scructure is a good practice. The following articles [Solidity CRUD 1](https://medium.com/@robhitchens/solidity-crud-part-1-824ffa69509a) and [Solidity CRUD 2](https://medium.com/@robhitchens/solidity-crud-part-2-ed8d8b4f74ec,) are good resources
+
 <a name="dos-with-unexpected-revert"></a>
 
 ## DoS with (Unexpected) revert
