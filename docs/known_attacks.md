@@ -220,54 +220,39 @@ Be careful with the smaller data-types like uint8, uint16, uint24...etc: they ca
 Be aware there are around [20 cases for overflow and underflow](https://github.com/ethereum/solidity/issues/796#issuecomment-253578925).
 
 ### Underflow in Depth: Storage Manipulation
-Consider [MerdeToken](https://github.com/Arachnid/uscc/tree/master/submissions-2017/doughoyte), by Doug Hoyte, an honorable mention from the [USCC](http://u.solidity.cc/). This token implements the standard features of the ERC20 Token, with a couple extra mechanisms
-```sol
-pragma solidity ^0.4.13;
-
-function MerdeToken(address _trustedThirdParty) {
-    owner = msg.sender;
-    trustedThirdParty = _trustedThirdParty;
+ [Doug Hoyte's USCC Submission](https://github.com/Arachnid/uscc/tree/master/submissions-2017/doughoyte), , an honorable [mention](http://u.solidity.cc/). This entry is interesting because it raises the following concerns of how C-like underflow affects Solidity storage. Here is a simplified version:
+ ```sol
+contract UnderflowManipulation {
+    address public owner;
+    uint256 public manipulateMe = 10;
+    function UnderflowManipulation() {
+        owner = msg.sender;
     }
-
-function setWithdrawLimit(uint newWithdrawLimit) onlyTrustedThirdParty {
-    withdrawLimit = newWithdrawLimit;
+    
+    uint[] public bonusCodes;
+    
+    function pushBonusCode(uint code) {
+        bonusCodes.push(code);
     }
-
-uint[] public bonusCodes;
-
-function pushBonusCode(uint code) onlyOwner {
-    bonusCodes.push(code);
+    
+    function popBonusCode()  {
+        require(bonusCodes.length >=0);
+        bonusCodes.length--;
     }
-
-function popBonusCode() onlyOwner {
-    require(bonusCodes.length >= 0);
-    bonusCodes.length--; // No pop() method?
+    
+    function modifyBonusCode(uint index, uint update)  {
+        require(index < bonusCodes.length);
+        bonusCodes[index] = update;
     }
+    
+}
+ ```
+ In general, the variable `manipulateMe`'s location cannot be influenced without going through the `keccak256`, which is infeasible. However, since dynamic arrays are stored sequentially, if a malicious actor wanted to change `manipulateMe` all they would need to do is:
+ * `popBonusCode` to underflow (the require statement is a tautology because Solidity doesn't have a [pop method](https://github.com/ethereum/solidity/pull/3743))
+ * Compute the index of `manipulateMe`
+ * Modify and update `manipulateMe`'s value using `modifyBonusCode`
 
-function modifyBonusCode(uint index, uint update) onlyOwner {
-    require(index < bonusCodes.length);
-    bonusCodes[index] = update;
-    }
-
-```
-In this design, a trusted third party is allowed to arbiter and set the `withdrawLimit`, and an ability for the owner to add items to an array.
-
-In general, a user cannot dictate storage location without going through the `keccak256`, which is infeasible to influence. However, dynamic arrays are sequentially stored at their hashed offset, so if the index is under attacker control, they also control the address location. 
-
-#### Exploitation
-Since the `require` in `popBonusCode()` always returns true (there is no [pop method](https://github.com/ethereum/solidity/issues/2780)), and `modifyBonusCode` allows the owner to alter any element in the array, the owner can now arbitrary write to any storage location due to wrapping. This is comparable to the C pointer manipulation bugs.
-
-So when the
-* contract is created
-* trusted third party sets a withdrawal limit of 1ETH
-* an investor deposits 50ETH
-
-The owner can
-* call `popBonusCode()` to underflow the array
-* calculate the index of `withdrawLimit` and set it high
-* withdraw all the ETH
-
-Obviously, the bonus code serves no purpose and would be immediately pointed out as fishy. But, in the real world, this back door would be obscured by a more complex functionality, and difficult to spot
+ In practice, this array would be immediately pointed out as fishy, but buried under more complex smart contract architecture, it can arbitrarily allow malicious changes to constant variables.
 
 When considering use of a dynamic array, a container data scructure is a good practice. The following articles [Solidity CRUD 1](https://medium.com/@robhitchens/solidity-crud-part-1-824ffa69509a) and [Solidity CRUD 2](https://medium.com/@robhitchens/solidity-crud-part-2-ed8d8b4f74ec,) are good resources
 
