@@ -408,6 +408,55 @@ modifier auction_complete {
 ```
 `block.number` and *[average block time](https://etherscan.io/chart/blocktime)* can be used to estimate time as well, but this is not future proof as block times may change (such as [fork reorganisations](https://blog.ethereum.org/2015/08/08/chain-reorganisation-depth-expectations/) and the [difficulty bomb](https://github.com/ethereum/EIPs/issues/649)). In a sale spanning days, the 12-minute rule allows one to construct a more reliable estimate of time. 
 
+## Multiple Inheritance Caution
+
+When utilizing multiple inheritance in Solidity, it is important to understand how the compiler composes the inheritance graph.
+
+```sol
+
+contract Final {
+    uint public a;
+    function Final(uint f) public {
+        a = f;
+    }
+}
+
+contract B is Final {
+    int public fee;
+    
+    function B(uint f) Final(f) public {
+    }
+    function setFee() public {
+        fee = 3;
+    }
+}
+
+contract C is Final {
+    int public fee;
+    
+    function C(uint f) Final(f) public {
+    }
+    function setFee() public {
+        fee = 5;
+    }
+}
+
+contract A is B, C {
+  function A() public B(3) C(5) {
+      setFee();
+  }
+}
+```
+When A is deployed, the compiler will *linearize* the inheritance from left to right, as:
+
+**C -> B -> A**
+
+The consequence of the linearization will yield a `fee` value of 5, since C is the most derived contract. This may seem obvious, but imagine scenarios where C is able to shadow crucial functions, reorder boolean clauses, and cause the developer to write exploitable contracts. Static analysis currently does not raise issue with overshadowed functions, so it must be manually inspected.
+
+For more on security and inheritance, check out this [article](https://pdaian.com/blog/solidity-anti-patterns-fun-with-inheritance-dag-abuse/)
+
+To help contribute, Solidity's Github has a [project](https://github.com/ethereum/solidity/projects/9#card-8027020) with all inheritance-related issues.
+
 ## Deprecated/historical recommendations
 
 These are recommendations which are no longer relevant due to changes in the protocol or improvements to solidity. They are recorded here for posterity and awareness. 
