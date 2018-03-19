@@ -412,6 +412,8 @@ modifier auction_complete {
 
 When utilizing multiple inheritance in Solidity, it is important to understand how the compiler composes the inheritance graph.
 ```sol
+pragma solidity ^0.4.19;
+
 contract Final {
     uint public a;
     function Final(uint f) public {
@@ -420,27 +422,36 @@ contract Final {
 }
 
 contract B is Final {
+    int public fee;
+    
     function B(uint f) Final(f) public {
+    }
+    function setFee() public {
+        fee = 3;
     }
 }
 
 contract C is Final {
+    int public fee;
+    
     function C(uint f) Final(f) public {
-        
+    }
+    function setFee() public {
+        fee = 5;
     }
 }
 
 contract A is B, C {
-    function A() public B(3) C(5) {
-        
-    }
+  function A() public B(3) C(5) {
+      setFee();
+  }
 }
 ```
 When A is deployed, the compiler will *linearize* the inheritance from left to right, as:
 
 ### C :arrow_right: B :arrow_right: A
 
-The value to a is 5, because the most derived contract C overrides both Final, A, and B. This may seem obvious, but imagine scenarios where C is able to shadow functions, reorder boolean clauses, and cause the developer to write exploitable contracts
+The consequence of the linearization will yield a `fee` value of 5, since C is the most derived contract. This may seem obvious, but imagine scenarios where C is able to shadow crucial functions, reorder boolean clauses, and cause the developer to write exploitable contracts. Static analysis currently does not raise issue with overshadowed functions, so it must be manually inspected.
 
 For more on security and inheritance, check out this [article](https://pdaian.com/blog/solidity-anti-patterns-fun-with-inheritance-dag-abuse/)
 
