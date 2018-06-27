@@ -240,6 +240,18 @@ function deposit() payable external { balances[msg.sender] += msg.value; }
 function() payable { LogDepositReceived(msg.sender); }
 ```
 
+## Check data length in fallback functions
+
+Since the [fallback functions](http://solidity.readthedocs.io/en/latest/contracts.html#fallback-function) is not only called for plain ether transfers (without data) but also when no other function matches, you should check that the data is empty if the fallback function is intended to be used only for the purpose of logging received Ether. Otherwise, callers will not notice if your contract is used incorrectly and functions that do not exist are called.
+
+```sol
+// bad
+function() payable { LogDepositReceived(msg.sender); }
+
+// good
+function() payable { require(msg.data.length == 0); LogDepositReceived(msg.sender); }
+```
+
 ## Explicitly mark visibility in functions and state variables
 
 Explicitly label the visibility of functions and state variables. Functions can be specified as being `external`, `public`, `internal` or `private`. Please understand the differences between them, for example, `external` may be sufficient instead of `public`. For state variables, `external` is not possible. Labeling the visibility explicitly will make it easier to catch incorrect assumptions about who can call the function or access the variable.
