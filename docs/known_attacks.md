@@ -151,13 +151,13 @@ contract StateHolder {
     address private lockHolder;
 
     function getLock() {
-        require(lockHolder == 0);
+        require(lockHolder == address(0));
         lockHolder = msg.sender;
     }
 
     function releaseLock() {
         require(msg.sender == lockHolder);
-        lockHolder = 0;
+        lockHolder = address(0);
     }
 
     function set(uint newState) {
