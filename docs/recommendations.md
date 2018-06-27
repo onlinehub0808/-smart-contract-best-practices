@@ -237,7 +237,7 @@ function() payable { balances[msg.sender] += msg.value; }
 // good
 function deposit() payable external { balances[msg.sender] += msg.value; }
 
-function() payable { LogDepositReceived(msg.sender); }
+function() payable { require(msg.data.length == 0); LogDepositReceived(msg.sender); }
 ```
 
 ## Check data length in fallback functions
