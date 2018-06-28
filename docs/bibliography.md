@@ -26,6 +26,7 @@ Here are some of them.  Feel free to add more.
 - https://eprint.iacr.org/2016/1007.pdf
 - https://github.com/Bunjin/Rouleth/blob/master/Security.md
 - https://github.com/LeastAuthority/ethereum-analyses
+- https://github.com/bokkypoobah/ParityMultisigRecoveryReconciliation
 - https://medium.com/@ConsenSys/assert-guards-towards-automated-code-bounties-safe-smart-contract-coding-on-ethereum-8e74364b795c
 - https://medium.com/@coriacetic/in-bits-we-trust-4e464b418f0b
 - https://medium.com/@hrishiolickel/why-smart-contracts-fail-undiscovered-bugs-and-what-we-can-do-about-them-119aa2843007
