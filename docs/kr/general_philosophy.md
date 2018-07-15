@@ -1,74 +1,73 @@
-Ethereum and complex blockchain programs are new and highly experimental. Therefore, you should expect constant changes in the security landscape, as new bugs and security risks are discovered, and new best practices are developed. Following the security practices in this document is therefore only the beginning of the security work you will need to do as a smart contract developer.
+이더리움과 복참한 블록체인 프로그램들은 완전히 새롭고 또 아주 실험적입니다. 그러므로 보안측면에서도 지속적인 변화가 있을 수 밖에 없고 새로운 버그와 보안 리스크들이 계속해서 발견되고 또 새로운 모범 사례들 또한 계속 개발되고 있습니다. 이 문서의 보안 사례들을 따르는 것은 스마트 컨트랙트 개발자로서 해야하는 보안 작업의 시작에 불과합니다.
 
-Smart contract programming requires a different engineering mindset than you may be used to. The cost of failure can be high, and change can be difficult, making it in some ways more similar to hardware programming or financial services programming than web or mobile development. It is therefore not enough to defend against known vulnerabilities. Instead, you will need to learn a new philosophy of development:
+스마트 컨트랙트 프로그래밍은 이전과는 다른 공학적 사고방식을 요구합니다. 실패(Failure)에 대한 비용은 높을 수 있고 변경하는 것이 어려울 수 있으므로 개발과정은 모바일과 웹을 개발하는 것보다는 마치 하드웨어를 프로그래밍하거나 금융 상품을 개발하는 것처럼 접근해야 합니다. 그러므로 알려진 취약점에 대해서만 대비하는 것은 충분치 않을 수 있습니다. 앞으로는 스마트 컨트랙트 개발에 대한 새로운 철학을 익혀야 할 것입니다.
 
-## Prepare for failure
+## 실패에 대한 대비(Prepare for failure)
 
-Any non-trivial contract will have errors in it. Your code must, therefore, be able to respond to bugs and vulnerabilities gracefully.
+모든 특별한 사례들의 스마트컨트랙트는 에러를 포함할 것입니다. 코드는 따라서 반드시 버그들과 취약점을 적절하게 대응할 수 있어야만 합니다.
+  - 무언가 잘못되고 있을 대 계약을 중지하기('서킷브레이커 circuit breaker')
+  - 위험 사항시 비용에 대한 관리(비율 제한 및 최대치 설정)하기
+  - 버그 수정과 개선에 대한 효과적인 업그레이드 경로를 준비하기
 
-  - Pause the contract when things are going wrong ('circuit breaker')
-  - Manage the amount of money at risk (rate limiting, maximum usage)
-  - Have an effective upgrade path for bugfixes and improvements
+## 신중하게 공개할 것
 
-## Rollout carefully
+버그는 항상 프로덕션 릴리즈 단계 이전에 잡는 것이 좋습니다.
+  - 스마트 컨트랙트 철저하게 테스트해야 하고, 새로운 공격이 알려질 때마다 테스트 케이스를 추가해야 합니다.
+  - 알파 버전을 테스트넷에 배포하고 [버그에 대한 포상 제도(bug bounties)](#bounties)를 운영해야 합니다.
+  - 활용 사례 및 테스트를 만들어가며 단계별로 버전을 공개해야 합니다.
 
-It is always better to catch bugs before a full production release.
-  - Test contracts thoroughly, and add tests whenever new attack vectors are discovered
-  - Provide [bug bounties](#bounties) starting from alpha testnet releases
-  - Rollout in phases, with increasing usage and testing in each phase
+## 컨트랙트를 최대한 단순하게
 
-## Keep contracts simple
+복잡성은 에러 발생확률을 증가시킵니다.
 
-Complexity increases the likelihood of errors.
+  - 컨트랙트의 로직이 단순한지 확인하세요
+  - 컨트랙트와 각 함수들을 작게 유지하기 위해서 코드를 모듈화 하세요
+  - 이미 작성된 도구와 코드들이 있다면 그 것들을 사용하세요(예: 난수 생성기를 새로 작성해서 공개하지 마세요)
+  - 가능하다면 성능이 좋은 코드보다 명확한 코드를 사용합니다
+  - 만들고 있는 시스템 중 탈중앙화를 필요로하는 부분에 대해서만 블록체인을 활용하세요
 
-  - Ensure the contract logic is simple
-  - Modularize code to keep contracts and functions small
-  - Use already-written tools or code where possible (eg. don't roll your own random number generator)
-  - Prefer clarity to performance whenever possible
-  - Only use the blockchain for the parts of your system that require decentralization
+## 최신 상태의 유지
 
-## Stay up to date
+다음 나열된 항목들을 통해 새로운 보안 사항들에 대해 계속 확인하도록 하세요.
 
-Use the resources listed in the next section to keep track of new security developments.
+  - 컨트랙트가 새로이 발견된 버그들에 대해 안전한지 확인하기
+  - 모든 도구와 라이브러리를 가능한 빠르게 최신 버전으로 업그레이드해서 사용하기
+  - 새롭게 등장하는 유용한 보안 기술을 적용하기
 
-  - Check your contracts for any new bug that's discovered
-  - Upgrade to the latest version of any tool or library as soon as possible
-  - Adopt new security techniques that appear useful
+## 블록체인의 속성에 대한 인식
 
-## Be aware of blockchain properties
+많은 프로그래밍 경험이 대부분은 이더리움 프로그래밍과 연관될 것입니다. 이 때, 꼭 주의해야할 함정들이 존재합니다.
 
-While much of your programming experience will be relevant to Ethereum programming, there are some pitfalls to be aware of.
+  - 외부에서의 함수 호출은 악의적인 코드를 실행하거나 제어흐름을 바꿔버릴 수도 있으므로 이에 대해 극도로 조심해야 합니다.
+  - `public` 함수들은 공개되어 있는 함수들이므로 악의적으로 호출될 수 있음을 꼭 감안해야 합니다. 블록체인에 기록된 데이터들은 개인 데이터일지라도 누구나 조회할 수 있습니다.
+  - 가스 비용과 블록 당 가스 한도에 대해 확인해야 합니다
 
-  - Be extremely careful about external contract calls, which may execute malicious code and change control flow.
-  - Understand that your public functions are public, and may be called maliciously. Your private data is also viewable by anyone.
-  - Keep gas costs and the block gas limit in mind.
+## 양면성을 가진 근본요소들: 단순함 대 복잡함에 관련한 사례들
 
-## Fundamental Tradeoffs: Simplicity versus Complexity cases
+스마트 컨트랙트의 구조 및 보안에 대해 가늠할 때, 고려해야하는 사항 중 양면성을 지닌 몇 가지 근본적인 사항들이 있습니다. 보편적으로는 스마트 컨트랙트들이 양면성 사이에서 적절한 균형을 잡는 것을 추천합니다.
 
-There are multiple fundamental tradeoffs to consider when assessing the structure and security of a smart contract system.  The general recommendation for any smart contract system is to identify the proper balance for these fundamental tradeoffs.
+소프트웨어 공학적 시점에서의 이상적인 스마트 컨트랙트 시스템은 모듈화 되어있고 중복되기보다는 재사용 가능하며 또 구성요소를 업그레이드할 수 있는 것입니다. 보안 아키텍쳐 관점에서의 이상적인 스마트 컨트랙트 시스템도 마찬가지입니다. 특히 복잡한 시스템일수록 더욱 그렇습니다.
 
-An ideal smart contract system from a software engineering bias is modular, reuses code instead of duplicating it, and supports upgradeable components.  An ideal smart contract system from a secure architecture bias may share this mindset, especially in the case of more complex smart contract systems.
+하지만, 이러한 보안 및 소프트웨어 공학의 모범사례에 일치하지 않는 몇가지 중요한 예외사항들이 있습니다. 사례별로 적절한 균형을 찾는 과정은 스마트 컨트랙트 시스템 차원에서 이상적인 속성값들의 조합을 찾아내는 것을 통해 이뤄집니다. 예를 들면,
 
-However, there are important exceptions where security and software engineering best practices may not be aligned.  In each case, the proper balance is obtained by identifying the optimal mix of properties along contract system dimensions such as:
+- 불변성 vs 업그레이드 용이성
+- 모놀리식 vs 모듈화
+- 중복 vs 재사용
 
-- Rigid versus Upgradeable
-- Monolithic versus Modular
-- Duplication versus Reuse
+###  불변성 vs 업그레이드 용이성(Rigid versus Upgradeable)
 
-### Rigid versus Upgradeable
+이 문서를 포함한 다양한 자료들이 종료가능한, 업그레이드 가능한, 혹은 수정가능한 패턴들 등, 유연한 요소들에 대해 강조하지만, 이런 유연성과 보안에는 근본적인 트레이드오프(fundamental tradeoff)가 존재합니다.
 
-While multiple resources, including this one, emphasize malleability characteristics such as Killable, Upgradeable or Modifiable patterns there is a *fundamental tradeoff* between malleability and security.
+유연한 패턴들은 복잡성을 증가시키고 공격받을 수 있는 면을 늘리게 됩니다. 단순한 코드는 스마트컨트랙트가 미리 정의된 시간 한도 내에서 아주 제한적으로 기능할 때 복잡한 코드보다 특히 효과적입니다. 예를 들면 특별한 거버넌스 없이 정해진 시간 내에 토큰 세일을 하는 시스템 등에서 효과적입니다.
 
-Malleability patterns by definition add complexity and potential attack surfaces.  Simplicity is particularly effective over complexity in cases where the smart contract system performs a very limited set of functionality for a pre-defined limited period of time, for example, a governance-free finite-time-frame token-sale contract system.
+### 모놀리식 대 모듈화(Monolithic versus Modular)
 
-### Monolithic versus Modular
+모놀리식으로 모두 갖춘 독립된 컨트랙트는 모든 지식 기반을 로컬에 조회 및 식별 가능한 상태로 유지합니다. 몇몇 스마트 컨트랙트 시스템들이 모놀리식으로 만들어진 것에 대해 높은 평가를 받긴 하지만, 데이터 및 제어 흐름을 극단적으로 로컬 위주로 만들어야 하는가에 대한 논쟁이 있기도 합니다.
 
-A monolithic self-contained contract keeps all knowledge locally identifiable and readable.  While there are few smart contract systems held in high regard that exist as monoliths, there is an argument to be made for extreme locality of data and flow - for example, in the case of optimizing code review efficiency.
+이외의 다른 트레이드오프들과 마찬가지로, 보안 모범 사례는 짧게 존재하는 스마트 컨트랙트 시스템들의 경우에는 소프트웨어 공학의 트렌드와는 다르고 또 복잡하고 지속적으로 존재하는 시스템에 대해서는 소프트웨어 공학의 트렌드와 유사합니다.
 
-As with the other tradeoffs considered here, security best practices trend away from software engineering best practices in simple short-lived contracts and trend toward software engineering best practices in the case of more complex perpetual contract systems.
+### 중복 대 재사용(Duplication versus Reuse)
 
-### Duplication versus Reuse
+소프트웨어 공학적 시점에서의 스마트 컨트랙트 시스템은 가능한 범위에서 최대한 많이 재사용 가능하도록 구현해야 합니다. 솔리디티로 만들어진 코드를 재사용하는 많은 방법들이 존재합니다. 코드들을 검증되어 있고 배포되어 있는 코드들을(*직접 소유하고 있는*) 사용하는 것이 코드재사용성을 높이기 위해 일반적으로 사용되는 안전한 방법입니다.
 
-A smart contract system from a software engineering perspective wishes to maximize reuse where reasonable.  There are many ways to reuse contract code in Solidity.  Using proven previously-deployed contracts *which you own* is generally the safest manner to achieve code reuse.
-
-Duplication is frequently relied upon in cases where self-owned previously-deployed contracts are not available.  Efforts such as [Live Libs](https://github.com/ConsenSys/live-libs) and [Zeppelin Solidity](https://github.com/OpenZeppelin/zeppelin-solidity) seek to provide patterns such that secure code can be re-used without duplication.  Any contract security analyses must include any re-used code that has not previously established a level of trust commensurate with the funds at risk in the target smart contract system.
+중복은 소유하고 있는 기 배포된 컨트랙트가 접근 불가능한 경우들에 대해 자주 발생합니다. [Live Libs](https://github.com/ConsenSys/live-libs)나 [Zeppelin Solidity](https://github.com/OpenZeppelin/zeppelin-solidity)와 같이 안전하고 재사용 가능한 코드들을 중복없이 사용할 수 있도록 제공하고자 하는 노력들이 있습니다. 컨트랙트 보안 분석시에는 대상 시스템에서 보호가 필요한 자금에 상응하는 신뢰 수준을 확보하고 있지 못한 재사용 코드들을 모두 포함해야 합니다.
