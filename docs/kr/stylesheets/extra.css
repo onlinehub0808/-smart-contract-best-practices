@@ -1,0 +1,15 @@
+.md-header {
+    background-color: #1F507A;
+}
+.md-footer-diligence {
+    float: right;
+    color: hsla(0,0%,100%,.3);
+    margin-right: 1.3rem;
+    font-size: 1.28rem;
+    padding: 0.8rem 0;
+}
+.md-footer-diligence a img {
+    height: auto;
+    width: 28px;
+    vertical-align: text-bottom;
+}
