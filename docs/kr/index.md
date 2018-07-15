@@ -1,24 +1,24 @@
-# Ethereum Smart Contract Security Best Practices
+# 이더리움 스마트 컨트랙트 보안 모범사례
 
-This document provides a baseline knowledge of security considerations for intermediate Solidity programmers. It is maintained by [ConsenSys Diligence](https://media.consensys.net/introducing-consensys-diligence-cf38f83948c), and the broader Ethereum community.
+본 문서는 중급 솔리디티 프로그래머를 위한 것으로 보안 지식의 출발점을 제공합니다. 이 문서는 [ConsenSys Diligence](https://media.consensys.net/introducing-consensys-diligence-cf38f83948c)와 이더리움 커뮤니티에 의하여 관리됩니다.
 
 [![Join the chat at https://gitter.im/ConsenSys/smart-contract-best-practices](https://badges.gitter.im/ConsenSys/smart-contract-best-practices.svg)](https://gitter.im/ConsenSys/smart-contract-best-practices?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-## Where to start?
+## 목차
 
-* [General Philosopy](./general_philosophy.md) describes the smart contract security mindset
-* [Solidity Recommendations](./recommendations.md) contains examples of good code patterns
-* [Known Attacks](./known_attacks.md) describes the different classes of vulnerabilities to avoid
-* [Software Engineering](./software_engineering.md) outlines some architectural and design approaches for risk mitigation
-* [Documentation and Procedures](./documentation_procedures.md) outlines best practices for documenting your system for other developers and auditors 
-* [Security Tools](./security_tools.md) lists tools for improving code quality, and detecting vulnerabilities
-* [Security Notifications](./security_notifications.md) lists sources of information for staying up to date
-* [Tokens](./tokens.md) outlines best practices specifically related to Tokens.
+* [기본 철학](./kr/general_philosophy.md) 스마트 컨트랙트의 보안을 위한 사고 방식을 다룹니다
+* [솔리디티 추천 패턴](./kr/recommendations.md) 스마트컨트랙트를 위한 훌륭한 코드 패턴들을 예제로 소개 합니다
+* [알려진 공격 사례](./kr/known_attacks.md) 피해야 할 다양한 종류의 취약점에 대해 다룹니다
+* [소프트웨어 공학](./kr/software_engineering.md) 리스크 완화를 위한 아키텍쳐 및 디자인 패턴에 대해 기술합니다
+* [문서화 및 절차](./kr/documentation_procedures.md) 다른 개발자들 및 코드 검사를 위해 시스템을 문서화하는 것에 대한 모범 사례를 기술합니다
+* [보안 도구 모음](./kr/security_tools.md) 코드 품질을 향상시키고 취약점을 발견할 수 있는 도구들에 다룹니다
+* [보안 알림 사항](./kr/security_notifications.md) 보안에 대한 최신 정보를 다룹니다
+* [토큰과 관련된 모범사례](./kr/tokens.md) 토큰과 관련한 모밤 사례들에 대해서 기술합니다.
 
-## Contributions are welcome!
+## 언제든지 기여해주세요 !
 
-Feel free to submit a pull request, with anything from small fixes, to full new sections. If you are writing new content, please reference the [contributing](./about/contributing.md) page for guidance on style. 
+작은 수정이던지 완전히 새로운 섹션이던지 상관없이 풀리퀘스트를 편하게 제출해주세요. [contributing](./kr/about/contributing.md) 페이지를 참조하여 스타일을 확인해주세요.
 
-See the [issues](https://github.com/ConsenSys/smart-contract-best-practices/issues) for topics that need to be covered or updated. If you have an idea you'd like to discuss, please chat with us in [Gitter](https://gitter.im/ConsenSys/smart-contract-best-practices).
+다뤄지거나 업데이트되어야 할 주제들에 대해 [이슈 목록](https://github.com/ConsenSys/smart-contract-best-practices/issues)을 확인해주세요. 토론이 필요할 때엔 [Gitter](https://gitter.im/ConsenSys/smart-contract-best-practices)를 통해 채팅으로 소통하면 좋겠습니다.
 
-If you've written an article or blog post, please add it to the [bibliography](./bibliography.md).  
+보안에 대한 글을 작성한 것이 있다면, [bibliography](./bibliography.md)에 추가해 주세요.
