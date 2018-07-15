@@ -21,22 +21,24 @@ pages:
     - Reviewers: about/reviewers.md
     - License: about/license.md
     - Contributing: about/contributing.md
-  - KR:
-    - Home: kr/index.md
-    - General Philosophy: kr/general_philosophy.md
-    - Recommendations for Smart Contract Security in Solidity: kr/recommendations.md
-    - Known Attacks: kr/known_attacks.md
-    - Software Engineering Techniques: kr/software_engineering.md
-    - Token specific recommendations: kr/tokens.md
-    - Documentation and Procedures: kr/documentation_procedures.md
-    - Security Tools: kr/security_tools.md
-    - Security Notifications: kr/security_notifications.md
-    - Future improvements: kr/future_improvements.md
-    - Smart Contract Security Bibliography: kr/bibliography.md
-    - About:
-      - Reviewers: kr/about/reviewers.md
-      - License: kr/about/license.md
-      - Contributing: kr/about/contributing.md
+  - Translations:
+    - KR:
+      - 홈: kr/index.md
+      - 기본 철학: kr/general_philosophy.md
+      - 보안을 위한 솔리디티 추천 패턴: kr/recommendations.md
+      - 알려진 공격들: kr/known_attacks.md
+      - 소프트웨어 공학 기술: kr/software_engineering.md
+      - 토큰을 위한 추천 패턴: kr/tokens.md
+      - 문서화 및 절차: kr/documentation_procedures.md
+      - 보안 도구 모음: kr/security_tools.md
+      - 보안 알림 사항: kr/security_notifications.md
+      - 개선 사항들: kr/future_improvements.md
+      - 스마트 컨트랙트 보안 참고자료: kr/bibliography.md
+      - About:
+        - Translator: kr/about/reviewers.md
+        - Reviewers: kr/about/reviewers.md
+        - License: kr/about/license.md
+        - Contributing: kr/about/contributing.md
 
 theme:
   name: 'material'
