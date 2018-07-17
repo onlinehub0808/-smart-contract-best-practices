@@ -173,7 +173,7 @@ contract StateHolder {
 
 <div style='font-size: 80%; display: inline;'>* 일부는 이더리움은 현재 완벽하게 병렬적이지 않기 때문에 <i>경쟁 조건</i>이라는 용어를 사용하는 것에 반대합니다. 하지만 논리적으로는 확실하게 자원에 대해 경쟁하는 절차를 지니는 기본 기능들이 있기 때문에, 같은 종류의 위험이 존재하고 같은 종류의 솔루션들이 동작합니다.</div>
 
-## 트랜잭션 순서 의존성(Transaction-Ordering Dependence: TOD)과 프론트 러닝(Front Running)
+## 트랜잭션 순서 의존성(Transaction-Ordering Dependence: TOD)과 선행매매(Front Running)
 
 상기 예시들은 공격자가 악의적인 코드를 *하나의 트랜잭션 내에* 담아서 실행하는 경쟁 조건들에 대한 것들이었습니다. 다음은 한 블록 내에 포함된 *트랜잭션들의 순서* 를 바꾸는 것이 쉽다는 것을 활용한 블록체인 고유의 경쟁조건에 대한 예시들입니다.
 
