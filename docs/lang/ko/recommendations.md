@@ -141,25 +141,25 @@ contract auction {
 
 * 가위바위보에서는 두 플레이어가 모두 첫 번째로 낼 패의 해쉬 값을 제출합니다. 그리고 둘 모두 해쉬를 제출하고 나면, 원래 값을 제출합니다. 원래 값을 제출했을 때, 기 제출한 해쉬값과 맞지 않으면 게임이 성립되지 않습니다.
 * 경매에서는, 1단계로 플레이어들이 경매 값(당연히, 경매 값보다 예금이 더 많은 상태여야 합니다)의 해쉬값을 제출하도록 합니다. 그리고 2단계로 실제 경매값을 제출하도록 합니다.
-* 난수 생성기에 의존적인 어플리케이션을 개발하는 경우, 순서는 항상 (1) 플레이어가 값을 제출하고 (2) 난수를 생성하고 (3) 플레이어가 값을 지불하는 순서가 되어야 합니다.
-* When developing an application that depends on a random number generator, the order should always be (1) players submit moves, (2) random number generated, (3) players paid out. The method by which random numbers are generated is itself an area of active research; current best-in-class solutions include Bitcoin block headers (verified through http://btcrelay.org), hash-commit-reveal schemes (ie. one party generates a number, publishes its hash to "commit" to the value, and then reveals the value later) and [RANDAO](http://github.com/randao/randao).
-* If you are implementing a frequent batch auction, a hash-commit scheme is also desirable.
+* 난수 생성기에 의존적인 어플리케이션을 개발하는 경우에는 항상 다음과 같이 순서를 사용해야 합니다. (1) 플레이어가 이동값을 제출하고 (2) 난수를 생성하고 (3) 플레이어가 값을 지불합니다. 난수생성 방법에 대한 것은 계속해서 연구중에 있는 주제입니다. 현재까지 중 가장 괜찮은 솔루션은 비트코인 블록 헤더의 방식(http://btcrelay.org 를 통해 검증됨)과 해쉬-커밋-공개 방식(즉, 한 측이 수를 생성하고 그 해쉬 값을 게재한 뒤, 실제 값을 나중에 공개하는 방식) 그리고 [RANDAO](http://github.com/randao/randao)입니다.
+* 고빈도 일괄 경매를 구현할 경우에는 해쉬-커밋 방식이 바람직합니다.
 
-## In 2-party or N-party contracts, beware of the possibility that some participants may "drop offline" and not return
+## 양자간 혹은 다자간 계약에서, 참가자가 오프라인으로 이탈하고 돌아오지 못하는 상황을 염두에 두어야 합니다
 
-Do not make refund or claim processes dependent on a specific party performing a particular action with no other way of getting the funds out. For example, in a rock-paper-scissors game, one common mistake is to not make a payout until both players submit their moves; however, a malicious player can "grief" the other by simply never submitting their move - in fact, if a player sees the other player's revealed move and determines that they lost, they have no reason to submit their own move at all. This issue may also arise in the context of state channel settlement. When such situations are an issue, (1) provide a way of circumventing non-participating participants, perhaps through a time limit, and (2) consider adding an additional economic incentive for participants to submit information in all of the situations in which they are supposed to do so.
+특정 당사자 측에서 어떤 액션을 취해주어야만 환불이 가능하도록 환불, 클레임 절차를 만들어서는 안됩니다. 예를 들어, 가위바위보 게임을 만들 때 보통 할 수 있는 실수는 양 참가자가 모두 패를 제출하기 전에는 게임의 결과를 내지 않는 것이 있습니다. 하지만 이 때 악의적인 참가자는 단지 아무것도 제출하지 않음을 통해 다른 참가자들을 비통한 상황에 몰아버릴 수 있습니다. 한 참가자가 다른 참가자의 패를 확인하였는데 지는 게임이었다면 굳이 패를 제출할 이유가 없습니다. 이 문제는 스테이트 채널(state-channel)에서도 발생합니다. 이런 문제가 발생하는 상황에서는 (1) 시간 제한 등을 통해, 네트워크에 실제로 참가하지않는 참여자를 배제하도록 하고 (2) 기대한 상황대로 잘 참여하여 정보를 제출한 참가자들에게 추가적인 경제적인 보상책을 주는 것에 대해 고려해봐야 합니다.
 
-## Solidity specific recommendations
+## 솔리디티를 위한 추천 사항들
 
 ### <!-- -->
 
-The following recommendations are specific to Solidity, but may also be instructive for developing smart contracts in other languages.
+다음 추천 사항들은 솔리디티에 특화된 것들입니다. 하지만 스마트 컨트랙트를 다른 언어를 사용하여 개발할 때에도 어느정도 지침으로 사용할 수 있습니다.
 
+## `assert()`를 통해 불변성을 강제하세요
 ## Enforce invariants with `assert()`
 
-An assert guard triggers when an assertion fails - such as an invariant property changing. For example, the token to ether issuance ratio, in a token issuance contract, may be fixed. You can verify that this is the case at all times with an `assert()`. Assert guards should often be combined with other techniques, such as pausing the contract and allowing upgrades. (Otherwise, you may end up stuck, with an assertion that is always failing.)
+단언문 방패(assert guard)는 변경되면 안되는 속성값이 변경되었을 경우처럼 단언문이 실패할 때 발동됩니다. 예를 들어, 토큰 발행 계약에서, 이더에 대한 토큰 발행 비율은 아무래도 고정되어 있어야 할 것입니다. 이 것을 매번 `assert()`를 호출함을 통해서 비율이 고정되어 있음을 검증할 수 있습니다. 단언문 방패는 업데이트 기법 등의 다른 기법들과 잘 결합되어 사용되어야만 합니다. 컨트랙트를 잠시 멈추고 업그레이드를 허용하는 상황등에서 잘못 사용할 경우 단언문이 항상 실패하면서 손쓸 수 없는 상태가 되어버릴 수 있습니다.
 
-Example:
+예시:
 
 ```sol
 contract Token {
@@ -174,143 +174,143 @@ contract Token {
 }
 ```
 
-Note that the assertion is *not* a strict equality of the balance because the contract can be [forcibly sent ether](#remember-that-ether-can-be-forcibly-sent-to-an-account) without going through the `deposit()` function!
+여기에서 단언문은 잔고와 공급이 완전히 같을 것을 요구하고 있지 않습니다. 이는 컨트랙트가 `deposit()` 함수를 사용하지 않고도, [강제로 이더를 받을 수 있는 방법](#remember-that-ether-can-be-forcibly-sent-to-an-account)이 있기 때문입니다.
 
+## `assert()`와 `require()`를 적절하게 사용하세요
 
-## Use `assert()` and `require()` properly
+솔리디티 버전 0.4.10에서 `assert()`와 `require()`가 소개되었습니다. `require(condition)` 표현은 입력값의 유효성을 검사하기 위해 사용됩니다. 이는 모든 사용자 입력 값에 사용되어야만 하고 조건에 문제가 있을 경우 트랜잭션을 무효화 합니다. `assert(condition)` 포현 또한 조건이 안 맞았을 경우 트랜잭션을 무효화 시키지만 불변 속성들에 대해서만 사용되어야 합니다. 따라서 내부적으로 에러가 생겼거나, 컨트랙트가 유효하지 않는 상황에 다다른 것을 의미합니다. 이 패러다임을 따르면, 정형화된 분석 도구들을 사용하여 컨트랙트의 불변 속성들이 잘 유지되고 있는지 또 컨트랙트 코드가 잘 정형화 되어 있는지 등을 확인하여 잘못된 옵코드(opcode)가 없음을 검증할 수 있습니다
 
-In Solidity 0.4.10 `assert()` and `require()` were introduced. `require(condition)` is meant to be used for input validation, which should be done on any user input, and reverts if the condition is false. `assert(condition)` also reverts if the condition is false but should be used only for invariants: internal errors or to check if your contract has reached an invalid state. Following this paradigm allows formal analysis tools to verify that the invalid opcode can never be reached: meaning no invariants in the code are violated and that the code is formally verified.
+## 정수를 나눌 때 반올림에 대해 주의하세요
 
-## Beware rounding with integer division
+모든 정수 나눗셈은 가장 가까운 정수로 내림처리됩니다. 더 정확한 계산이 필요할 경우에는 곱셈을 사용해보세요. 혹은 제수와 피제수를 모두 저장하는 것도 방법입니다.
 
-All integer division rounds down to the nearest integer. If you need more precision, consider using a multiplier, or store both the numerator and denominator.
-
-(In the future, Solidity will have a fixed-point type, which will make this easier.)
+(솔리디티는 향후 이 문제를 더 쉽게 처리할 수 있도록 부동소수형을 지원할 것입니다.)
 
 ```sol
-// bad
-uint x = 5 / 2; // Result is 2, all integer divison rounds DOWN to the nearest integer
+// 나쁜 케이스
+uint x = 5 / 2; // 결과값이 2입니다. 모든 정수 나눗셈은 가까운 값으로의 "내림" 연산을 진행합니다
 ```
 
-Using a multiplier prevents rounding down, this multiplier needs to be accounted for when working with x in the future:
+내림 연산을 피하기 위해서 승수를 사용합니다. 나중에 x를 실제로 사용할 때에는 승수를 고려해서 사용해야 합니다:
 
 ```sol
-// good
+// 좋은 케이스
 uint multiplier = 10;
 uint x = (5 * multiplier) / 2;
 ```
 
-Storing the numerator and denominator means you can calculate the result of `numerator/denominator` off-chain:
+제수와 피제수를 같이 저장할 경우, 오프-체인 상에서 결과를 직접 계산할 수 있습니다:
+
 ```sol
-// good
+// 좋은 케이스
 uint numerator = 5;
 uint denominator = 2;
 ```
 
-## Remember that Ether can be forcibly sent to an account
+## 이더가 아무 계좌에나 강제적으로 전송될 수 있다는 것을 꼭 명심하세요
 
-Beware of coding an invariant that strictly checks the balance of a contract.
 
-An attacker can forcibly send wei to any account and this cannot be prevented (not even with a fallback function that does a `revert()`).
+컨트랙트의 잔고를 엄격하게 체크하도록 하는 불변 속성을 코딩할 때 주의하십시오.
 
-The attacker can do this by creating a contract, funding it with 1 wei, and invoking
-`selfdestruct(victimAddress)`.  No code is invoked in `victimAddress`, so it
-cannot be prevented.
+공격자는 강제로 어느 컨트랙트에게나 웨이(wei)를 전송할 수 있고 이 것을 막을 수는 없습니다(심지어 폴백 함수가 `revert()`를 시행하더라도).
 
-## Be aware of the tradeoffs between abstract contracts and interfaces
+공격자는 계약을 생성하고 1웨이를 넣은 다음 `selfdestruct(victimAddress)`를 호출 할 수 있습니다. `victimAddress`의 아무런 코드도 실행될 수 없으므로 막을 수 없는 공격이 됩니다.
 
-Both interfaces and abstract contracts provide one with a customizable and re-usable approach for smart contracts. Interfaces, which were introduced in Solidity 0.4.11, are similar to abstract contracts but cannot have any functions implemented. Interfaces also have limitations such as not being able to access storage or inherit from other interfaces which generally makes abstract contracts more practical. Although, interfaces are certainly useful for designing contracts prior to implementation. Additionally, it is important to keep in mind that if a contract inherits from an abstract contract it must implement all non-implemented functions via overriding or it will be abstract as well.
+## 추상 컨트랙트와 및 인터페이스 사이의 트레이드오프에 대해 유의하세요
 
-## Keep fallback functions simple
+인터페이스와 추상 컨트랙트는 둘 모두 스마트 컨트랙트에 대해 사용자화 가능하고 재사용 가능한 접근 방법을 제공해줍니다. 솔리디티 0.4.11 버전에서 소개된 인터페이스는 추상 컨트랙트와 비슷하지만 함수의 구현체를 가질 수 없습니다. 또한 인터페이스는 스토리지 변수에 접근할 수 없고 또 추상 컨트랙트에서는 더욱 유용한 다른 인터페이스로부터 상속받는 기능을 사용할 수 없습니다. 그렇지만, 인터페이스는 확실히 구현보다 설계를 위해 유용하게 사용될 수 있습니다. 반면 추상 컨트랙트를 상속받는 경우에는, 모든 미 구현된 함수를 오버라이딩을 통해 구현하거나 스스로 추상 컨트랙트가 되어야만 하는 것을 명심하세요.
 
-[Fallback functions](http://solidity.readthedocs.io/en/latest/contracts.html#fallback-function) are called when a contract is sent a message with no arguments (or when no function matches), and only has access to 2,300 gas when called from a `.send()` or `.transfer()`. If you wish to be able to receive Ether from a `.send()` or `.transfer()`, the most you can do in a fallback function is log an event. Use a proper function if a computation or more gas is required.
+## 폴백 함수를 단순하게 유지하세요
+
+[폴백 함수](http://solidity.readthedocs.io/en/latest/contracts.html#fallback-function)는 컨트랙트에 아무런 변수 없이 메세지가 도착했을 때 혹은 일치하는 함수가 없을 때 호출 됩니다. 그리고 `.send()`나 `. transer()`를 통해 호출되었을 경우에는 오직 2,300 가스만 주어집니다. 만일 이더를 `.send()`나 `.transfer()`를 통해 수신하도록 만들고자 한다면, 폴백 함수에서 할 수 있는 것은 이벤트 로그를 남기는 것 정도 입니다. 계산이나 가스 소모가 필요한 일은 적절한 다른 함수를 사용해야 합니다.
 
 ```sol
-// bad
+// 나쁜 케이스
 function() payable { balances[msg.sender] += msg.value; }
 
-// good
+// 좋은 케이스
 function deposit() payable external { balances[msg.sender] += msg.value; }
 
 function() payable { require(msg.data.length == 0); LogDepositReceived(msg.sender); }
 ```
 
-## Check data length in fallback functions
+## 폴백 함수의 데이터 길이를 체크하세요
 
-Since the [fallback functions](http://solidity.readthedocs.io/en/latest/contracts.html#fallback-function) is not only called for plain ether transfers (without data) but also when no other function matches, you should check that the data is empty if the fallback function is intended to be used only for the purpose of logging received Ether. Otherwise, callers will not notice if your contract is used incorrectly and functions that do not exist are called.
+[폴백 함수](http://solidity.readthedocs.io/en/latest/contracts.html#fallback-function)는 아무런 데이터 없이 이더 송금을 위해서만 사용되는 것이 아니고 일치하는 함수가 없었을 경우에도 사용될 수 있습니다. 따라서 폴백 함수가 이더를 수신하는 것을 로깅하는 용도로 사용된다면, 데이터가 비어있는지 꼭 확인해야 합니다. 그렇지 않으면, 호출자는 컨트랙트가 잘못 사용되었거나 혹은 존재하지 않는 함수를 잘 못 호출했을 때 이를 알아차릴 수 없습니다.
+
 
 ```sol
-// bad
+// 나쁜 케이스
 function() payable { LogDepositReceived(msg.sender); }
 
-// good
+// 좋은 케이스
 function() payable { require(msg.data.length == 0); LogDepositReceived(msg.sender); }
 ```
 
-## Explicitly mark visibility in functions and state variables
+## 명료하게 함수와 상태 변수의 가시성에 대해서 표시해야 합니다
 
-Explicitly label the visibility of functions and state variables. Functions can be specified as being `external`, `public`, `internal` or `private`. Please understand the differences between them, for example, `external` may be sufficient instead of `public`. For state variables, `external` is not possible. Labeling the visibility explicitly will make it easier to catch incorrect assumptions about who can call the function or access the variable.
+함수와 상태 변수의 가시성에 대해서 명료하게 표시해야 합니다. 함수는 `external`, `public`, `internal` 혹은 `private`으로 분류할 수 있습니다. `public`을 쓰기보다는 `external`로도 충분한 경우 등이 있으므로 각각의 차이점에 대해서 숙지해야 합니다. 상태 변수에 대해서는 `external`을 사용해서는 안됩니다. 가시성을 명료하게 표기하는 것을 통해 함수를 호출하거나 변수에 접근하는 범위에 대해 실수하는 것을 쉽게 잡아낼 수 있습니다.
 
 ```sol
-// bad
-uint x; // the default is internal for state variables, but it should be made explicit
-function buy() { // the default is public
-    // public code
+// 좋은 예시
+uint x; // 상태변수를 위한 기본값은 internal입니다. 하지만 확실하게 명시해야 합니다.
+function buy() { // 함수의 기본값은 public입니다.
+    // public 함수 코드
 }
 
-// good
+// 좋은 예시
 uint private y;
 function buy() external {
-    // only callable externally
+    // 외부 계정만 호출 가능합니다
 }
 
 function utility() public {
-    // callable externally, as well as internally: changing this code requires thinking about both cases.
+    // 외부 계정도 호출 가능하지만 내부적으로도 호출 가능합니다. 이 코드를 수정하려면 양 쪽의 상황에 대해 모두 생각해봐야만 합니다.
 }
 
 function internalAction() internal {
-    // internal code
+    // internal 함수 코드
 }
 ```
 
-## Lock pragmas to specific compiler version
+## 프라그마(pragma)를 특정 컴파일러 버전에 대해 고정해야 합니다
 
-Contracts should be deployed with the same compiler version and flags that they have been tested the most with. Locking the pragma helps ensure that contracts do not accidentally get deployed using, for example, the latest compiler which may have higher risks of undiscovered bugs. Contracts may also be deployed by others and the pragma indicates the compiler version intended by the original authors.
+컨트랙트는 가장 많이 테스트된 환경과 같은 컴파일러 버전 및 플래그 옵션으로 배포되어야만 합니다. 따라서 프라그마(pragma)를 고정하는 것은 컨트랙트를 의도치 않게 최신 컴파일러 버전 등을 사용해 배포되지 않도록 해줍니다. 최신 컴파일러 버전은 상대적으로 위험하고 발견되지 않은 버그를 포함할 수도 있습니다. 컨트랙트는 다른 사람들에 의해 배포될 수도 있기 때문에 프라그마(pragma)는 원작자의 의도에 따른 컴파일러 버전을 지시해야 합니다.
 
 ```sol
-// bad
+// 나쁜 케이스
 pragma solidity ^0.4.4;
 
 
-// good
+// 좋은 케이스
 pragma solidity 0.4.4;
 ```
 
-### Exception
+### 예외 처리
 
-Pragma statements can be allowed to float when a contract is intended for consumption by other developers, as in the case with contracts in a library or EthPM package. Otherwise, the developer would need to manually update the pragma in order to compile locally.
+라이브러리에 포함된 컨트랙트나 EthPM 패키지와 같은 경우처럼, 다른 개발자이 사용하도록 의도된 컨트랙트의 경우에는 프라그마문에 `^`를 사용해 최신 버전을 허용하도록 할 수 있습니다. 그렇지 않으면, 개발자들이 로컬환경에서 컴파일하기 위해서는 직접 수동으로 프라그마를 수정해야합니다.
 
-## Differentiate functions and events
+## 함수와 이벤트를 차별화해야 합니다
 
-Favor capitalization and a prefix in front of events (we suggest *Log*), to prevent the risk of confusion between functions and events. For functions, always start with a lowercase letter, except for the constructor.
+이벤트에는 대문자를 쓰는 것과 접두어를 활용하는 것을 추천합니다(*Log* 라는 접두어를 추천). 이를 통해 함수와 이벤트 간의 혼동을 방지할 수 있습니다. 함수는 생성자(constructor)를 제외하고는 꼭 소문자로 시작해야 합니다.
 
 ```sol
-// bad
+// 나쁜 케이스
 event Transfer() {}
 function transfer() {}
 
-// good
+// 좋은 케이스
 event LogTransfer() {}
 function transfer() external {}
 ```
 
-## Prefer newer Solidity constructs
+## 새로운 솔리디티 API를 사용하세요
 
-Prefer constructs/aliases such as `selfdestruct` (over `suicide`) and `keccak256` (over `sha3`).  Patterns like `require(msg.sender.send(1 ether))` can also be simplified to using `transfer()`, as in `msg.sender.transfer(1 ether)`.
+`suicide` 보다는 `selfdestruct`, `sha3` 보다는 `keccak256` 등 처럼, 새로운 솔리디티 API를 사용하세요. `require(msg.sender.send(1 ether))` 등의 패턴은 `transfer()`등을 통해 `mesg.sender.transfer(1 ether)`처럼 단순화 시킬 수 있습니다.
 
-## Be aware that 'Built-ins' can be shadowed
+## '내장 속성(buit-in)'의 경우 숨김처리가 가능합니다
 
-It is currently possible to [shadow](https://en.wikipedia.org/wiki/Variable_shadowing) built-in globals in Solidity. This allows contracts to override the functionality of built-ins such as `msg` and `revert()`. Although this [is intended](https://github.com/ethereum/solidity/issues/1249), it can mislead users of a contract as to the contract's true behavior.
+솔리디티에서 내장 전역 속성(built-in globals)에 대해서는 [숨김 처리(shadow)](https://en.wikipedia.org/wiki/Variable_shadowing)가 가능합니다. 내장 기능인 `msg`나 `revert()` 등의 기능을 오버라이드할 수 있습니다. 이 것은 [의도된 바](https://github.com/ethereum/solidity/issues/1249)이기는 하지만 사용자들이 컨트랙트를 사용할 때 실제 기대한 바와 다르게 동작시킬 위험이 존재합니다.
 
 ```sol
 contract PretendingToRevert {
@@ -324,11 +324,11 @@ contract ExampleContract is PretendingToRevert {
 }
 ```
 
-Contract users (and auditors) should be aware of the full smart contract source code of any application they intend to use.
+컨트랙트 사용자는 혹은 감사자는 해당 어플리케이션이 사용하고자 하는 전체 스마트 컨트랙트 코드에 대해서 인지하고 있어야 합니다.
 
-## Avoid using `tx.origin`
+## `tx.origin`의 사용을 피하세요
 
-Never use `tx.origin` for authorization, another contract can have a method which will call your contract (where the user has some funds for instance) and your contract will authorize that transaction as your address is in `tx.origin`.
+`tx.origin`을 인증의 목적으로 절대 사용하지 마세요. 다른 컨트랙트가 여러분의 컨트랙트(예를 들면 사용자의 자금이 보관된)를 호출하는 메소드를 가질 수 있고, 여러분의 컨트랙트는 해당 트랜잭션의 `tx.origin`을 여러분의 컨트랙트로 인식하기 때문에 잘못된 인증을 할 수 있습니다.
 
 ```
 pragma solidity 0.4.18;
@@ -365,47 +365,49 @@ contract AttackingContract {
 }
 ```
 
-You should use `msg.sender` for authorization (if another contract calls your contract `msg.sender` will be the address of the contract and not the address of the user who called the contract).
+인증을 위해서는 반드시 `msg.sender`를 사용해야 합니다(만약 다른 컨트랙트가 여러분의 컨트랙트를 호출하는 경우에는 `msg.sender`는 컨트랙트를 호출한 사용자의 주소가 아니라 호출 컨트랙트의 주소가 됩니다).
 
-You can read more about it here: [Solidity docs](https://solidity.readthedocs.io/en/develop/security-considerations.html#tx-origin)
+이에 대해서는 여기에서 더 확인할 수 있습니다: [솔리디티 문서: tx-origin](https://solidity.readthedocs.io/en/develop/security-considerations.html#tx-origin)
 
-Besides the issue with authorization, there is a chance that `tx.origin` will be removed from the Ethereum protocol in the future, so code that uses `tx.origin` won't be compatible with future releases [Vitalik: 'Do NOT assume that tx.origin will continue to be usable or meaningful.'](https://ethereum.stackexchange.com/questions/196/how-do-i-make-my-dapp-serenity-proof/200#200)
+인증과 관련한 문제 때문에, 향후 이더리움 프로토콜에서 `tx.origin`이 제거될 가능성이 있습니다. 따라서 `tx.origin`을 사용하는 코드의 경우에는 향후 릴리즈 버전들과 호환되지 않을 것입니다. [비탈릭: tx.origin이 사용가능하지 않아지거나 의미가 없어질 수 있는 것을 고려해주세요'](https://ethereum.stackexchange.com/questions/196/how-do-i-make-my-dapp-serenity-proof/200#200)
 
-It's also worth mentioning that by using `tx.origin` you're limiting interoperability between contracts because the contract that uses tx.origin cannot be used by another contract as a contract can't be the `tx.origin`.
+한 가지 알아야 할 것은 `tx.origin`을 사용하는 것은 컨트랙트 간의 상호운용성을 제한한다는 것입니다. 왜냐면 `tx.origin`을 사용하는 컨트랙트는 컨트랙트를 `tx.origin`으로 받을 수 없으므로, 다른 컨트랙트가 사용할 수 없게 됩니다.
 
-## Timestamp Dependence
+## 타임스탬프 의존성
 
-There are three main considerations when using a timestamp to execute a critical function in a contract, especially when actions involve fund transfer.
+컨트랙트 내부에서 특히 송금이 결합된 경우 등의 중요한 함수를 실행할 때 타임스탬프를 사용하는 경우에는 다음 3 가지 사항을 고려해야 합니다.
 
-### Gameability
+### 게임성
 
-Be aware that the timestamp of the block can be manipulated by a miner. Consider this [contract](https://etherscan.io/address/0xcac337492149bdb66b088bf5914bedfbf78ccc18#code):
+블록의 타임스탬프는 채굴자에 의해 조작될 수 있습니다. 다음 [컨트랙트](https://etherscan.io/address/0xcac337492149bdb66b088bf5914bedfbf78ccc18#code)를 확인해 보세요:
 
 ```sol
 
 uint256 constant private salt =  block.timestamp;
 
 function random(uint Max) constant private returns (uint256 result){
-    //get the best seed for randomness
+    // 무작위 씨드 확보
     uint256 x = salt * 100/Max;
     uint256 y = salt * block.number/(salt % 5) ;
     uint256 seed = block.number/3 + (salt % 300) + Last_Payout + y;
     uint256 h = uint256(block.blockhash(seed));
 
-    return uint256((h / x)) % Max + 1; //random number between 1 and Max
+    return uint256((h / x)) % Max + 1; // 1과 최댓값 사이의 난수
 }
 ```
 
-When the contract uses the timestamp to seed a random number, the miner can actually post a timestamp within 30 seconds of the block being validating, effectively allowing the miner to precompute an option more favorable to their chances in the lottery. Timestamps are not random and should not be used in that context.
+컨트랙트가 난수 생성을 위한 씨드로 타임스탬프를 사용할 때, 채굴자는 검증받는 블록에 대해 타임스탬프를 블록이 검증받는 30초 내에 타임스탬프를 찍을 수 있습니다. 이는 채굴자가 난수 생성 값을 채굴자에게 더 유리하게 사전 계산할 수 있도록 합니다. 따라서 타임스탬프는 랜덤하지 않고 이런 용도로 사용되어서는 안됩니다.
 
-### *30-second Rule*
-A general rule of thumb in evaluating timestamp usage is:
-#### If the contract function can tolerate a [30-second](https://ethereum.stackexchange.com/questions/5924/how-do-ethereum-mining-nodes-maintain-a-time-consistent-with-the-network/5931#5931) drift in time, it is safe to use `block.timestamp`
-If the scale of your time-dependent event can vary by 30-seconds and maintain integrity, it is safe to use a timestamp. This includes things like ending of auctions, registration periods, etc.
+### *30초 룰*
 
-### Caution using `block.number` as a timestamp
+타임스탬프 사용의 유효성을 확인하는 일반적인 규칙은 다음과 같습니다:
 
-When a contract creates an `auction_complete` modifier to signify the end of a token sale such as [so]((https://github.com/SpankChain/old-sc_auction/blob/master/contracts/Auction.sol))
+#### 컨트랙트 함수가 [30초]((https://ethereum.stackexchange.com/questions/5924/how-do-ethereum-mining-nodes-maintain-a-time-consistent-with-the-network/5931#5931)의 오차를 허용할 때, `block.timestamp`를 사용할 수 있습니다
+시간 의존적인 이벤트의 시간 단위가 30초 이상에서 무결성을 유지할 수 있다면, 타임스탬프를 사용할 수 있습니다. 이는 경매의 종료나 등록기간 종료 등에 활용할 수 있습니다.
+
+### `block.number`를 타임스탬프처럼 사용하는 것을 주의하세요
+
+컨트랙트가 토큰 세일의 종료를 나타내고자 [다음과 같이](https://github.com/SpankChain/old-sc_auction/blob/master/contracts/Auction.sol) `autction_complete` 한정자를 생성하는 경우에,
 ```sol
 modifier auction_complete {
     require(auctionEndBlock <= block.number     ||
@@ -413,11 +415,11 @@ modifier auction_complete {
           currentAuctionState == AuctionState.cancel)
         _;}
 ```
-`block.number` and *[average block time](https://etherscan.io/chart/blocktime)* can be used to estimate time as well, but this is not future proof as block times may change (such as [fork reorganisations](https://blog.ethereum.org/2015/08/08/chain-reorganisation-depth-expectations/) and the [difficulty bomb](https://github.com/ethereum/EIPs/issues/649)). In a sale spanning days, the 12-minute rule allows one to construct a more reliable estimate of time.
+`block.number`와 [*평균 블록 생성 시간*](https://etherscan.io/chart/blocktime)은 시간을 추정하는 것에 사용될 수 있긴 하지만 블록 시간이 변경될 수 있고([포크 재조정](https://blog.ethereum.org/2015/08/08/chain-reorganisation-depth-expectations/)등으로 인해) 또 [난이도 폭탄](https://github.com/ethereum/EIPs/issues/649)으로 인해 미래를 확실하게 보장할 수는 없습니다.
 
-## Multiple Inheritance Caution
+## 다중 상속을 주의하세요
 
-When utilizing multiple inheritance in Solidity, it is important to understand how the compiler composes the inheritance graph.
+솔리디티에서 다중 상속을 활용할 때, 컴파일러가 상속 구조를 어떻게 구성하는지 이해하는 것이 중요합니다.
 
 ```sol
 
@@ -454,20 +456,20 @@ contract A is B, C {
   }
 }
 ```
-When A is deployed, the compiler will *linearize* the inheritance from left to right, as:
+A가 배포될 때, 컴파일러는 상속 구조를 왼쪽에서 오른쪽으로 선형화시킬 겁니다. 마치:
 
-**C -> B -> A**
+**C -> B -> A** 와 같이 됩니다.
 
-The consequence of the linearization will yield a `fee` value of 5, since C is the most derived contract. This may seem obvious, but imagine scenarios where C is able to shadow crucial functions, reorder boolean clauses, and cause the developer to write exploitable contracts. Static analysis currently does not raise issue with overshadowed functions, so it must be manually inspected.
+C가 마지막 파생 컨트랙트이므로 선형화의 결과는 `fee` 값을 5라고 할 것입니다. 명확해보일 수도 있지만, C가 중요 함수들을 쉐도잉하거나, 조건절들의 순서를 바꾸거나, 개발자가 악성 컨트랙트를 작성할 수 있게 하는 상황 등을 생각해봅시다. 현재의 정적분석은 오버쉐도우 함수에 대해서 이슈를 제기하지 않게 때문에, 이런 경우들은 반드시 수동으로 검사되어야 합니다.
 
-For more on security and inheritance, check out this [article](https://pdaian.com/blog/solidity-anti-patterns-fun-with-inheritance-dag-abuse/)
+보안 및 상속과 관련한 더 많은 정보는 다음 [글](https://pdaian.com/blog/solidity-anti-patterns-fun-with-inheritance-dag-abuse/)을 참조하세요.
 
-To help contribute, Solidity's Github has a [project](https://github.com/ethereum/solidity/projects/9#card-8027020) with all inheritance-related issues.
+추가적인 기여를 위해서, 솔리디티의 깃허브 저장소에 모든 상속관련 이슈를 다루는 [프로젝트](https://github.com/ethereum/solidity/projects/9#card-8027020)를 확인해주세요.
 
-## Deprecated/historical recommendations
+## 폐기된 과거 추천 사항들
 
-These are recommendations which are no longer relevant due to changes in the protocol or improvements to solidity. They are recorded here for posterity and awareness.
+프로토콜이 바뀌어가고 솔리디티가 개선됨에 따라서 더 이상 사용할 필요가 없는 추천사항들이 있습니다. 이에 해당하는 것들을 다음 사람들이 잘 파악할 수 있도록 아래에 폐기된 추천사항들이 기록되어 있습니다.
 
-### Beware division by zero (Solidity < 0.4)
+### 0으로 나누는 것을 주의하세요(솔리디티 버전 0.4 미만)
 
-Prior to version 0.4, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not `throw` an exception when a number is divided by zero. Ensure you're running at least version 0.4.
+버전 0.4 이전에서 솔리디티는 숫자가 0으로 나뉘어 졌을 때 예외를 던지지 않고 [0을 반환](https://github.com/ethereum/solidity/issues/670)했습니다. 따라서 최소한 0.4 버전 이후를 사용하는 것을 확실하게 하세요.
