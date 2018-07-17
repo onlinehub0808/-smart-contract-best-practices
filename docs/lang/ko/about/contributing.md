@@ -24,17 +24,17 @@
 - **확실할 경우에 새로운 섹션을 추가해주세요**
 - **가능한 코드라인은 80자 이하로 작성해주세요**
 - insecure, bad, good 등으로 **코드를 적절하게 표시**
-- Use the format of the [Airbnb Javascript Style guide](https://github.com/airbnb/javascript) as a starting point
+- [에어비앤비 자바스크립트 스타일 가이드](https://github.com/airbnb/javascript)를 시작점으로 사용해주세요
 
-### Recommendations Section
+### 솔리디티 추천 패턴 섹션
 
-- Always favor a declarative tip starting with a verb for the section title
-- Include good and bad examples, when possible
-- Ensure each subsection has an anchor tag for future hyperlinking
+- 섹션 제목에는 항상 동사로 시작하는 선언적인 문장을 사용해주세요
+- 가능하다면 좋은 예시와 나쁜 예시를 모두 포함해주세요
+- 하위 섹션의 경우 향후 하이퍼링크를 사용할 수 있도록 a태그를 포함하고 있는지 확인해주세요
 
-### Attacks Section
+### 공격 사례 섹션
 
-- Provide an example - then point to a recommendation for the solution in the relevant section of the doc
-- List first/most visible attack, where possible
-- Ensure each subsection has an anchor tag for future hyperlinking
-- Mark vulnerable pieces of code as `// INSECURE`
+- 예시를 제공하고 추천 사례에서 솔루션에 해당되는 부분을 알려주세요
+- 가능하다면, 가장 최초의 그리고 가장 잦은 형태의 공격을 나열해주세요
+- 하위 섹션의 경우 향후 하이퍼링크를 사용할 수 있도록 a태그를 포함하고 있는지 확인해주세요
+- 취약점을 내포하는 코드조각은 `// INSECURE`를 추가해주세요. (번역본에는 //안전하지 않음 으로 표기됨)
