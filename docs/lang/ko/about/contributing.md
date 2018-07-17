@@ -1,29 +1,29 @@
-We welcome all contributions - send a pull request or open an issue. When possible, send different pull requests by section/topic.
+우리는 기여하는 분들을 환영합니다. 이슈를 열어주거나 풀리퀘스트를 보내주세요. 가능하다면, 섹션/토픽 별로 다르게 풀리퀘스트를 보내주세요.
 
-Feel free to peruse the [open issues](https://github.com/ConsenSys/smart-contract-best-practices/issues) for ideas which need to be expanded on a bit here.
+조금 더 확장될 필요가 있는 아이디어들을 위해서 [열린 이슈들](https://github.com/ConsenSys/smart-contract-best-practices/issues)들을 많이 읽어주세요.
 
-## Editing and Submitting changes
+## 편집 및 변경 사항의 제출
 
-1. Fork the repo
-2. Make changes to the markdown files in the [docs directory](../../../../tree/master/docs) of the master branch
-3. Submit a Pull Request
+1. 저장소를 포크해주세요
+2. [docs 디렉토리](../../../../tree/master/docs) 내의 마크다운 파일들에 변경을 만들어 주세요
+3. 풀리퀘스트를 제출해주세요
 
-## Audience
+## 청중 수준
 
-Write for an intermediate Ethereum developer, they know the basics of Solidity programming and have coded a number of contracts
+중급 이더리움 개발자를 대상으로 작성해주세요. 솔리디티 프로그래밍의 기본을 알고 있고, 많은 컨트랙트를 코딩한 경험이 있다고 가정해주세요.
 
-## Style Guidelines
+## 스타일 가이드라인
 
-### General
+### 일반적 가이드
 
-- **Favor succinctness in writing**
-  - Use max 3-4 sentences in a section (exceptions can be made when critical)
-  - Show, don’t tell (examples speak more than lengthy exposition)
-  - Include a simple, illustrative example rather than complex examples that require substantial, extraneous reading
-- **Add a source link to the original document when available**
-- **Create new sections when warranted**
-- **Keep code lines under 80 characters when possible**
-- **Mark code** as insecure, bad, good where relevant
+- **명료하게 글을 써주세요**
+  - 한 섹션 당 최대 3,4개의 단어를 사용해주세요 (중요할 경우엔 예외가 있을 수 있습니다)
+  - 말하기보다는 직접 보여주세요(예제가 장황한 설명보다 더 많은 것을 말해줍니다)
+  - 너무 많고 관련없는 것까지 요구하는 복잡한 예제보다는 단순하고 설명이 충분한 예제를 포함해주세요
+- **가능하다면 원 문서에 대한 링크를 연결해주세요**
+- **확실할 경우에 새로운 섹션을 추가해주세요**
+- **가능한 코드라인은 80자 이하로 작성해주세요**
+- insecure, bad, good 등으로 **코드를 적절하게 표시**
 - Use the format of the [Airbnb Javascript Style guide](https://github.com/airbnb/javascript) as a starting point
 
 ### Recommendations Section
@@ -38,4 +38,3 @@ Write for an intermediate Ethereum developer, they know the basics of Solidity p
 - List first/most visible attack, where possible
 - Ensure each subsection has an anchor tag for future hyperlinking
 - Mark vulnerable pieces of code as `// INSECURE`
-
