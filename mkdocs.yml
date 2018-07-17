@@ -26,16 +26,16 @@ pages:
       - 홈: lang/ko/index.md
       - 기본 철학: lang/ko/general_philosophy.md
       - 보안을 위한 솔리디티 추천 패턴: lang/ko/recommendations.md
-      - 알려진 공격들: lang/ko/known_attacks.md
-      - 소프트웨어 공학 기술: lang/ko/software_engineering.md
-      - 토큰을 위한 추천 패턴: lang/ko/tokens.md
+      - 알려진 공격 사례: lang/ko/known_attacks.md
+      - 소프트웨어 공학: lang/ko/software_engineering.md
+      - 토큰과 관련된 모범 사례: lang/ko/tokens.md
       - 문서화 및 절차: lang/ko/documentation_procedures.md
       - 보안 도구 모음: lang/ko/security_tools.md
-      - 보안 알림 사항: lang/ko/security_notifications.md
+      - 보안 소식: lang/ko/security_notifications.md
       - 개선 사항들: lang/ko/future_improvements.md
       - 스마트 컨트랙트 보안 참고자료: lang/ko/bibliography.md
       - About:
-        - Translator: lang/ko/about/reviewers.md
+        - Translator: lang/ko/about/translators.md
         - Reviewers: lang/ko/about/reviewers.md
         - License: lang/ko/about/license.md
         - Contributing: lang/ko/about/contributing.md
