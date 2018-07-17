@@ -1,40 +1,41 @@
-When launching a contract that will have substantial funds or is required to be mission critical, it is important to include proper documentation. Some documentation related to security includes:
+상당량의 펀드를 가지는 컨트랙트를 런칭할 때엔 혹은 필수 기능을 구현할 때에는, 적절한 문서를 포함하고 있는 것이 중요합니다. 일부 문서화 작업은 보안과도 연관되어 있습니다.
 
-## Specifications and Rollout Plans
+## 스펙 및 공개 계획
 
-- Specs, diagrams, state machines, models, and other documentation that helps auditors, reviewers, and the community understand what the system is intended to do.
-- Many bugs can be found just from the specifications, and they are the least costly to fix.
-- Rollout plans that include details listed [here](https://github.com/ConsenSys/smart-contract-best-practices#contract-rollout), and target dates.
+- 스펙, 도표, 상태머신, 모델, 그리고 다른 문서화 등은 감사자(auditor)들과 리뷰어 그리고 커뮤니티가 시스템이 어떻게 동작하기를 원하는지 이해하는 것에 중요합니다.
+- 많은 버그가 스펙 수준에서 찾아질 수 있고, 비용을 최소화 하는 일입니다.
+- 공개 계획은 [다음](https://github.com/ConsenSys/smart-contract-best-practices#contract-rollout)에 포함된 내용과 목표 날짜 등을 포함하고 있어야 합니다.
 
-## Status
+## 상태
 
-- Where current code is deployed
-- Compiler version, flags used, and steps for verifying the deployed bytecode matches the source code
-- Compiler versions and flags that will be used for the different phases of rollout.
-- Current status of deployed code (including outstanding issues, performance stats, etc.)
+- 현재 코드가 어디에 배포되어 있는지
+- 컴파일러 버전, 사용된 플래그, 그리고 배포된 바이트 코드가 소스코드와 같은지 검증하는 절차
+- 공개 단계별로의 컴파일러 버전과 플래그
+- 배포된 코드의 현재 상태(드러난 이슈들과 퍼포먼스 통계 등)
 
-## Known Issues
+## 알려진 이슈
 
-- Key risks with contract
-  - e.g., You can lose all your money, hacker can vote for certain outcomes
-- All known bugs/limitations
-- Potential attacks and mitigants
-- Potential conflicts of interest (e.g., will be using yourself, like Slock.it did with the DAO)
+- 현 컨트랙트의 핵심 리스크
+  - 예: 모든 돈을 잃을 수 있습니다. 해커가 특정한 결과를 위해 투표할 수 있습니다
+- 알려진 모든 버그와 한계점들
+- 가능한 공격 및 대비책
+- 가능한 이해 상충
+  - 예: Slock.it이 DAO를 통해 했던 것처럼 당신이 이용될 수 있습니다
 
-## History
+## 히스토리
 
-- Testing (including usage stats, discovered bugs, length of testing)
-- People who have reviewed code (and their key feedback)
+- 테스트 히스토리(사용 통계, 발견된 버그, 테스트 길이 등을 포함하여)
+- 코드 리뷰어의 명단(및 그들의 핵심 피드백들)
 
-## Procedures
+## 절차
 
-- Action plan in case a bug is discovered (e.g., emergency options, public notification process, etc.)
-- Wind down process if something goes wrong (e.g., funders will get percentage of your balance before attack, from remaining funds)
-- Responsible disclosure policy (e.g., where to report bugs found, the rules of any bug bounty program)
-- Recourse in case of failure (e.g., insurance, penalty fund, no recourse)
+- 버그가 발견되었을 때의 액션 플랜(예: 긴급 상황, 공지 프로세스 등)
+- 무엇이 잘못 되었을 때의 대응 전략(예: 공격이 발생했을 경우, 투자자가 남아있는 펀드에서 기존 보유량의 몇 퍼센트를 받아갈 수 있을 것인지)
+- 책임감있는 공개 전략(예: 버그를 찾았을 때 어디에 보고할 것인지, 버그 바운티 프로그램에 대한 규칙 등)
+- 실패했을 때의 상환 청구권 (예: 보험, 페널티 펀드, 상환청구권 없음 등)
 
-## Contact Information
+## 연락처
 
-- Who to contact with issues
-- Names of programmers and/or other important parties
-- Chat room where questions can be asked
+- 이슈가 있을 때, 연락할 담당자
+- 개발자들의 이름 및 중요 파트너 정보
+- 질답이 이루어지는 채팅방 등
