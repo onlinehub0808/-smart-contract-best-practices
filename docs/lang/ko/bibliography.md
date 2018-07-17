@@ -1,15 +1,14 @@
-A lot of this document contains code, examples and insights gained from various parts already written by the community.
-Here are some of them.  Feel free to add more.
+많은 문서들이 코드와 예시 그리고 이미 커뮤니티에 의해 쓰여진 다양한 부분에서 기인한 인사이트를 포함하고 있습니다. 여기 그 중 일부가 있습니다. 자유롭게 추가해주세요.
 
-##### By Ethereum core developers
+##### 이더리움 코어 개발자들에 의한 것들
 
-- [How to Write Safe Smart Contracts](https://chriseth.github.io/notes/talks/safe_solidity) (Christian Reitwiessner)
-- [Smart Contract Security](https://blog.ethereum.org/2016/06/10/smart-contract-security/) (Christian Reitwiessner)
-- [Thinking about Smart Contract Security](https://blog.ethereum.org/2016/06/19/thinking-smart-contract-security/) (Vitalik Buterin)
-- [Solidity](http://solidity.readthedocs.io)
-- [Solidity Security Considerations](http://solidity.readthedocs.io/en/latest/security-considerations.html)
+- [스마트 컨트랙트를 안전하게 작성하는 방법](https://chriseth.github.io/notes/talks/safe_solidity) (Christian Reitwiessner)
+- [스마트 컨트랙트 보안](https://blog.ethereum.org/2016/06/10/smart-contract-security/) (Christian Reitwiessner)
+- [스마트 컨트랙트의 보안에 대해 생각해보기](https://blog.ethereum.org/2016/06/19/thinking-smart-contract-security/) (Vitalik Buterin)
+- [솔리디티](http://solidity.readthedocs.io)
+- [솔리디티 보안에 대한 고려사항](http://solidity.readthedocs.io/en/latest/security-considerations.html)
 
-##### By Community
+##### 커뮤니티에 의해 쓰여진 것들
 
 - http://forum.ethereum.org/discussion/1317/reentrant-contracts
 - http://hackingdistributed.com/2016/06/16/scanning-live-ethereum-contracts-for-bugs/
