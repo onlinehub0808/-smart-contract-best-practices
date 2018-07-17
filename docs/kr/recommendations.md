@@ -1,32 +1,32 @@
-This page demonstrates a number of solidity patterns which should generally be followed when writing smart contracts.
+이 페이지에서는 스마트 컨트랙트를 작성할 때 일반적으로 꼭 따라야 하는 여러가지 솔리디티 패턴들을 살펴보도록 하겠습니다.
 
-## Protocol specific recommendations
+## 프로토콜에 따른 추천사항들
 
 ### <!-- -->
 
-The following recommendations apply to the development of any contract system on Ethereum.
+다음 추천사항들은 이더리움 상의 모든 컨트랙트 시스템에 적용되는 사항들입니다.
 
-## External Calls
+## 외부 호출(External Calls)
 
-### Use caution when making external calls
+### 외부 호출을 만들 때 경고(caution) 사용하기
 
-Calls to untrusted contracts can introduce several unexpected risks or errors. External calls may execute malicious code in that contract _or_ any other contract that it depends upon. As such, every external call should be treated as a potential security risk. When it is not possible, or undesirable to remove external calls, use the recommendations in the rest of this section to minimize the danger.
+신뢰할 수 없는 컨트랙트를 호출하면 예상치 못한 여러가지 위험과 에러를 마주할 수 있습니다. 외부 호출은 해당 컨트랙트 내부의 혹은 의존성을 가진 다른 연결된 컨트랙트 내부에 존재하는 악의적인 코드를 실행할 수 있습니다. 따라서 모든 외부 호출은 반드시 잠재적인 보안 위협으로 간주해야 합니다. 외부호출을 제거하는 것이 불가능하거나 어려운 상황이라면 본 섹션의 나머지 항목에서 소개하는 추천 사항들을 통해 위험요소를 최소화하기 바랍니다.
 
-### Mark untrusted contracts
+### 신뢰할 수 없는 컨트랙트 표시하기
 
-When interacting with external contracts, name your variables, methods, and contract interfaces in a way that makes it clear that interacting with them is potentially unsafe. This applies to your own functions that call external contracts.
+외부 컨트랙트와 상호작용할 때, 변수와 메소드 그리고 컨트랙트 인터페이스의 이름을 잠재적으로 안전하지 않은 상호작용을 하는 것임을 한 눈에 알아볼 수 있도록 명명합니다. 이 규칙을 외부 컨트랙트를 호출하는 함수들에게 적용합니다.
 
 ```sol
-// bad
-Bank.withdraw(100); // Unclear whether trusted or untrusted
+// 나쁜 케이스
+Bank.withdraw(100); // 신뢰할 수 있는지 아닌지 불분명합니다
 
-function makeWithdrawal(uint amount) { // Isn't clear that this function is potentially unsafe
+function makeWithdrawal(uint amount) { // 이 함수가 잠재적으로 위험한지 불분명합니다
     Bank.withdraw(amount);
 }
 
-// good
-UntrustedBank.withdraw(100); // untrusted external call
-TrustedBank.withdraw(100); // external but trusted bank contract maintained by XYZ Corp
+// 좋은 케이스
+UntrustedBank.withdraw(100); // 신뢰할 수 없는 외부 호출
+TrustedBank.withdraw(100); // 외부 호출이지만 XYZ Corp가 운영하는 신뢰가능한 컨트랙트에 대한 호출
 
 function makeUntrustedWithdrawal(uint amount) {
     UntrustedBank.withdraw(amount);
@@ -34,66 +34,60 @@ function makeUntrustedWithdrawal(uint amount) {
 ```
 
 
-### Avoid state changes after external calls
+### 외부 호출 이후에 상태 변경하지 않기
 
-Whether using *raw calls* (of the form `someAddress.call()`) or *contract calls* (of the form `ExternalContract.someMethod()`), assume that malicious code might execute. Even if `ExternalContract` is not malicious, malicious code can be executed by any contracts *it* calls. 
+`someAddress.call()`과 같은 형태의 호출(*raw call*)이나 `ExternalContract.someMethod()`와 같은 형태의 호출(*contract call*)을 사용할 때, 악의적인 코드가 실행될 것이라고 가정해야 합니다. 심지어 `ExternalContract`가 악의적이지 않더라도 *그 컨트랙트* 가 실행하는 다른 어떤 컨트랙트에 의해 악의적인 코드가 실행될 수도 있습니다.
 
-One particular danger is malicious code may hijack the control flow, leading to race conditions. (See [Race Conditions](./known_attacks#race-conditions) for a fuller discussion of this problem).
+특히, 악의적인 코드가 제어 흐름을 하이재킹해 경쟁 상태(Race Condition)로 이끄는 공격이 있습니다. (이 문제에 대한 토론을 더 자세하게 보기 위해서는 [Race Conditions](./known_attacks#race-conditions) 항목으로 이동하세요).
 
-If you are making a call to an untrusted external contract, *avoid state changes after the call*. This pattern is also sometimes known as the [checks-effects-interactions pattern](http://solidity.readthedocs.io/en/develop/security-considerations.html?highlight=check%20effects#use-the-checks-effects-interactions-pattern).
-
-
-### Be aware of the tradeoffs between `send()`, `transfer()`, and `call.value()()`
-
-When sending ether be aware of the relative tradeoffs between the use of
-`someAddress.send()`, `someAddress.transfer()`, and `someAddress.call.value()()`.
-
-- `someAddress.send()`and `someAddress.transfer()` are considered *safe* against [reentrancy](./known_attacks#reentrancy).
-    While these methods still trigger code execution, the called contract is
-    only given a stipend of 2,300 gas which is currently only enough to log an
-    event.
-- `x.transfer(y)` is equivalent to `require(x.send(y));`, it will automatically revert if the send fails.
-- `someAddress.call.value(y)()` will send the provided ether and trigger code execution.  
-    The executed code is given all available gas for execution making this type of value transfer *unsafe* against reentrancy.
-
-Using `send()` or `transfer()` will prevent reentrancy but it does so at the cost of being incompatible with any contract whose fallback function requires more than 2,300 gas. It is also possible to use `someAddress.call.value(ethAmount).gas(gasAmount)()` to forward a custom amount of gas.
-
-One pattern that attempts to balance this trade-off is to implement both
-a [*push* and *pull*](#favor-pull-over-push-for-external-calls) mechanism, using `send()` or `transfer()`
-for the *push* component and `call.value()()` for the *pull* component.
-
-It is worth pointing out that exclusive use of `send()` or `transfer()` for value transfers
-does not itself make a contract safe against reentrancy but only makes those
-specific value transfers safe against reentrancy.
+만일 신뢰할 수 없는 외부 컨트랙트에 대한 호출을 만들고 있다면 호출 이후에는 상태를 변경하지 마세요. 이 패턴은 [checks-effects-interactions pattern](http://solidity.readthedocs.io/en/develop/security-considerations.html?highlight=check%20effects#use-the-checks-effects-interactions-pattern)로도 알려져 있습니다.
 
 
-### Handle errors in external calls
+### `send()`와 `transfer()` 그리고 `call.value()()`간의 트레이드오프에 대해 파악하기
 
-Solidity offers low-level call methods that work on raw addresses: `address.call()`, `address.callcode()`, `address.delegatecall()`, and `address.send()`. These low-level methods never throw an exception, but will return `false` if the call encounters an exception. On the other hand, *contract calls* (e.g., `ExternalContract.doSomething()`) will automatically propagate a throw (for example, `ExternalContract.doSomething()` will also `throw` if `doSomething()` throws).
+이더를 전송할 때, `someAddress.send()`, `someAddress.transfer()`, 그리고 `someAddress.call.value()()` 항목 사이의 상대적인 장단점 대해 알고 있어야 합니다.
 
-If you choose to use the low-level call methods, make sure to handle the possibility that the call will fail, by checking the return value.
+- `someAddress.send()`와 `someAddress.transfer()` 방식을 사용하는 것은 [reentrancy](./known_attacks#reentrancy) 공격에 대해 상대적으로 안전한 것으로 간주되고 있습니다.
+    위 메소드들이 코드 실행을 트리거할 때, 호출된 컨트랙트에는 이벤트를 기록하기에 충분한 양인 2,300 가스만 주어집니다.
+- `x.transfer(y)` 표현은 `require(x.send(y));`과 같습니다. 이 것은 송금이 실패했을 때 자동으로 트랜잭션을 무효화(revert) 시킵니다.
+- `someAddress.call.value(y)()` 표현은 적시된 이더리움을 송금하고 코드 실행을 트리거합니다.
+    이때는 실행되는 코드에 가용 가스 전부가 주어집니다. 따라서 이러한 방식의 전송은 재진입(reentrancy) 공격에 대해 *안전하지 않습니다*.
+
+
+`send()` 혹은 `transfer()` 메소드를 사용하면 재진입(reentrancy) 공격을 예방할 수 있지만, 2300 가스 이상을 사용하는 폴백 함수(fallback function)를 가진 컨트랙트들과는 호환되지 않는 단점이 있습니다. 혹은 `someAddress.call.value(ethAmount).gas(gasAmount)()` 형태의 표현을 통해 지정된 양의 가스를 전달시키는 방법을 사용할 수도 있습니다.
+
+이 트레이드오프 사이에서 적절한 균형을 찾기 위한 괜찮은 방법 중 하나는 `send()` 혹은 `transfer()`를 사용하여 푸시(*push*)를 구현하고, `call.value()()`를 사용하여 풀(*pull*)을 구현하여 [푸시앤풀 메커니즘(*push* and *pull*)](#favor-pull-over-push-for-external-calls)을 사용하는 것입니다.
+
+한 가지 주의할 점은 `send()`나 `transfer()` 함수를 송금 전용으로 사용하는 것이 컨트랙트 자체를 재진입공격으로부터 안전하게 만드는 것이 아니라 단순히 해당 송금에 대해서만 안전하게 만든다는 것입니다.
+
+
+### 외부 호출 시 에러 처리하기
+
+솔리디티는 주소값에 직접 접근할 수 있도록 `address.call()`, `address.callcode()`, `address.delegatecall()`, 및 `address.send()` 등의 로우-레벨(low-level) 메소드들을 제공합니다. 이 로우-레벨 메소드들은 예외를 발생시키지 않고 만일 예외 상황이 발생했을 경우에는 `false` 값을 반환합니다 반면, 컨트랙트 콜(*contract calls*, e.g., `ExternalContract.doSomething()`)들은 자동으로 예외를 전달합니다. (예로, `doSomething()`에서 예외를 던질 경우 `ExternalContract.doSomething()` 또한 예외를 던집니다.)
+
+로우-레벨 메소드들을 사용할 경우에는, 반드시 호출 결과를 확인해서 호출이 실패하는 경우를 처리해야만 합니다.
 
 ```sol
-// bad
+// 나쁜 케이스
 someAddress.send(55);
-someAddress.call.value(55)(); // this is doubly dangerous, as it will forward all remaining gas and doesn't check for result
-someAddress.call.value(100)(bytes4(sha3("deposit()"))); // if deposit throws an exception, the raw call() will only return false and transaction will NOT be reverted
+someAddress.call.value(55)(); // 이 것은 남아있는 모든 가스를 전달한 뒤, 결과를 확인하지 않는 것이므로 곱절로 위험합니다.
+someAddress.call.value(100)(bytes4(sha3("deposit()"))); // deposit 호출이 예외를 발생시킨다면 로우-레벨 메소드 call()은 false를 반환하기만 하고 트랜잭션은 무효화(revert)되지 않을 것입니다
 
-// good
+// 좋은 케이스
 if(!someAddress.send(55)) {
-    // Some failure code
+    // 실패하는 코드
 }
 
 ExternalContract(someAddress).deposit.value(100);
 ```
 
 
-### Favor *pull* over *push* for external calls
+### 외부호출에 푸쉬(*push*)보다는 풀(*pull*)을 사용하세요
 
-External calls can fail accidentally or deliberately. To minimize the damage caused by such failures, it is often better to isolate each external call into its own transaction that can be initiated by the recipient of the call. This is especially relevant for payments, where it is better to let users withdraw funds rather than push funds to them automatically. (This also reduces the chance of [problems with the gas limit](./known_attacks#dos-with-block-gas-limit).)  Avoid combining multiple `send()` calls in a single transaction.
+외부호출은 의도치 않게 혹은 고의로 실패할 가능성이 있습니다. 이러한 실패들로 인한 피해를 최소화하기 위해서는 각각의 외부 호출들을 호출 수신자가 시작할 수 있는 각 트랜잭션별로 격리하는 것이 좋습니다. 이 것은 특히 지불 등과 같이 사용자들의 펀드를 직접 업데이트 해주기(push)보다는 사용자가 직접 출금해가도록(pull) 하는 것이 나은 상황 등에 적절한 방법입니다.(이런 방법은 [가스 한도와 관련된 문제들](./known_attacks#dos-with-block-gas-limit)의 발생을 줄여줍니다). 즉, 한 트랜잭션에서 `send()` 호출을 여러개 묶어서 사용하면 안됩니다.
 
 ```sol
-// bad
+// 나쁜 케이스
 contract auction {
     address highestBidder;
     uint highestBid;
@@ -102,7 +96,7 @@ contract auction {
         require(msg.value >= highestBid);
 
         if (highestBidder != 0) {
-            highestBidder.transfer(highestBid); // if this call consistently fails, no one else can bid
+            highestBidder.transfer(highestBid); // 이 호출이 지속적으로 실패한다면, 아무도 경매에 참가할 수 없습니다
         }
 
        highestBidder = msg.sender;
@@ -110,7 +104,7 @@ contract auction {
     }
 }
 
-// good
+// 좋은 케이스
 contract auction {
     address highestBidder;
     uint highestBid;
@@ -120,7 +114,7 @@ contract auction {
         require(msg.value >= highestBid);
 
         if (highestBidder != 0) {
-            refunds[highestBidder] += highestBid; // record the refund that this user can claim
+            refunds[highestBidder] += highestBid; // 유저가 환불해갈 수 있는 금액을 기록합니다
         }
 
         highestBidder = msg.sender;
@@ -135,18 +129,19 @@ contract auction {
 }
 ```
 
-## Don't assume contracts are created with zero balance
+## 컨트랙트의 잔고가 무조건 0으로 생성된다고 가정하지 마세요
 
-An attacker can send wei to the address of a contract before it is created.  Contracts should not assume that its initial state contains a zero balance.  See [issue 61](https://github.com/ConsenSys/smart-contract-best-practices/issues/61) for more details.
+공격자는 컨트랙트가 생성되기 이전에 해당 컨트랙트의 주소에 이더를 보내놓을 수 있습니다. 따라서 컨트랙트의 시작 상태의 잔고가 0이라고 가정해서는 절대로 안됩니다. 자세한 내용을 확인하려면 다음 [깃허브 이슈issue 61](https://github.com/ConsenSys/smart-contract-best-practices/issues/61)를 확인해주세요
 
-## Remember that on-chain data is public
+## 체인 상에 기록된 데이터는 완전 공개되어 있습니다
 
-Many applications require submitted data to be private up until some point in time in order to work. Games (eg. on-chain rock-paper-scissors) and auction mechanisms (eg. sealed-bid second-price auctions) are two major categories of examples. If you are building an application where privacy is an issue, take care to avoid requiring users to publish information too early.
+많은 어플리케이션들이 올바른 동작을 위해서는 체인상에 등록한 데이터가 특정 시점까지 비공개로 유지되는 것을 필요로 합니다. 게임(예: 블록 체인 가위바위보) 및 경매 메커니즘 (예: 밀봉 형태의 2차 가격 경매 등)은 비공개를 필요로 하는 예시의 주요 항목들이빈다. 혹은 프라이버시 이슈를 가지고 있는 어플리케이션을 개발한다면 유저가 정보를 너무 쉽게 공개하지 못하도록 해야 합니다.
 
-Examples:
+예시:
 
-* In rock paper scissors, require both players to submit a hash of their intended move first, then require both players to submit their move; if the submitted move does not match the hash throw it out.
-* In an auction, require players to submit a hash of their bid value in an initial phase (along with a deposit greater than their bid value), and then submit their action bid value in the second phase.
+* 가위바위보에서는 두 플레이어가 모두 첫 번째로 낼 패의 해쉬 값을 제출합니다. 그리고 둘 모두 해쉬를 제출하고 나면, 원래 값을 제출합니다. 원래 값을 제출했을 때, 기 제출한 해쉬값과 맞지 않으면 게임이 성립되지 않습니다.
+* 경매에서는, 1단계로 플레이어들이 경매 값(당연히, 경매 값보다 예금이 더 많은 상태여야 합니다)의 해쉬값을 제출하도록 합니다. 그리고 2단계로 실제 경매값을 제출하도록 합니다.
+* 난수 생성기에 의존적인 어플리케이션을 개발하는 경우, 순서는 항상 (1) 플레이어가 값을 제출하고 (2) 난수를 생성하고 (3) 플레이어가 값을 지불하는 순서가 되어야 합니다.
 * When developing an application that depends on a random number generator, the order should always be (1) players submit moves, (2) random number generated, (3) players paid out. The method by which random numbers are generated is itself an area of active research; current best-in-class solutions include Bitcoin block headers (verified through http://btcrelay.org), hash-commit-reveal schemes (ie. one party generates a number, publishes its hash to "commit" to the value, and then reveals the value later) and [RANDAO](http://github.com/randao/randao).
 * If you are implementing a frequent batch auction, a hash-commit scheme is also desirable.
 
@@ -293,7 +288,7 @@ pragma solidity 0.4.4;
 
 ### Exception
 
-Pragma statements can be allowed to float when a contract is intended for consumption by other developers, as in the case with contracts in a library or EthPM package. Otherwise, the developer would need to manually update the pragma in order to compile locally. 
+Pragma statements can be allowed to float when a contract is intended for consumption by other developers, as in the case with contracts in a library or EthPM package. Otherwise, the developer would need to manually update the pragma in order to compile locally.
 
 ## Differentiate functions and events
 
@@ -329,7 +324,7 @@ contract ExampleContract is PretendingToRevert {
 }
 ```
 
-Contract users (and auditors) should be aware of the full smart contract source code of any application they intend to use. 
+Contract users (and auditors) should be aware of the full smart contract source code of any application they intend to use.
 
 ## Avoid using `tx.origin`
 
@@ -341,16 +336,16 @@ pragma solidity 0.4.18;
 contract MyContract {
 
     address owner;
-    
+
     function MyContract() public {
         owner = msg.sender;
     }
-    
+
     function sendTo(address receiver, uint amount) public {
         require(tx.origin == owner);
         receiver.transfer(amount);
     }
-    
+
 }
 
 contract AttackingContract {
@@ -366,7 +361,7 @@ contract AttackingContract {
     function() public {
         myContract.sendTo(attacker, msg.sender.balance);
     }
-    
+
 }
 ```
 
@@ -387,16 +382,16 @@ There are three main considerations when using a timestamp to execute a critical
 Be aware that the timestamp of the block can be manipulated by a miner. Consider this [contract](https://etherscan.io/address/0xcac337492149bdb66b088bf5914bedfbf78ccc18#code):
 
 ```sol
-    
+
 uint256 constant private salt =  block.timestamp;
-    
+
 function random(uint Max) constant private returns (uint256 result){
     //get the best seed for randomness
     uint256 x = salt * 100/Max;
     uint256 y = salt * block.number/(salt % 5) ;
-    uint256 seed = block.number/3 + (salt % 300) + Last_Payout + y; 
-    uint256 h = uint256(block.blockhash(seed)); 
-    
+    uint256 seed = block.number/3 + (salt % 300) + Last_Payout + y;
+    uint256 h = uint256(block.blockhash(seed));
+
     return uint256((h / x)) % Max + 1; //random number between 1 and Max
 }
 ```
@@ -406,7 +401,7 @@ When the contract uses the timestamp to seed a random number, the miner can actu
 ### *30-second Rule*
 A general rule of thumb in evaluating timestamp usage is:
 #### If the contract function can tolerate a [30-second](https://ethereum.stackexchange.com/questions/5924/how-do-ethereum-mining-nodes-maintain-a-time-consistent-with-the-network/5931#5931) drift in time, it is safe to use `block.timestamp`
-If the scale of your time-dependent event can vary by 30-seconds and maintain integrity, it is safe to use a timestamp. This includes things like ending of auctions, registration periods, etc. 
+If the scale of your time-dependent event can vary by 30-seconds and maintain integrity, it is safe to use a timestamp. This includes things like ending of auctions, registration periods, etc.
 
 ### Caution using `block.number` as a timestamp
 
@@ -414,11 +409,11 @@ When a contract creates an `auction_complete` modifier to signify the end of a t
 ```sol
 modifier auction_complete {
     require(auctionEndBlock <= block.number     ||
-          currentAuctionState == AuctionState.success || 
+          currentAuctionState == AuctionState.success ||
           currentAuctionState == AuctionState.cancel)
         _;}
 ```
-`block.number` and *[average block time](https://etherscan.io/chart/blocktime)* can be used to estimate time as well, but this is not future proof as block times may change (such as [fork reorganisations](https://blog.ethereum.org/2015/08/08/chain-reorganisation-depth-expectations/) and the [difficulty bomb](https://github.com/ethereum/EIPs/issues/649)). In a sale spanning days, the 12-minute rule allows one to construct a more reliable estimate of time. 
+`block.number` and *[average block time](https://etherscan.io/chart/blocktime)* can be used to estimate time as well, but this is not future proof as block times may change (such as [fork reorganisations](https://blog.ethereum.org/2015/08/08/chain-reorganisation-depth-expectations/) and the [difficulty bomb](https://github.com/ethereum/EIPs/issues/649)). In a sale spanning days, the 12-minute rule allows one to construct a more reliable estimate of time.
 
 ## Multiple Inheritance Caution
 
@@ -435,7 +430,7 @@ contract Final {
 
 contract B is Final {
     int public fee;
-    
+
     function B(uint f) Final(f) public {
     }
     function setFee() public {
@@ -445,7 +440,7 @@ contract B is Final {
 
 contract C is Final {
     int public fee;
-    
+
     function C(uint f) Final(f) public {
     }
     function setFee() public {
@@ -471,7 +466,7 @@ To help contribute, Solidity's Github has a [project](https://github.com/ethereu
 
 ## Deprecated/historical recommendations
 
-These are recommendations which are no longer relevant due to changes in the protocol or improvements to solidity. They are recorded here for posterity and awareness. 
+These are recommendations which are no longer relevant due to changes in the protocol or improvements to solidity. They are recorded here for posterity and awareness.
 
 ### Beware division by zero (Solidity < 0.4)
 
