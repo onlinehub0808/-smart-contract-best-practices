@@ -25,7 +25,11 @@
 
 ---
 
-## Tasks for translating into Korean
+## 번역 태스크
+
+번역작업은 실제 내용과는 상관 없는 경우가 많을 것이니 포크 레포지토리에서 [https://github.com/james-lim/smart-contract-best-practices](https://github.com/james-lim/smart-contract-best-practices)에서 토론을 이어가는 것이 좋을 것 같습니다.
+
+### 초벌번역(Draft)
 
 - [x] [Home](./index.md)
 - [x] [기본 철학](./general_philosophy.md)
@@ -35,6 +39,21 @@
 - [x] [토큰과 관련된 모범사례](./tokens.md)
 - [x] [문서화 및 절차](./documentation_procedures.md)
 - [x] [보안 도구 모음](./security_tools.md)
+- [x] [보안 소식](./security_notifications.md)
+- [x] [개선 사항](./future_improvements.md)
+- [x] [스마트 컨트랙트 보안 참고자료](./bibliography.md)
+- [x] [기여하기](./about/contributing.md)
+
+### 리뷰(Review)
+
+- [ ] [Home](./index.md)
+- [ ] [기본 철학](./general_philosophy.md)
+- [ ] [솔리디티 추천 패턴](./recommendations.md)
+- [ ] [알려진 공격 사례](./known_attacks.md)
+- [ ] [소프트웨어 공학](./software_engineering.md)
+- [ ] [토큰과 관련된 모범사례](./tokens.md)
+- [ ] [문서화 및 절차](./documentation_procedures.md)
+- [ ] [보안 도구 모음](./security_tools.md)
 - [ ] [보안 소식](./security_notifications.md)
 - [ ] [개선 사항](./future_improvements.md)
 - [ ] [스마트 컨트랙트 보안 참고자료](./bibliography.md)
