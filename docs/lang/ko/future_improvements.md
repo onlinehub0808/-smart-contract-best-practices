@@ -1,8 +1,7 @@
-## Functional languages
+## 함수형 언어
 
-!!! warning
-    This page is quite outdated
+!!! Warning
+    이 페이지는 꽤 오래되었습니다
 
 
-
-Functional languages give certain guarantees over procedural languages like Solidity, namely immutability within a function and strong compile time checking. This can reduce the risk of errors by providing deterministic behavior (for more see [this](https://plus.google.com/u/0/events/cmqejp6d43n5cqkdl3iu0582f4k), Curry-Howard correspondence, and linear logic).
+함수형 언어는 솔리티티와 같은 절차형 언어데 비하여 함수 내의 불변성(immutability) 및 강력한 컴파일 확인 단계 등의 이점을 제공해줄 수 있습니다. 이 것은 결정론적인 동작을 통해 에러의 발생을 줄일 수 있습니다(더 자세한 것은 [여기](https://plus.google.com/u/0/events/cmqejp6d43n5cqkdl3iu0582f4k)와, 커리-하워드 대응 및 선형 논리 등을 읽어보세요).
