@@ -1,0 +1,26 @@
+번역 / 리뷰(date and commit they reviewed in parentheses):
+
+- `lang/ko/index.md`
+  - 초벌번역 Wanseob Lim (15/07/2018 ec5bbb6)
+- `lang/ko/general_philosophy.md`
+  - 초벌번역 Wanseob Lim (15/07/2018 3295145)
+- `lang/ko/recommendations.md`
+  - 초벌번역 Wanseob Lim (17/07/2018 8de2a13)
+- `lang/ko/known_attacks.md`
+  - 초벌번역 Wanseob Lim (17/07/2018 3ab3050)
+- `lang/ko/software_engineering.md`
+  - 초벌번역 Wanseob Lim (17/07/2018 11e1c02)
+- `lang/ko/tokens.md`
+  - 초벌번역 Wanseob Lim (17/07/2018 b333535)
+- `lang/ko/documentation_procedures.md`
+  - 초벌번역 Wanseob Lim (17/07/2018 9e9f701)
+- `lang/ko/security_tools.md`
+  - 초벌번역 Wanseob Lim (17/07/2018 b864ac0)
+- `lang/ko/security_notifications.md`
+  - 초벌번역 Wanseob Lim (17/07/2018 14918f1)
+- `lang/ko/future_improvements.md`
+  - 초벌번역 Wanseob Lim (17/07/2018 37fc1b2)
+- `lang/ko/bibliography.md`
+  - 초벌번역 Wanseob Lim (17/07/2018 5441783)
+- `lang/ko/about/contributing.md`
+  - 초벌번역 Wanseob Lim (17/07/2018 53f3948)
