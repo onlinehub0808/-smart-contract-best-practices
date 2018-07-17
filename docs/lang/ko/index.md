@@ -28,9 +28,9 @@
 
 - [x] [Home](./index.md)
 - [x] [기본 철학](./general_philosophy.md)
-- [ ] [솔리디티 추천 패턴](./recommendations.md)
-- [ ] [알려진 공격 사례](./known_attacks.md)
-- [ ] [소프트웨어 공학](./software_engineering.md)
+- [x] [솔리디티 추천 패턴](./recommendations.md)
+- [x] [알려진 공격 사례](./known_attacks.md)
+- [x] [소프트웨어 공학](./software_engineering.md)
 - [ ] [문서화 및 절차](./documentation_procedures.md)
 - [ ] [보안 도구 모음](./security_tools.md)
 - [ ] [보안 알림 사항](./security_notifications.md)
