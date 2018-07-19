@@ -1,7 +1,7 @@
 ## Functional languages
 
 !!! warning
-    This page is quite outdated
+    This page is quite outdated. Contributions to update it are welcome. 
 
 
 
