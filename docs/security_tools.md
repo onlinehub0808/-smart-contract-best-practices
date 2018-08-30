@@ -1,10 +1,12 @@
 ### Static Analysis
 
 - [Manticore](https://github.com/trailofbits/manticore) - Dynamic binary analysis tool with [EVM support](https://asciinema.org/a/haJU2cl0R0Q3jB9wd733LVosL)
-- [Mythril](https://github.com/ConsenSys/mythril) - Reversing and bug hunting framework for the Ethereum blockchain
+- [Mythril OSS](https://github.com/ConsenSys/mythril) - Open-source security analysis tool for Solidity code and Ethereum bytecode.
+- [Mythril Platform API](https://mythril.ai/) - SaaS platform and tools ecosystem for smart contract security.
 - [Oyente](https://github.com/melonproject/oyente) - Analyze Ethereum code to find common vulnerabilities, based on this [paper](http://www.comp.nus.edu.sg/~loiluu/papers/oyente.pdf).
 - [Solgraph](https://github.com/raineorshine/solgraph) - Generates a DOT graph that visualizes function control flow of a Solidity contract and highlights potential security vulnerabilities.
 - [SmartCheck](https://tool.smartdec.net) - Static analysis of Solidity source code for security vulnerabilities and best practices.
+- [Surya](https://github.com/ConsenSys/surya) - A set of utilities for exploring Solidity contracts
 
 ### Test Coverage
 
