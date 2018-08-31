@@ -101,7 +101,7 @@ contract auction {
     function bid() payable {
         require(msg.value >= highestBid);
 
-        if (highestBidder != 0) {
+        if (highestBidder != address(0)) {
             highestBidder.transfer(highestBid); // if this call consistently fails, no one else can bid
         }
 
@@ -119,7 +119,7 @@ contract auction {
     function bid() payable external {
         require(msg.value >= highestBid);
 
-        if (highestBidder != 0) {
+        if (highestBidder != address(0)) {
             refunds[highestBidder] += highestBid; // record the refund that this user can claim
         }
 
