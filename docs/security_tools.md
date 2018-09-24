@@ -8,7 +8,8 @@
 - [SmartCheck](https://tool.smartdec.net) - Static analysis of Solidity source code for security vulnerabilities and best practices.
 - [Securify](https://securify.ch/) - Fully automated online static analyzer for smart contracts, providing a security report based on vulnerability patterns. 
 - [Sūrya](https://github.com/ConsenSys/surya) - Utility tool for smart contract systems, offering a number of visual outputs and information about the contracts' structure. Also supports querying the function call graph.
-- [EVM Lab](https://github.com/ethereum/evmlab) - Rich tool package to interact with the EVM. Includes a VM, Etherchain API, and a trace-viewer.  
+- [EVM Lab](https://github.com/ethereum/evmlab) - Rich tool package to interact with the EVM. Includes a VM, Etherchain API, and a trace-viewer.
+- [Slither](https://github.com/trailofbits/slither) - Static analysis framework with detectors for many common Solidity issues. It has taint and value tracking capabilities and is written in Python.
 
 ### Test Coverage
 
