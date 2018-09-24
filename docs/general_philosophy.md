@@ -15,7 +15,7 @@ Any non-trivial contract will have errors in it. Your code must, therefore, be a
 It is always better to catch bugs before a full production release.
 
   - Test contracts thoroughly, and add tests whenever new attack vectors are discovered
-  - Provide [bug bounties](#bounties) starting from alpha testnet releases
+  - Provide [bug bounties](software_engineering.md#bug-bounty-programs) starting from alpha testnet releases
   - Rollout in phases, with increasing usage and testing in each phase
 
 ## Keep contracts simple
@@ -72,4 +72,4 @@ As with the other tradeoffs considered here, security best practices trend away 
 
 A smart contract system from a software engineering perspective wishes to maximize reuse where reasonable.  There are many ways to reuse contract code in Solidity.  Using proven previously-deployed contracts *which you own* is generally the safest manner to achieve code reuse.
 
-Duplication is frequently relied upon in cases where self-owned previously-deployed contracts are not available.  Efforts such as [Live Libs](https://github.com/ConsenSys/live-libs) and [Zeppelin Solidity](https://github.com/OpenZeppelin/zeppelin-solidity) seek to provide patterns such that secure code can be re-used without duplication.  Any contract security analyses must include any re-used code that has not previously established a level of trust commensurate with the funds at risk in the target smart contract system.
+Duplication is frequently relied upon in cases where self-owned previously-deployed contracts are not available.  Efforts such as [Zeppelin Solidity](https://github.com/OpenZeppelin/zeppelin-solidity) seek to provide patterns such that secure code can be re-used without duplication.  Any contract security analyses must include any re-used code that has not previously established a level of trust commensurate with the funds at risk in the target smart contract system.
