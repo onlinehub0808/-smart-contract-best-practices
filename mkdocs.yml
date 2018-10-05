@@ -17,6 +17,7 @@ pages:
   - Security Notifications: security_notifications.md
   - Future improvements: future_improvements.md
   - Smart Contract Security Bibliography: bibliography.md
+  - List of Smart Contract Bug Bounty Programs: bug_bounty_list.md
   - About:
     - Reviewers: about/reviewers.md
     - License: about/license.md
