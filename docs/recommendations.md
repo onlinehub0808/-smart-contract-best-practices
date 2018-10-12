@@ -320,7 +320,7 @@ pragma solidity 0.4.4;
 
 Pragma statements can be allowed to float when a contract is intended for consumption by other developers, as in the case with contracts in a library or EthPM package. Otherwise, the developer would need to manually update the pragma in order to compile locally.
 
-## Use events for contract activity monitoring
+## Use events to monitor contract activity
 
 It can be useful to have a way to monitor the contract's activity after it was deployed. One way to accomplish this is to look at all transactions of the contract, however that may be insufficient, as message calls between contracts are not recorded in the blockchain. Moreover, it shows only the input parameters, not the actual changes being made to the state.
 
@@ -370,19 +370,6 @@ contract Game {
 
 Here, all transactions that go through the `Charity` contract, either directly or not, will show up in the event list of that contract along with the amount of donated money.
 
-## Differentiate functions and events
-
-Favor capitalization and a prefix in front of events (we suggest *Log*), to prevent the risk of confusion between functions and events. For functions, always start with a lowercase letter, except for the constructor.
-
-```sol
-// bad
-event Transfer() {}
-function transfer() {}
-
-// good
-event LogTransfer() {}
-function transfer() external {}
-```
 
 ## Prefer newer Solidity constructs
 
@@ -592,3 +579,19 @@ These are recommendations which are no longer relevant due to changes in the pro
 ### Beware division by zero (Solidity < 0.4)
 
 Prior to version 0.4, Solidity [returns zero](https://github.com/ethereum/solidity/issues/670) and does not `throw` an exception when a number is divided by zero. Ensure you're running at least version 0.4.
+
+### Differentiate functions and events (Solidity < 0.4.21)
+
+In [v0.4.21](https://github.com/ethereum/solidity/blob/develop/Changelog.md#0421-2018-03-07) Solidity introduced the `emit` keyword to indicate an event `emit EventName();`. As of 0.5.0, it is required. 
+
+Favor capitalization and a prefix in front of events (we suggest *Log*), to prevent the risk of confusion between functions and events. For functions, always start with a lowercase letter, except for the constructor.
+
+```sol
+// bad
+event Transfer() {}
+function transfer() {}
+
+// good
+event LogTransfer() {}
+function transfer() external {}
+```
