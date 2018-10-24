@@ -653,7 +653,7 @@ Because contract addresses can be pre-computed, this check could also fail if it
 
     If your goal is to prevent other contracts from being able to call your contract, the `extcodesize` check is probably sufficient. An alternative approach is to check the value of `(tx.origin == msg.sender)`, though this also [has drawbacks](recommendations/#avoid-using-txorigin).
 
-    There may be other situations in which the `extcodesize` check serves your purose. Describing all of them here is out of scope. Understand the underlying behaviors of the EVM and use your Judgement.
+    There may be other situations in which the `extcodesize` check serves your purpose. Describing all of them here is out of scope. Understand the underlying behaviors of the EVM and use your Judgement.
 
     
 
