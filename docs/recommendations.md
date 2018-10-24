@@ -601,7 +601,48 @@ contract Auction is TypeSafeAuction {
     }
 }
 ```
+## Avoid using `extcodesize` to check for Externally Owned Accounts
 
+Often the following modifier (or a similar check) is used to verify whether a call was made from an externally owned account (EOA) or a contract account:
+
+```sol
+// bad
+modifier isNotContract(address _a) {
+  uint size;
+  assembly {
+    size := extcodesize(_a)
+  }
+    require(size == 0);
+     _;
+}
+```
+
+The idea is simple: if an address has associated code to it, it's not an EOA but a contract account. However, a contract does not have source code available during construction. This means that while the constructor is running, `extcodesize` for that address returns zero. Below is a minimal example that shows how this can be exploited:
+
+```sol
+contract OnlyForEOA {    
+    uint public flag;
+    
+    // bad
+    modifier isNotContract(address _a){
+        uint len;
+        assembly { len := extcodesize(_a) }
+        require(len == 0);
+        _;
+    }
+    
+    function setFlag(uint i) public isNotContract(msg.sender){
+        flag = i;
+    }
+}
+
+contract FakeEOA {
+    constructor(address _a) public {
+        OnlyForEOA c = OnlyForEOA(_a);
+        c.setFlag(1);
+    }
+}
+```
 
 ## Deprecated/historical recommendations
 
