@@ -371,6 +371,8 @@ pragma solidity ^0.4.4;
 pragma solidity 0.4.4;
 ```
 
+Note: a floating pragma version (ie. `^0.4.25`) will compile fine with `0.4.26-nightly.2018.9.25`, however nightly builds should never be used to compile code for production.
+
 ### Exception
 
 Pragma statements can be allowed to float when a contract is intended for consumption by other developers, as in the case with contracts in a library or EthPM package. Otherwise, the developer would need to manually update the pragma in order to compile locally.
