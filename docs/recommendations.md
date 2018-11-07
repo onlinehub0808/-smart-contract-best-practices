@@ -203,6 +203,8 @@ contract Negation {
 
 One way to handle this is to check the value of a variable before negation and throw if it's equal to the `MIN_INT`. Another option is to make sure that the most negative number will never be achieved by using a type with a higher capacity (e.g. `int32` instead of `int16`).
 
+A similar issue with `int` types occurs when `MIN_INT` is multiplied or divided by `-1`. 
+
 ## Solidity specific recommendations
 
 ### <!-- -->
