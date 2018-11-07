@@ -1,8 +1,6 @@
 # Ethereum Smart Contract Security Best Practices
 
-This document provides a baseline knowledge of security considerations for intermediate Solidity programmers. It is maintained by [ConsenSys Diligence](https://media.consensys.net/introducing-consensys-diligence-cf38f83948c), and the broader Ethereum community.
-
-[![Join the chat at https://gitter.im/ConsenSys/smart-contract-best-practices](https://badges.gitter.im/ConsenSys/smart-contract-best-practices.svg)](https://gitter.im/ConsenSys/smart-contract-best-practices?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+This document provides a baseline knowledge of security considerations for intermediate Solidity programmers. It is maintained by [ConsenSys Diligence](https://consensys.net/diligence/), with contributions from our friends in the broader Ethereum community.
 
 ## Where to start?
 
