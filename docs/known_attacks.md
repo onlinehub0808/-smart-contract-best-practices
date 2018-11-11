@@ -344,7 +344,6 @@ This attack [was conducted](https://osolmaz.com/2018/10/18/anatomy-block-stuffin
 
 A Block Stuffing attack can be used on any contract requiring an action within a certain time period. However, as with any attack, it is only profitable when the expected reward exceeds its cost. Cost of this attack is directly proportional to the number of blocks which need to be stuffed. If a large payout can be obtained by preventing actions from other participants, your contract will likely be targeted by such an attack. 
 
-
 ## Insufficient gas griefing
 
 Contracts can execute other contract's functions either through a defined `Interface` or via `call()`. In the second case, if that call will fail, contract creator has two options: revert the whole transaction or continue execution.
@@ -383,7 +382,7 @@ contract Executor {
 ```
 
 Another solution is to limit the number of accounts who can mine the transaction. Here's an example that uses the predefined whitelist of approved accounts. The whitelist can be dynamical (e.g. to remove transaction miners that act maliciously).
-s
+
 ```sol
 modifier isWhitelisted() {
     require(whitelist[msg.sender] != 0, "Transaction miner is not whitelisted");
@@ -394,7 +393,6 @@ function relay (bytes _data) isWhitelisted public {
     ...
 }
 ```
-
 
 ## Forcibly Sending Ether to a Contract
 
