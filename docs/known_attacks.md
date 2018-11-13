@@ -346,30 +346,37 @@ A Block Stuffing attack can be used on any contract requiring an action within a
 
 ## Insufficient gas griefing
 
-Contracts can execute other contract's functions either through a defined `Interface` or via `call()`. In the second case, if that call will fail, contract creator has two options: revert the whole transaction or continue execution.
+This attack may be possible on a contract which accepts generic data and uses it to make a call another contract (a 'sub-call') via the low level `address.call()` function, as is often the case with multisignature and transaction relayer contracts.
 
-Suppose a developer will go with the second option: do not revert the parent transaction. Here's an example of the contract implemented that way:
+If the call fails, the contract has two options:
+
+1. revert the whole transaction
+2. continue execution.
+
+Take the following example of a simplified `Relayer` contract which continues execution regardless of the outcome of the subcall:
 
 ```sol
 contract Relayer {
-    mapping (bytes => uint) executed;
+    mapping (bytes => bool) executed;
     
     function relay(bytes _data) public {
         // replay protection; do not call the same transaction twice
         require(executed[_data] == 0, "Duplicate call");
-        executed[_data] = 1;
+        executed[_data] = true;
         innerContract.call(bytes4(keccak256("execute(bytes)")), _data);
     }
 }
 ```
 
-This contract allows transaction relaying. Someone who wants to make a transaction but can't execute it by himself (e.g. due to the lack of ether to pay for gas) can sign data that he wants to pass and transfer the data with his signature over any medium. Those who will receive this transaction can send it to the network on behalf of the user, acting as a "transaction miner".
+This contract allows transaction relaying. Someone who wants to make a transaction but can't execute it by himself (e.g. due to the lack of ether to pay for gas) can sign data that he wants to pass and transfer the data with his signature over any medium. A third party "forwarder" can then submit this transaction to the network on behalf of the user.
 
-When function enters into subcall, [it provides up to 63/64 of its remaining gas](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-150.md) to this subcall. The subcall won't throw "out of gas" error if it doesn't have enough gas to complete. Subcall will revert, but the transaction will continue to execute.
+If given just the right amount of gas, the `Relayer` would complete execution recording the `_data`argument in the `executed` mapping, but the subcall would fail because it received insufficient gas to complete execution.
 
-An attacker can use this to censor transactions. In other words, an attacker can make transactions fail by sending them with a low amount of gas. This transaction won't be executed as it will revert, but the `relay` call will complete, marking subcall as executed and therefore preventing anyone from calling it again. Theoretically, an attacker can censor all transactions this way, given that he will be first to submit them to `Relayer`.
+Note: When a contract makes a sub-call to another contract, the EVM limits the gas forwarded to [to 63/64 of the remaining gas](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-150.md), 
 
-One way to fix that is to require transaction miner to provide enough gas to finish the subcall. If the miner will try to conduct the attack in this scenario, `require` statement will fail and the inner call will revert. A user can specify a minimum gas limit along with the other data.
+An attacker can use this to censor transactions, causing them to fail by sending them with a low amount of gas. This attack is a form of "[griefing](https://en.wikipedia.org/wiki/Griefer)": It doesn't directly benefit the attacker, but causes grief for the victim. A dedicated attacker, willing to consistently spend a small amount of gas could theoretically censor all transactions this way, if they were the first to submit them to `Relayer`.
+
+One way to address this is to implement logic requiring forwarders to provide enough gas to finish the subcall. If the miner tried to conduct the attack in this scenario, the `require` statement would fail and the inner call would revert. A user can specify a minimum gasLimit along with the other data (in this example, typically the `_gasLimit` value would be verified by a signature, but that is ommitted for simplicity in this case).
 
 ```
 // contract called by Relayer
@@ -381,18 +388,8 @@ contract Executor {
 }
 ```
 
-Another solution is to limit the number of accounts who can mine the transaction. Here's an example that uses the predefined whitelist of approved accounts. The whitelist can be dynamical (e.g. to remove transaction miners that act maliciously).
+Another solution is to permit only trusted accounts to mine the transaction. 
 
-```sol
-modifier isWhitelisted() {
-    require(whitelist[msg.sender] != 0, "Transaction miner is not whitelisted");
-    _;
-}
-
-function relay (bytes _data) isWhitelisted public {
-    ...
-}
-```
 
 ## Forcibly Sending Ether to a Contract
 
