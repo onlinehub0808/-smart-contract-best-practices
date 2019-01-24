@@ -160,9 +160,9 @@ contract Worker
 
 If `Worker.doWork()` is called with the address of the deployed `Destructor` contract as an argument, the `Worker` contract will self-destruct. Delegate execution only to trusted contracts, and **never to a user supplied address**.
 
-## Don't assume contracts are created with zero balance
-
-An attacker can send ether to the address of a contract before it is created.  Contracts should not assume that its initial state contains a zero balance.  See [issue 61](https://github.com/ConsenSys/smart-contract-best-practices/issues/61) for more details.
+!!! Warning
+      Don't assume contracts are created with zero balance
+      An attacker can send ether to the address of a contract before it is created.  Contracts should not assume that its initial state contains a zero balance.  See [issue 61](https://github.com/ConsenSys/smart-contract-best-practices/issues/61) for more details.
 
 ## Remember that on-chain data is public
 
@@ -364,6 +364,12 @@ function() payable { require(msg.data.length == 0); LogDepositReceived(msg.sende
 Starting from Solidity `0.4.0`, every function that is receiving ether must use `payable` modifier, otherwise if the transaction has `msg.value > 0` will revert ([except when forced](./recommendations/#remember-that-ether-can-be-forcibly-sent-to-an-account)).
 
 Declare variables and especially function arguments as `address payable`, if you want to call `transfer` on them. You can use `.transfer(..)` and `.send(..)` on `address payable`, but not on `address`. You can use a low-level `.call(..)` on both `address` and `address payable`, even if you attach value to it. This is not recommended.<sup><a href='https://ethereum.stackexchange.com/questions/64108/whats-the-difference-between-address-and-address-payable'>\*</a></sup>
+
+!!! Note
+
+    Something that might not be obvious: The `payable` modifier only applies to calls from *external* contracts. If I call a non-payable function in the payable function in the same contract, the non-payable function won't fail, though `msg.value` is still set
+
+
 
 
 ## Explicitly mark visibility in functions and state variables
