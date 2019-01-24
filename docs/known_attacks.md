@@ -225,28 +225,28 @@ contract UnderflowManipulation {
     function UnderflowManipulation() {
         owner = msg.sender;
     }
-    
+
     uint[] public bonusCodes;
-    
+
     function pushBonusCode(uint code) {
         bonusCodes.push(code);
     }
-    
+
     function popBonusCode()  {
         require(bonusCodes.length >=0);  // this is a tautology
         bonusCodes.length--; // an underflow can be caused here
     }
-    
-    function modifyBonusCode(uint index, uint update)  { 
+
+    function modifyBonusCode(uint index, uint update)  {
         require(index < bonusCodes.length);
         bonusCodes[index] = update; // write to any index less than bonusCodes.length
     }
-    
+
 }
 ```
- 
+
 In general, the variable `manipulateMe`'s location cannot be influenced without going through the `keccak256`, which is infeasible. However, since dynamic arrays are stored sequentially, if a malicious actor wanted to change `manipulateMe` all they would need to do is:
- 
+
  * Call `popBonusCode` to underflow (Note: Solidity [lacks a built-in pop method](https://github.com/ethereum/solidity/pull/3743))
  * Compute the storage location of `manipulateMe`
  * Modify and update `manipulateMe`'s value using `modifyBonusCode`
@@ -303,7 +303,7 @@ Each block has an upper bound on the amount of gas that can be spent, and thus t
 
 ### Gas Limit DoS on a Contract via Unbounded Operations
 
-You may have noticed another problem with the previous example: by paying out to everyone at once, you risk running into the block gas limit. 
+You may have noticed another problem with the previous example: by paying out to everyone at once, you risk running into the block gas limit.
 
 This can lead to problems even in the absence of an intentional attack. However, it's especially bad if an attacker can manipulate the amount of gas needed. In the case of the previous example, the attacker could add a bunch of addresses, each of which needs to get a very small refund. The gas cost of refunding each of the attacker's addresses could, therefore, end up being more than the gas limit, blocking the refund transaction from happening at all.
 
@@ -342,7 +342,7 @@ If the attack succeeds, no other transactions will be included in the block. Som
 
 This attack [was conducted](https://osolmaz.com/2018/10/18/anatomy-block-stuffing) on Fomo3D, a gambling app. The app was designed to reward the last address that purchased a "key". Each key purchase extended the timer, and the game ended once the timer went to 0. The attacker bought a key and then stuffed 13 blocks in a row until the timer was triggered and the payout was released. Transactions sent by attacker took 7.9 million gas on each block, so the gas limit allowed a few small "send" transactions (which take 21,000 gas each), but disallowed any calls to the `buyKey()` function (which costs 300,000+ gas).
 
-A Block Stuffing attack can be used on any contract requiring an action within a certain time period. However, as with any attack, it is only profitable when the expected reward exceeds its cost. Cost of this attack is directly proportional to the number of blocks which need to be stuffed. If a large payout can be obtained by preventing actions from other participants, your contract will likely be targeted by such an attack. 
+A Block Stuffing attack can be used on any contract requiring an action within a certain time period. However, as with any attack, it is only profitable when the expected reward exceeds its cost. Cost of this attack is directly proportional to the number of blocks which need to be stuffed. If a large payout can be obtained by preventing actions from other participants, your contract will likely be targeted by such an attack.
 
 ## Insufficient gas griefing
 
@@ -358,7 +358,7 @@ Take the following example of a simplified `Relayer` contract which continues ex
 ```sol
 contract Relayer {
     mapping (bytes => bool) executed;
-    
+
     function relay(bytes _data) public {
         // replay protection; do not call the same transaction twice
         require(executed[_data] == 0, "Duplicate call");
@@ -372,7 +372,7 @@ This contract allows transaction relaying. Someone who wants to make a transacti
 
 If given just the right amount of gas, the `Relayer` would complete execution recording the `_data`argument in the `executed` mapping, but the subcall would fail because it received insufficient gas to complete execution.
 
-Note: When a contract makes a sub-call to another contract, the EVM limits the gas forwarded to [to 63/64 of the remaining gas](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-150.md), 
+Note: When a contract makes a sub-call to another contract, the EVM limits the gas forwarded to [to 63/64 of the remaining gas](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-150.md),
 
 An attacker can use this to censor transactions, causing them to fail by sending them with a low amount of gas. This attack is a form of "[griefing](https://en.wikipedia.org/wiki/Griefer)": It doesn't directly benefit the attacker, but causes grief for the victim. A dedicated attacker, willing to consistently spend a small amount of gas could theoretically censor all transactions this way, if they were the first to submit them to `Relayer`.
 
@@ -388,7 +388,7 @@ contract Executor {
 }
 ```
 
-Another solution is to permit only trusted accounts to mine the transaction. 
+Another solution is to permit only trusted accounts to mine the transaction.
 
 
 ## Forcibly Sending Ether to a Contract
@@ -400,7 +400,7 @@ contract Vulnerable {
     function () payable {
         revert();
     }
-    
+
     function somethingBad() {
         require(this.balance > 0);
         // Do something bad
@@ -408,22 +408,29 @@ contract Vulnerable {
 }
 ```
 
-Contract logic seems to disallow payments to the contract and therefore disallow "something bad" from happening. However, a few methods exist for forcibly sending ether to the contract and therefore making its balance greater than zero. 
+Contract logic seems to disallow payments to the contract and therefore disallow "something bad" from happening. However, a few methods exist for forcibly sending ether to the contract and therefore making its balance greater than zero.
 
-The `selfdestruct` contract method allows a user to specify a beneficiary to send any excess ether. `selfdestruct` [does not trigger a contract's fallback function](https://solidity.readthedocs.io/en/develop/security-considerations.html#sending-and-receiving-ether). 
+The `selfdestruct` contract method allows a user to specify a beneficiary to send any excess ether. `selfdestruct` [does not trigger a contract's fallback function](https://solidity.readthedocs.io/en/develop/security-considerations.html#sending-and-receiving-ether).
 
 It is also possible to [precompute](https://github.com/Arachnid/uscc/tree/master/submissions-2017/ricmoo) a contract's address and send Ether to that address before deploying the contract.
 
-Contract developers should be aware that Ether can be forcibly sent to a contract and should design contract logic accordingly. Generally, assume that it is not possible to restrict sources of funding to your contract. 
+Contract developers should be aware that Ether can be forcibly sent to a contract and should design contract logic accordingly. Generally, assume that it is not possible to restrict sources of funding to your contract.
 
 ## Deprecated/historical attacks
 
-These are attacks which are no longer possible due to changes in the protocol or improvements to solidity. They are recorded here for posterity and awareness. 
+These are attacks which are no longer possible due to changes in the protocol or improvements to solidity. They are recorded here for posterity and awareness.
 
 ### Call Depth Attack (deprecated)
 
 As of the [EIP 150](https://github.com/ethereum/EIPs/issues/150) hardfork, call depth attacks are no longer relevant<sup><a href='http://ethereum.stackexchange.com/questions/9398/how-does-eip-150-change-the-call-depth-attack'>\*</a></sup> (all gas would be consumed well before reaching the 1024 call depth limit).
 
+### Constantinople Reentrancy Attack
+
+On January 16th, 2019, Constantinople protocol upgrade was delayed due to a security vulnerability enabled by [EIP 1283](https://eips.ethereum.org/EIPS/eip-1283). _EIP 1283: Net gas metering for SSTORE without dirty maps_ proposes changes to reduce excessive gas costs on dirty storage writes.
+
+This change led to possibility of a new reentrancy vector making previously known secure withdrawal patterns (`.send()` and `.transfer()`) unsafe in specific situations<sup><a href='https://medium.com/chainsecurity/constantinople-enables-new-reentrancy-attack-ace4088297d9'>\*</a></sup>, where the attacker could hijack the control flow and use the remaining gas enabled by EIP 1283, leading to vulnerabilities due to reentrancy.
+
+  
 ## Other Vulnerabilities
 
 The [Smart Contract Weakness Classification Registry](https://smartcontractsecurity.github.io/SWC-registry/) offers a complete and up-to-date catalogue of known smart contract vulnerabilities and anti-patterns along with real-world examples. Browsing the registry is a good way of keeping up-to-date with the latest attacks.
