@@ -246,13 +246,8 @@ contract UnderflowManipulation {
 ```
 
 In general, the variable `manipulateMe`'s location cannot be influenced without going through the `keccak256`, which is infeasible. However, since dynamic arrays are stored sequentially, if a malicious actor wanted to change `manipulateMe` all they would need to do is:
-<<<<<<< HEAD
 
- * Call `popBonusCode` to underflow (Note: Solidity [lacks a built-in pop method](https://github.com/ethereum/solidity/pull/3743))
-=======
- 
  * Call `popBonusCode` to underflow (Note: `array.pop()` method [was added](https://github.com/ethereum/solidity/blob/v0.5.0/Changelog.md) in Solidity 0.5.0)
->>>>>>> 9a302b01bce3d008e7a7a613daefeff64c2baf86
  * Compute the storage location of `manipulateMe`
  * Modify and update `manipulateMe`'s value using `modifyBonusCode`
 
@@ -435,7 +430,7 @@ On January 16th, 2019, Constantinople protocol upgrade was delayed due to a secu
 
 This change led to possibility of a new reentrancy vector making previously known secure withdrawal patterns (`.send()` and `.transfer()`) unsafe in specific situations<sup><a href='https://medium.com/chainsecurity/constantinople-enables-new-reentrancy-attack-ace4088297d9'>\*</a></sup>, where the attacker could hijack the control flow and use the remaining gas enabled by EIP 1283, leading to vulnerabilities due to reentrancy.
 
-  
+
 ## Other Vulnerabilities
 
 The [Smart Contract Weakness Classification Registry](https://smartcontractsecurity.github.io/SWC-registry/) offers a complete and up-to-date catalogue of known smart contract vulnerabilities and anti-patterns along with real-world examples. Browsing the registry is a good way of keeping up-to-date with the latest attacks.
