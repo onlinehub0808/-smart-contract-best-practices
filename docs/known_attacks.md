@@ -246,8 +246,13 @@ contract UnderflowManipulation {
 ```
 
 In general, the variable `manipulateMe`'s location cannot be influenced without going through the `keccak256`, which is infeasible. However, since dynamic arrays are stored sequentially, if a malicious actor wanted to change `manipulateMe` all they would need to do is:
+<<<<<<< HEAD
 
  * Call `popBonusCode` to underflow (Note: Solidity [lacks a built-in pop method](https://github.com/ethereum/solidity/pull/3743))
+=======
+ 
+ * Call `popBonusCode` to underflow (Note: `array.pop()` method [was added](https://github.com/ethereum/solidity/blob/v0.5.0/Changelog.md) in Solidity 0.5.0)
+>>>>>>> 9a302b01bce3d008e7a7a613daefeff64c2baf86
  * Compute the storage location of `manipulateMe`
  * Modify and update `manipulateMe`'s value using `modifyBonusCode`
 
@@ -378,7 +383,7 @@ An attacker can use this to censor transactions, causing them to fail by sending
 
 One way to address this is to implement logic requiring forwarders to provide enough gas to finish the subcall. If the miner tried to conduct the attack in this scenario, the `require` statement would fail and the inner call would revert. A user can specify a minimum gasLimit along with the other data (in this example, typically the `_gasLimit` value would be verified by a signature, but that is ommitted for simplicity in this case).
 
-```
+```sol
 // contract called by Relayer
 contract Executor {
     function execute(bytes _data, uint _gasLimit) {
