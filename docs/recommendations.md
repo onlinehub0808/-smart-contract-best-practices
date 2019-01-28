@@ -36,7 +36,7 @@ function makeUntrustedWithdrawal(uint amount) {
 
 ### Avoid state changes after external calls
 
-Whether using *raw calls* (of the form `someAddress.call()`) or *contract calls* (of the form `ExternalContract.someMethod()`), assume that malicious code might execute. Even if `ExternalContract` is not malicious, malicious code can be executed by any contracts *it* calls. 
+Whether using *raw calls* (of the form `someAddress.call()`) or *contract calls* (of the form `ExternalContract.someMethod()`), assume that malicious code might execute. Even if `ExternalContract` is not malicious, malicious code can be executed by any contracts *it* calls.
 
 One particular danger is malicious code may hijack the control flow, leading to vulnerabilities due to reentrancy. (See [Reentrancy](./known_attacks#reentrancy) for a fuller discussion of this problem).
 
@@ -81,7 +81,7 @@ someAddress.call.value(100)(bytes4(sha3("deposit()"))); // if deposit throws an 
 
 // good
 if(!someAddress.send(55)) {
-    // Some failure code
+    // handle failure code
 }
 
 ExternalContract(someAddress).deposit.value(100);
@@ -158,22 +158,21 @@ contract Worker
 }
 ```
 
-If `Worker.doWork()` is called with the address of the deployed `Destructor` contract as an argument, the `Worker` contract will self-destruct. Delegate execution only to trusted contracts, and never to a user supplied address.
+If `Worker.doWork()` is called with the address of the deployed `Destructor` contract as an argument, the `Worker` contract will self-destruct. Delegate execution only to trusted contracts, and **never to a user supplied address**.
 
-## Don't assume contracts are created with zero balance
-
-An attacker can send wei to the address of a contract before it is created.  Contracts should not assume that its initial state contains a zero balance.  See [issue 61](https://github.com/ConsenSys/smart-contract-best-practices/issues/61) for more details.
+!!! Warning
+      Don't assume contracts are created with zero balance
+      An attacker can send ether to the address of a contract before it is created.  Contracts should not assume that its initial state contains a zero balance.  See [issue 61](https://github.com/ConsenSys/smart-contract-best-practices/issues/61) for more details.
 
 ## Remember that on-chain data is public
 
-Many applications require submitted data to be private up until some point in time in order to work. Games (eg. on-chain rock-paper-scissors) and auction mechanisms (eg. sealed-bid second-price auctions) are two major categories of examples. If you are building an application where privacy is an issue, take care to avoid requiring users to publish information too early.
+Many applications require submitted data to be private up until some point in time in order to work. Games (eg. on-chain rock-paper-scissors) and auction mechanisms (eg. sealed-bid [Vickrey auctions](https://en.wikipedia.org/wiki/Vickrey_auction)) are two major categories of examples. If you are building an application where privacy is an issue, make sure you avoid requiring users to publish information too early. The best strategy is to use [commitment schemes](https://en.wikipedia.org/wiki/Commitment_scheme) with separate phases: first commit using the hash of the values and in a later phase revealing the values.
 
 Examples:
 
 * In rock paper scissors, require both players to submit a hash of their intended move first, then require both players to submit their move; if the submitted move does not match the hash throw it out.
-* In an auction, require players to submit a hash of their bid value in an initial phase (along with a deposit greater than their bid value), and then submit their action bid value in the second phase.
-* When developing an application that depends on a random number generator, the order should always be (1) players submit moves, (2) random number generated, (3) players paid out. The method by which random numbers are generated is itself an area of active research; current best-in-class solutions include Bitcoin block headers (verified through http://btcrelay.org), hash-commit-reveal schemes (ie. one party generates a number, publishes its hash to "commit" to the value, and then reveals the value later) and [RANDAO](http://github.com/randao/randao).
-* If you are implementing a frequent batch auction, a hash-commit scheme is also desirable.
+* In an auction, require players to submit a hash of their bid value in an initial phase (along with a deposit greater than their bid value), and then submit their auction bid value in the second phase.
+* When developing an application that depends on a random number generator, the order should always be (1) players submit moves, (2) random number generated, (3) players paid out. The method by which random numbers are generated is itself an area of active research; current best-in-class solutions include Bitcoin block headers (verified through http://btcrelay.org), hash-commit-reveal schemes (ie. one party generates a number, publishes its hash to "commit" to the value, and then reveals the value later) and [RANDAO](http://github.com/randao/randao). As Ethereum is a deterministic protocol, no variable within the protocol could be used as an unpredictable random number. Also be aware that miners are in some extent in control of the `block.blockhash()` value<sup><a href='https://ethereum.stackexchange.com/questions/419/when-can-blockhash-be-safely-used-for-a-random-number-when-would-it-be-unsafe'>\*</a></sup>.
 
 ## In 2-party or N-party contracts, beware of the possibility that some participants may "drop offline" and not return
 
@@ -190,11 +189,11 @@ contract Negation {
     function negate8(int8 _i) public pure returns(int8) {
         return -_i;
     }
-    
+
     function negate16(int16 _i) public pure returns(int16) {
         return -_i;
     }
-    
+
     int8 public a = negate8(-128); // -128
     int16 public b = negate16(-128); // 128
     int16 public c = negate16(-32768); // -32768
@@ -203,7 +202,7 @@ contract Negation {
 
 One way to handle this is to check the value of a variable before negation and throw if it's equal to the `MIN_INT`. Another option is to make sure that the most negative number will never be achieved by using a type with a higher capacity (e.g. `int32` instead of `int16`).
 
-A similar issue with `int` types occurs when `MIN_INT` is multiplied or divided by `-1`. 
+A similar issue with `int` types occurs when `MIN_INT` is multiplied or divided by `-1`.
 
 ## Solidity specific recommendations
 
@@ -233,9 +232,35 @@ contract Token {
 Note that the assertion is *not* a strict equality of the balance because the contract can be [forcibly sent ether](#remember-that-ether-can-be-forcibly-sent-to-an-account) without going through the `deposit()` function!
 
 
-## Use `assert()` and `require()` properly
+## Use `assert()`, `require()`, `revert()` properly
 
-In Solidity 0.4.10 `assert()` and `require()` were introduced. `require(condition)` is meant to be used for input validation, which should be done on any user input, and reverts if the condition is false. `assert(condition)` also reverts if the condition is false but should be used only for invariants: internal errors or to check if your contract has reached an invalid state. Following this paradigm allows formal analysis tools to verify that the invalid opcode can never be reached: meaning no invariants in the code are violated and that the code is formally verified.
+In Solidity 0.4.10 `assert()` and `require()` were introduced.
+
+> The convenience functions **assert** and **require** can be used to check for conditions and throw an exception if the condition is not met.
+
+> The **assert** function should only be used to test for internal errors, and to check invariants.
+
+> The **require** function should be used to ensure valid conditions, such as inputs, or contract state variables are met, or to validate return values from calls to external contracts. <sup><a href='https://solidity.readthedocs.io/en/latest/control-structures.html#error-handling-assert-require-revert-and-exceptions'>\*</a></sup>
+
+Following this paradigm allows formal analysis tools to verify that the invalid opcode can never be reached: meaning no invariants in the code are violated and that the code is formally verified.
+
+```sol
+pragma solidity ^0.5.0;
+
+contract Sharer {
+    function sendHalf(address payable addr) public payable returns (uint balance) {
+        require(msg.value % 2 == 0, "Even value required."); //Require() can have an optional message string
+        uint balanceBeforeTransfer = address(this).balance;
+        addr.transfer(msg.value / 2);
+        // Since transfer throws an exception on failure and
+        // cannot call back here, there should be no way for us to
+        // still have half of the money.
+        assert(address(this).balance == balanceBeforeTransfer - msg.value / 2); // used for internal error checking
+        return address(this).balance;
+    }
+}
+```
+
 
 ## Use modifiers only for assertions
 
@@ -244,7 +269,7 @@ The code inside a modifier is usually executed before the function body, so any 
 ```sol
 contract Registry {
     address owner;
-    
+
     function isVoter(address _addr) external returns(bool) {
         // Code
     }
@@ -252,12 +277,12 @@ contract Registry {
 
 contract Election {
     Registry registry;
-    
+
     modifier isEligible(address _addr) {
         require(registry.isVoter(_addr));
         _;
     }
-    
+
     function vote() isEligible(msg.sender) public {
         // Code
     }
@@ -266,13 +291,14 @@ contract Election {
 
 In this case, the `Registry` contract can make a reentracy attack by calling `Election.vote()` inside `isVoter()`.
 
-Use modifiers only for [error handling](https://solidity.readthedocs.io/en/develop/control-structures.html#error-handling-assert-require-revert-and-exceptions).
+Use [modifiers](https://solidity.readthedocs.io/en/develop/contracts.html#function-modifiers) to replace duplicate condition checks in multiple functions, such as `isOwner()`, otherwise use `require` or `revert` inside the function. This makes your smart contract code more readable and easier to audit.
+
 
 ## Beware rounding with integer division
 
 All integer division rounds down to the nearest integer. If you need more precision, consider using a multiplier, or store both the numerator and denominator.
 
-(In the future, Solidity will have a fixed-point type, which will make this easier.)
+(In the future, Solidity will have a [fixed-point](https://solidity.readthedocs.io/en/develop/types.html#fixed-point-numbers) type, which will make this easier.)
 
 ```sol
 // bad
@@ -298,11 +324,11 @@ uint denominator = 2;
 
 Beware of coding an invariant that strictly checks the balance of a contract.
 
-An attacker can forcibly send wei to any account and this cannot be prevented (not even with a fallback function that does a `revert()`).
+An attacker can forcibly send ether to any account and this cannot be prevented (not even with a fallback function that does a `revert()`).
 
 The attacker can do this by creating a contract, funding it with 1 wei, and invoking
 `selfdestruct(victimAddress)`.  No code is invoked in `victimAddress`, so it
-cannot be prevented.
+cannot be prevented. This is also true for
 
 ## Be aware of the tradeoffs between abstract contracts and interfaces
 
@@ -334,9 +360,27 @@ function() payable { LogDepositReceived(msg.sender); }
 function() payable { require(msg.data.length == 0); LogDepositReceived(msg.sender); }
 ```
 
+## Explicitly mark payable functions and state variables
+Starting from Solidity `0.4.0`, every function that is receiving ether must use `payable` modifier, otherwise if the transaction has `msg.value > 0` will revert ([except when forced](./recommendations/#remember-that-ether-can-be-forcibly-sent-to-an-account)).
+
+Declare variables and especially function arguments as `address payable`, if you want to call `transfer` on them. You can use `.transfer(..)` and `.send(..)` on `address payable`, but not on `address`. You can use a low-level `.call(..)` on both `address` and `address payable`, even if you attach value to it. This is not recommended.<sup><a href='https://ethereum.stackexchange.com/questions/64108/whats-the-difference-between-address-and-address-payable'>\*</a></sup>
+
+!!! Note
+
+    Something that might not be obvious: The `payable` modifier only applies to calls from *external* contracts. If I call a non-payable function in the payable function in the same contract, the non-payable function won't fail, though `msg.value` is still set
+
+
+
+
 ## Explicitly mark visibility in functions and state variables
 
 Explicitly label the visibility of functions and state variables. Functions can be specified as being `external`, `public`, `internal` or `private`. Please understand the differences between them, for example, `external` may be sufficient instead of `public`. For state variables, `external` is not possible. Labeling the visibility explicitly will make it easier to catch incorrect assumptions about who can call the function or access the variable.
+
+* `External` functions are part of the contract interface. An external function `f` cannot be called internally (i.e. `f()` does not work, but `this.f()` works). External functions are sometimes more efficient when they receive large arrays of data.
+* `Public` functions are part of the contract interface and can be either called internally or via messages. For public state variables, an automatic getter function (see below) is generated.
+* `Internal` functions and state variables can only be accessed internally, without using `this`.
+* `Private` functions and state variables are only visible for the contract they are defined in and not in derived contracts. **Note**: Everything that is inside a contract is visible to all observers external to the blockchain, even `Private` variables.<sup><a href='https://solidity.readthedocs.io/en/develop/contracts.html?#visibility-and-getters'>\*</a></sup>
+
 
 ```sol
 // bad
@@ -348,7 +392,7 @@ function buy() { // the default is public
 // good
 uint private y;
 function buy() external {
-    // only callable externally
+    // only callable externally or using this.buy()
 }
 
 function utility() public {
@@ -381,12 +425,12 @@ Pragma statements can be allowed to float when a contract is intended for consum
 
 ## Use events to monitor contract activity
 
-It can be useful to have a way to monitor the contract's activity after it was deployed. One way to accomplish this is to look at all transactions of the contract, however that may be insufficient, as message calls between contracts are not recorded in the blockchain. Moreover, it shows only the input parameters, not the actual changes being made to the state.
+It can be useful to have a way to monitor the contract's activity after it was deployed. One way to accomplish this is to look at all transactions of the contract, however that may be insufficient, as message calls between contracts are not recorded in the blockchain. Moreover, it shows only the input parameters, not the actual changes being made to the state. Also events could be used to trigger functions in the user interface.
 
 ```sol
 contract Charity {
     mapping(address => uint) balances;
-    
+
     function donate() payable public {
         balances[msg.sender] += msg.value;
     }
@@ -400,17 +444,17 @@ contract Game {
 }
 ```
 
-Here, `Game` contract will make an internal call to `Charity.donate()`. This transaction won't appear in the transaction list of `Charity`. Even if we look at the `Game` transaction, we will only see the amount the player spent to buy coins, not the amount that went to the `Charity` contract.
+Here, `Game` contract will make an internal call to `Charity.donate()`. This transaction won't appear in the external transaction list of `Charity`, but only visible in the internal transactions.
 
-It is possible to fix both issues via events. An event is a convenient way to log something that happened in the contract. Events that were emitted stay in the blockchain along with the other contract data and they are available for future audit. Here is an improvement to the example above, using events to provide a history of the Charity's donations.
+An event is a convenient way to log something that happened in the contract. Events that were emitted stay in the blockchain along with the other contract data and they are available for future audit. Here is an improvement to the example above, using events to provide a history of the Charity's donations.
 
 ```sol
 contract Charity {
     // define event
     event LogDonate(uint _amount);
-    
+
     mapping(address => uint) balances;
-    
+
     function donate() payable public {
         balances[msg.sender] += msg.value;
         // emit event
@@ -432,7 +476,7 @@ Here, all transactions that go through the `Charity` contract, either directly o
 
 ## Prefer newer Solidity constructs
 
-Prefer constructs/aliases such as `selfdestruct` (over `suicide`) and `keccak256` (over `sha3`).  Patterns like `require(msg.sender.send(1 ether))` can also be simplified to using `transfer()`, as in `msg.sender.transfer(1 ether)`.
+Prefer constructs/aliases such as `selfdestruct` (over `suicide`) and `keccak256` (over `sha3`).  Patterns like `require(msg.sender.send(1 ether))` can also be simplified to using `transfer()`, as in `msg.sender.transfer(1 ether)`. Check out [Solidity Change log](https://github.com/ethereum/solidity/blob/develop/Changelog.md) for more similar changes.
 
 ## Be aware that 'Built-ins' can be shadowed
 
@@ -450,7 +494,7 @@ contract ExampleContract is PretendingToRevert {
 }
 ```
 
-Contract users (and auditors) should be aware of the full smart contract source code of any application they intend to use. 
+Contract users (and auditors) should be aware of the full smart contract source code of any application they intend to use.
 
 ## Avoid using `tx.origin`
 
@@ -460,16 +504,16 @@ Never use `tx.origin` for authorization, another contract can have a method whic
 contract MyContract {
 
     address owner;
-    
+
     function MyContract() public {
         owner = msg.sender;
     }
-    
+
     function sendTo(address receiver, uint amount) public {
         require(tx.origin == owner);
         receiver.transfer(amount);
     }
-    
+
 }
 
 contract AttackingContract {
@@ -485,7 +529,7 @@ contract AttackingContract {
     function() public {
         myContract.sendTo(attacker, msg.sender.balance);
     }
-    
+
 }
 ```
 
@@ -506,16 +550,16 @@ There are three main considerations when using a timestamp to execute a critical
 Be aware that the timestamp of the block can be manipulated by a miner. Consider this [contract](https://etherscan.io/address/0xcac337492149bdb66b088bf5914bedfbf78ccc18#code):
 
 ```sol
-    
+
 uint256 constant private salt =  block.timestamp;
-    
+
 function random(uint Max) constant private returns (uint256 result){
     //get the best seed for randomness
     uint256 x = salt * 100/Max;
     uint256 y = salt * block.number/(salt % 5) ;
-    uint256 seed = block.number/3 + (salt % 300) + Last_Payout + y; 
-    uint256 h = uint256(block.blockhash(seed)); 
-    
+    uint256 seed = block.number/3 + (salt % 300) + Last_Payout + y;
+    uint256 h = uint256(block.blockhash(seed));
+
     return uint256((h / x)) % Max + 1; //random number between 1 and Max
 }
 ```
@@ -549,7 +593,7 @@ contract Final {
 
 contract B is Final {
     int public fee;
-    
+
     function B(uint f) Final(f) public {
     }
     function setFee() public {
@@ -559,7 +603,7 @@ contract B is Final {
 
 contract C is Final {
     int public fee;
-    
+
     function C(uint f) Final(f) public {
     }
     function setFee() public {
@@ -587,7 +631,7 @@ To help contribute, Solidity's Github has a [project](https://github.com/ethereu
 
 When a function takes a contract address as an argument, it is better to pass an interface or contract type rather than raw `address`. If the function is called elsewhere within the source code, the compiler it will provide additional type safety guarantees.
 
-Here we see two alternatives: 
+Here we see two alternatives:
 
 ```sol
 contract Validator {
@@ -619,10 +663,10 @@ contract NonValidator{}
 
 contract Auction is TypeSafeAuction {
     NonValidator nonValidator;
-  
+
     function bet(uint _value) {
         bool valid = validateBet(nonValidator, _value); // TypeError: Invalid type for argument in function call.
-                                                        // Invalid implicit conversion from contract NonValidator 
+                                                        // Invalid implicit conversion from contract NonValidator
                                                         // to contract Validator requested.
     }
 }
@@ -644,12 +688,12 @@ modifier isNotContract(address _a) {
 }
 ```
 
-The idea is straight forward: if an address contains code, it's not an EOA but a contract account. However, a contract does not have source code available during construction. This means that while the constructor is running, it can make calls to other contracts, but `extcodesize` for its address returns zero. Below is a minimal example that shows how this check can be circumvented:
+The idea is straight forward: if an address contains code, it's not an EOA but a contract account. However, **a contract does not have source code available during construction**. This means that while the constructor is running, it can make calls to other contracts, but `extcodesize` for its address returns zero. Below is a minimal example that shows how this check can be circumvented:
 
 ```sol
 contract OnlyForEOA {    
     uint public flag;
-    
+
     // bad
     modifier isNotContract(address _a){
         uint len;
@@ -657,7 +701,7 @@ contract OnlyForEOA {
         require(len == 0);
         _;
     }
-    
+
     function setFlag(uint i) public isNotContract(msg.sender){
         flag = i;
     }
@@ -671,21 +715,21 @@ contract FakeEOA {
 }
 ```
 
-Because contract addresses can be pre-computed, this check could also fail if it checks an address which is empty at block `n`, but which has a contract deployed to it at some block greater than `n`. 
+Because contract addresses can be pre-computed, this check could also fail if it checks an address which is empty at block `n`, but which has a contract deployed to it at some block greater than `n`.
 
 !!! warning
 
-    This issue is nuanced. 
+    This issue is nuanced.
 
     If your goal is to prevent other contracts from being able to call your contract, the `extcodesize` check is probably sufficient. An alternative approach is to check the value of `(tx.origin == msg.sender)`, though this also [has drawbacks](recommendations/#avoid-using-txorigin).
 
     There may be other situations in which the `extcodesize` check serves your purpose. Describing all of them here is out of scope. Understand the underlying behaviors of the EVM and use your Judgement.
 
-    
+
 
 ## Deprecated/historical recommendations
 
-These are recommendations which are no longer relevant due to changes in the protocol or improvements to solidity. They are recorded here for posterity and awareness. 
+These are recommendations which are no longer relevant due to changes in the protocol or improvements to solidity. They are recorded here for posterity and awareness.
 
 ### Beware division by zero (Solidity < 0.4)
 
@@ -693,7 +737,7 @@ Prior to version 0.4, Solidity [returns zero](https://github.com/ethereum/solidi
 
 ### Differentiate functions and events (Solidity < 0.4.21)
 
-In [v0.4.21](https://github.com/ethereum/solidity/blob/develop/Changelog.md#0421-2018-03-07) Solidity introduced the `emit` keyword to indicate an event `emit EventName();`. As of 0.5.0, it is required. 
+In [v0.4.21](https://github.com/ethereum/solidity/blob/develop/Changelog.md#0421-2018-03-07) Solidity introduced the `emit` keyword to indicate an event `emit EventName();`. As of 0.5.0, it is required.
 
 Favor capitalization and a prefix in front of events (we suggest *Log*), to prevent the risk of confusion between functions and events. For functions, always start with a lowercase letter, except for the constructor.
 

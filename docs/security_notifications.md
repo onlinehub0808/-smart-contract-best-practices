@@ -1,12 +1,13 @@
 This is a list of resources that will often highlight discovered exploits in Ethereum or Solidity. The official source of security notifications is the Ethereum Blog, but in many cases, vulnerabilities will be disclosed and discussed earlier in other locations.
 
 - [Ethereum Blog](https://blog.ethereum.org/): The official Ethereum blog
-  - [Ethereum Blog - Security only](https://blog.ethereum.org/category/security/): All blog posts that are tagged *Security*
+    - [Ethereum Blog - Security only](https://blog.ethereum.org/category/security/): All blog posts that are tagged *Security*
 - [Ethereum Gitter](https://gitter.im/orgs/ethereum/rooms) chat rooms
-  - [Solidity](https://gitter.im/ethereum/solidity)
-  - [Go-Ethereum](https://gitter.im/ethereum/go-ethereum)
-  - [CPP-Ethereum](https://gitter.im/ethereum/cpp-ethereum)
-  - [Research](https://gitter.im/ethereum/research)
+    - [Solidity](https://gitter.im/ethereum/solidity)
+    - [Go-Ethereum](https://gitter.im/ethereum/go-ethereum)
+    - [CPP-Ethereum](https://gitter.im/ethereum/cpp-ethereum)
+    - [Research](https://gitter.im/ethereum/research)
+- [Smart Contract Security Weekly](https://tinyletter.com/smart-contract-security): Weekly updates of Ethereum Smart Contract and infrastructure Security ([Past Articles](https://tinyletter.com/smart-contract-security/archive))
 - [Reddit](https://www.reddit.com/r/ethereum)
 - [Network Stats](https://ethstats.net/)
 

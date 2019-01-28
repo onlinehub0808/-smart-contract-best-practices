@@ -30,9 +30,10 @@ Complexity increases the likelihood of errors.
 
 ## Stay up to date
 
-Use the resources listed in the next section to keep track of new security developments.
+Use the resources listed in the [security notifications
+](security_notifications.md) section to keep track of new security developments.
 
-  - Check your contracts for any new bug that's discovered
+  - Check your contracts for any new bug as soon as it is discovered
   - Upgrade to the latest version of any tool or library as soon as possible
   - Adopt new security techniques that appear useful
 
@@ -41,7 +42,7 @@ Use the resources listed in the next section to keep track of new security devel
 While much of your programming experience will be relevant to Ethereum programming, there are some pitfalls to be aware of.
 
   - Be extremely careful about external contract calls, which may execute malicious code and change control flow.
-  - Understand that your public functions are public, and may be called maliciously. Your private data is also viewable by anyone.
+  - Understand that your public functions are public, and may be called maliciously and in any order. The private data in smart contracts is also viewable by anyone.
   - Keep gas costs and the block gas limit in mind.
   - Be aware that timestamps are imprecise on a blockchain, miners can influence the time of execution of a transaction within a margin of several seconds.
   - Randomness is non-trivial on blockchain, most approaches to random number generation are gameable on a blockchain.

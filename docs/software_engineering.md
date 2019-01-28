@@ -7,7 +7,7 @@ Note: There's always a risk when you add a new component to your system. A badly
 ### Upgrading Broken Contracts
 
 !!! warning
-    This section is outdated. There are many important questions, and risks related to smart contract upgradeability. Do your research into the state of the art. We welcome discussion on the [related issue](https://github.com/ConsenSys/smart-contract-best-practices/issues/164). 
+    This section is outdated. There are many important questions, and risks related to smart contract upgradeability. Do your research into the state of the art. We welcome discussion on the [related issue](https://github.com/ConsenSys/smart-contract-best-practices/issues/164).
 
 
 Code will need to be changed if errors are discovered or if improvements need to be made. It is no good to discover a bug, but have no way to deal with it.
@@ -211,9 +211,9 @@ Some tips for running bounty programs:
 - Decide which currency bounties will be distributed in (BTC and/or ETH)
 - Decide on an estimated total budget for bounty rewards
 - From the budget, determine three tiers of rewards:
-  - smallest reward you are willing to give out
-  - highest reward that's usually awardable
-  - an extra range to be awarded in case of very severe vulnerabilities
+    - smallest reward you are willing to give out
+    - highest reward that's usually awardable
+    - an extra range to be awarded in case of very severe vulnerabilities
 - Determine who the bounty judges are (3 may be ideal typically)
 - Lead developer should probably be one of the bounty judges
 - When a bug report is received, the lead developer, with advice from judges, should evaluate the severity of the bug
