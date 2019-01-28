@@ -388,7 +388,7 @@ contract Executor {
 }
 ```
 
-Another solution is to permit only trusted accounts to mine the transaction.
+Another solution is to permit only trusted accounts to relay the transaction.
 
 
 ## Forcibly Sending Ether to a Contract
