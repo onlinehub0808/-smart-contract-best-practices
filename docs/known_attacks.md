@@ -2,7 +2,7 @@ The following is a list of known attacks which you should be aware of, and defen
 
 ## Reentrancy
 
-One of the major dangers of calling external contracts is that they can take over the control flow, and make changes to your data that the calling function wasn't expecting. This class of bug can take many forms, and both of the major bugs that led to the DAO's collapse were bugs of this sort.
+One of the major dangers of [calling external contracts](./recommendations#external-calls) is that they can take over the control flow, and make changes to your data that the calling function wasn't expecting. This class of bug can take many forms, and both of the major bugs that led to the DAO's collapse were bugs of this sort.
 
 ### Reentrancy on a Single Function
 
@@ -19,9 +19,16 @@ function withdrawBalance() public {
 }
 ```
 
-Since the user's balance is not set to 0 until the very end of the function, the second (and later) invocations will still succeed, and will withdraw the balance over and over again. A very similar bug was one of the vulnerabilities in the DAO attack.
+Since the user's balance is not set to 0 until the very end of the function, the second (and later) invocations will still succeed, and will withdraw the balance over and over again.
 
-In the example given, the best way to avoid the problem is to [use `send()` instead of `call.value()()`](./recommendations#send-vs-call-value). This will prevent any external code from being executed.
+!!! Factoid
+    A DAO is a Decentralized Autonomous Organization. Its goal is to codify the rules and decisionmaking apparatus of an organization, eliminating the need for documents and people in governing, creating a structure with decentralized control.
+
+    On June 17th 2016, [The DAO](https://www.coindesk.com/understanding-dao-hack-journalists) was hacked and 3.6 million Ether ($50 Million) were stolen using the first reentrancy attack.
+
+    Ethereum Foundation issued a critical update to rollback the hack. This resulted in Ethereum being forked into Ethereum Classic and Ethereum.
+
+In the example given, the best mitigation method is to [use `send()` instead of `call.value()()`](./recommendations#send-vs-call-value). This will limit any external code from being executed.
 
 However, if you can't remove the external call, the next simplest way to prevent this attack is to make sure you don't call an external function until you've done all the internal work you need to do:
 
@@ -67,7 +74,7 @@ The same solutions will work, with the same caveats. Also note that in this exam
 
 Since reentrancy can occur across multiple functions, and even multiple contracts, any solution aimed at preventing reentrancy with a single function will not be sufficient.
 
-Instead, we have recommended finishing all internal work (ie. state changes) first, and only then calling the external function. This rule, if followed carefully, will allow you to avoid vulnerabilities due to reentrancy. However, you need to not only avoid calling external functions too soon, but also avoid calling functions which call external functions. For example, the following is insecure:
+Instead, **we have recommended finishing all internal work (ie. state changes) first, and only then calling the external function**. This rule, if followed carefully, will allow you to avoid vulnerabilities due to reentrancy. However, you need to not only avoid calling external functions too soon, but also avoid calling functions which call external functions. For example, the following is insecure:
 
 ```sol
 // INSECURE
@@ -169,16 +176,24 @@ contract StateHolder {
 
 An attacker can call `getLock()`, and then never call `releaseLock()`. If they do this, then the contract will be locked forever, and no further changes will be able to be made. If you use mutexes to protect against reentrancy, you will need to carefully ensure that there are no ways for a lock to be claimed and never released. (There are other potential dangers when programming with mutexes, such as deadlocks and livelocks. You should consult the large amount of literature already written on mutexes, if you decide to go this route.)
 
-##  Front Running (AKA Transaction-Ordering Dependence)
+----------------
 
-Above were examples of reentrancy involving the attacker executing malicious code *within a single transaction*. The following are a different type of attack inherent to Blockchains: the fact that *the order of transactions themselves* (within a block) is easily subject to manipulation.
 
-Since a transaction is in the mempool for a short while, one can know what actions will occur, before it is included in a block. This can be troublesome for things like decentralized markets, where a transaction to buy some tokens can be seen, and a market order implemented before the other transaction gets included. Protecting against this is difficult, as it would come down to the specific contract itself. For example, in markets, it would be better to implement batch auctions (this also protects against high frequency trading concerns). Another way to use a pre-commit scheme (“I’m going to submit the details later”).
+##  Front-Running (AKA Transaction-Ordering Dependence)
+
+Above were examples of reentrancy involving the attacker executing malicious code *within a single transaction*. The following are a different type of attack inherent to Blockchains: the fact that *the order of transactions themselves* (e.g. within a block) is easily subject to manipulation.
+
+Since a transaction is in the mempool for a short while, one can know what actions will occur before it is included in a block. This can be troublesome for things like decentralized markets, where a transaction to buy some tokens can be seen, and a market order implemented before the other transaction gets included. Protecting against this is difficult, as it would come down to the specific contract itself. For example, in markets, it would be better to implement batch auctions (this also protects against high frequency trading concerns). Another way to use a pre-commit scheme (“I’m going to submit the details later”).
+
+---------------
 
 ## Timestamp Dependence
 Be aware that the timestamp of the block can be manipulated by the miner, and all direct and indirect uses of the timestamp should be considered.
 
-See the [Recommendations](./recommendations/#timestamp-dependence) section for design considerations related to Timestamp Dependence.
+!!! Note
+    See the [Recommendations](./recommendations/#timestamp-dependence) section for design considerations related to Timestamp Dependence.
+
+----------------
 
 ## Integer Overflow and Underflow
 
@@ -207,13 +222,17 @@ function transfer(address _to, uint256 _value) {
 }
 ```
 
-If a balance reaches the maximum uint value (2^256) it will circle back to zero. This checks for that condition. This may or may not be relevant, depending on the implementation. Think about whether or not the uint value has an opportunity to approach such a large number. Think about how the uint variable changes state, and who has authority to make such changes. If any user can call functions which update the uint value, it's more vulnerable to attack. If only an admin has access to change the variable's state, you might be safe. If a user can increment by only 1 at a time, you are probably also safe because there is no feasible way to reach this limit.
+If a balance reaches the *maximum uint value (2^256)* it will circle back to zero which checks for the condition. This may or may not be relevant, depending on the implementation. Think about whether or not the `uint` value has an opportunity to approach such a large number. Think about how the `uint` variable changes state, and who has authority to make such changes. If any user can call functions which update the `uint` value, it's more vulnerable to attack. If only an admin has access to change the variable's state, you might be safe. If a user can increment by only 1 at a time, you are probably also safe because there is no feasible way to reach this limit.
 
 The same is true for underflow. If a uint is made to be less than zero, it will cause an underflow and get set to its maximum value.
 
 Be careful with the smaller data-types like uint8, uint16, uint24...etc: they can even more easily hit their maximum value.
 
-Be aware there are around [20 cases for overflow and underflow](https://github.com/ethereum/solidity/issues/796#issuecomment-253578925).
+!!! Warning
+    Be aware there are around [20 cases for overflow and underflow](https://github.com/ethereum/solidity/issues/796#issuecomment-253578925).
+
+One simple solution to mitigate the common mistakes for overflow and underflow is to use `SafeMath.sol` [library](https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/math/SafeMath.sol) for arithmetic functions.
+
 
 ### Underflow in Depth: Storage Manipulation
  [Doug Hoyte's submission](https://github.com/Arachnid/uscc/tree/master/submissions-2017/doughoyte) to the 2017 underhanded solidity contest received [an honorable mention](http://u.solidity.cc/). The entry is interesting, because it raises the concerns about how C-like underflow might affect Solidity storage. Here is a simplified version:
@@ -251,12 +270,15 @@ In general, the variable `manipulateMe`'s location cannot be influenced without 
  * Compute the storage location of `manipulateMe`
  * Modify and update `manipulateMe`'s value using `modifyBonusCode`
 
- In practice, this array would be immediately pointed out as fishy, but buried under more complex smart contract architecture, it can arbitrarily allow malicious changes to constant variables.
+!!! Note
+    In practice, this array would be immediately pointed out as fishy, but buried under more complex smart contract architecture, it can arbitrarily allow malicious changes to constant variables, such as total supply of a token.
 
 When considering use of a dynamic array, a container data scructure is a good practice. The Solidity CRUD [part 1](https://medium.com/@robhitchens/solidity-crud-part-1-824ffa69509a) and [part 2](https://medium.com/@robhitchens/solidity-crud-part-2-ed8d8b4f74ec) articles are good resources.
 
-<a name="dos-with-unexpected-revert"></a>
 
+----------------
+
+<a name="dos-with-unexpected-revert"></a>
 ## DoS with (Unexpected) revert
 
 Consider a simple auction contract:
@@ -278,7 +300,7 @@ contract Auction {
 }
 ```
 
-When it tries to refund the old leader, it reverts if the refund fails. This means that a malicious bidder can become the leader while making sure that any refunds to their address will *always* fail. In this way, they can prevent anyone else from calling the `bid()` function, and stay the leader forever. A recommendation is to set up a [pull payment system](./recommendations#favor-pull-over-push-for-external-calls) instead, as described earlier.
+If attacker bids using a smart contract which has a fallback function that reverts any payment, the attacker can win any auction. When it tries to refund the old leader, it reverts if the refund fails. This means that a malicious bidder can become the leader while making sure that any refunds to their address will *always* fail. In this way, they can prevent anyone else from calling the `bid()` function, and stay the leader forever. A recommendation is to set up a [pull payment system](./recommendations#favor-pull-over-push-for-external-calls) instead, as described earlier.
 
 Another example is when a contract may iterate through an array to pay users (e.g., supporters in a crowdfunding contract). It's common to want to make sure that each payment succeeds. If not, one should revert. The issue is that if one call fails, you are reverting the whole payout system, meaning the loop will never complete. No one gets paid because one address is forcing an error.
 
@@ -344,6 +366,8 @@ This attack [was conducted](https://osolmaz.com/2018/10/18/anatomy-block-stuffin
 
 A Block Stuffing attack can be used on any contract requiring an action within a certain time period. However, as with any attack, it is only profitable when the expected reward exceeds its cost. Cost of this attack is directly proportional to the number of blocks which need to be stuffed. If a large payout can be obtained by preventing actions from other participants, your contract will likely be targeted by such an attack.
 
+----------------
+
 ## Insufficient gas griefing
 
 This attack may be possible on a contract which accepts generic data and uses it to make a call another contract (a 'sub-call') via the low level `address.call()` function, as is often the case with multisignature and transaction relayer contracts.
@@ -372,7 +396,8 @@ This contract allows transaction relaying. Someone who wants to make a transacti
 
 If given just the right amount of gas, the `Relayer` would complete execution recording the `_data`argument in the `executed` mapping, but the subcall would fail because it received insufficient gas to complete execution.
 
-Note: When a contract makes a sub-call to another contract, the EVM limits the gas forwarded to [to 63/64 of the remaining gas](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-150.md),
+!!! Note
+    When a contract makes a sub-call to another contract, the EVM limits the gas forwarded to [to 63/64 of the remaining gas](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-150.md),
 
 An attacker can use this to censor transactions, causing them to fail by sending them with a low amount of gas. This attack is a form of "[griefing](https://en.wikipedia.org/wiki/Griefer)": It doesn't directly benefit the attacker, but causes grief for the victim. A dedicated attacker, willing to consistently spend a small amount of gas could theoretically censor all transactions this way, if they were the first to submit them to `Relayer`.
 
@@ -390,6 +415,7 @@ contract Executor {
 
 Another solution is to permit only trusted accounts to relay the transaction.
 
+-------------
 
 ## Forcibly Sending Ether to a Contract
 
@@ -412,9 +438,9 @@ Contract logic seems to disallow payments to the contract and therefore disallow
 
 The `selfdestruct` contract method allows a user to specify a beneficiary to send any excess ether. `selfdestruct` [does not trigger a contract's fallback function](https://solidity.readthedocs.io/en/develop/security-considerations.html#sending-and-receiving-ether).
 
-It is also possible to [precompute](https://github.com/Arachnid/uscc/tree/master/submissions-2017/ricmoo) a contract's address and send Ether to that address before deploying the contract.
+!!! Warning
+    It is also possible to [precompute](https://github.com/Arachnid/uscc/tree/master/submissions-2017/ricmoo) a contract's address and send Ether to that address before deploying the contract.
 
-Contract developers should be aware that Ether can be forcibly sent to a contract and should design contract logic accordingly. Generally, assume that it is not possible to restrict sources of funding to your contract.
 
 ## Deprecated/historical attacks
 
