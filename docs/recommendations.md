@@ -345,7 +345,7 @@ function() payable { balances[msg.sender] += msg.value; }
 // good
 function deposit() payable external { balances[msg.sender] += msg.value; }
 
-function() payable { require(msg.data.length == 0); LogDepositReceived(msg.sender); }
+function() payable { require(msg.data.length == 0); emit LogDepositReceived(msg.sender); }
 ```
 
 ## Check data length in fallback functions
@@ -354,10 +354,10 @@ Since the [fallback functions](http://solidity.readthedocs.io/en/latest/contract
 
 ```sol
 // bad
-function() payable { LogDepositReceived(msg.sender); }
+function() payable { emit LogDepositReceived(msg.sender); }
 
 // good
-function() payable { require(msg.data.length == 0); LogDepositReceived(msg.sender); }
+function() payable { require(msg.data.length == 0); emit LogDepositReceived(msg.sender); }
 ```
 
 ## Explicitly mark payable functions and state variables
@@ -737,8 +737,6 @@ Prior to version 0.4, Solidity [returns zero](https://github.com/ethereum/solidi
 
 ### Differentiate functions and events (Solidity < 0.4.21)
 
-In [v0.4.21](https://github.com/ethereum/solidity/blob/develop/Changelog.md#0421-2018-03-07) Solidity introduced the `emit` keyword to indicate an event `emit EventName();`. As of 0.5.0, it is required.
-
 Favor capitalization and a prefix in front of events (we suggest *Log*), to prevent the risk of confusion between functions and events. For functions, always start with a lowercase letter, except for the constructor.
 
 ```sol
@@ -750,3 +748,5 @@ function transfer() {}
 event LogTransfer() {}
 function transfer() external {}
 ```
+!!! Note
+    In [v0.4.21](https://github.com/ethereum/solidity/blob/develop/Changelog.md#0421-2018-03-07) Solidity introduced the `emit` keyword to indicate an event `emit EventName();`. As of 0.5.0, it is required.
