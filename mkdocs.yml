@@ -8,16 +8,15 @@ repo_url: https://github.com/ConsenSys/smart-contract-best-practices
 pages:
   - Home: index.md
   - General Philosophy: general_philosophy.md
-  - Recommendations for Smart Contract Security in Solidity: recommendations.md
+  - Solidity Recommendations: recommendations.md
   - Known Attacks: known_attacks.md
   - Software Engineering Techniques: software_engineering.md
   - Token specific recommendations: tokens.md
   - Documentation and Procedures: documentation_procedures.md
   - Security Tools: security_tools.md
   - Security EIPs: security_eips.md
-  - Security Notifications: security_notifications.md
-  - Smart Contract Security Bibliography: bibliography.md
-  - List of Smart Contract Bug Bounty Programs: bug_bounty_list.md
+  - Security Resources: security_notifications.md
+  - Bug Bounty Programs: bug_bounty_list.md
   - About:
     - Reviewers: about/reviewers.md
     - License: about/license.md
@@ -48,3 +47,4 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.tasklist(custom_checkbox=true)
   - pymdownx.tilde
+  - markdown_include.include

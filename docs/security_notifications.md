@@ -21,3 +21,8 @@ Additionally, here is a list of Ethereum core developers who may write about sec
 - **Vlad Zamfir**: [Twitter](https://twitter.com/vladzamfir), [Github](https://github.com/vladzamfir), [Ethereum Blog](https://blog.ethereum.org/author/vlad/)
 
 Beyond following core developers, it is critical to participate in the wider blockchain-related security community - as security disclosures or observations will come through a variety of parties.
+
+
+-------------------------------------
+
+{!docs/bibliography.md!}
