@@ -235,6 +235,7 @@ One simple solution to mitigate the common mistakes for overflow and underflow i
 
 
 ### Underflow in Depth: Storage Manipulation
+
  [Doug Hoyte's submission](https://github.com/Arachnid/uscc/tree/master/submissions-2017/doughoyte) to the 2017 underhanded solidity contest received [an honorable mention](http://u.solidity.cc/). The entry is interesting, because it raises the concerns about how C-like underflow might affect Solidity storage. Here is a simplified version:
 
 ```sol
@@ -318,6 +319,8 @@ function refundAll() public {
 ```
 
 Again, the recommended solution is to [favor pull over push payments](./recommendations#favor-pull-over-push-for-external-calls).
+
+-------------
 
 ## DoS with Block Gas Limit
 
@@ -441,6 +444,7 @@ The `selfdestruct` contract method allows a user to specify a beneficiary to sen
 !!! Warning
     It is also possible to [precompute](https://github.com/Arachnid/uscc/tree/master/submissions-2017/ricmoo) a contract's address and send Ether to that address before deploying the contract.
 
+-------------
 
 ## Deprecated/historical attacks
 
