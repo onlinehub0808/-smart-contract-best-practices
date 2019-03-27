@@ -7,8 +7,8 @@
 
 ### Static and Dynamic Analysis
 
-- [Truffle Security](https://github.com/ConsenSys/truffle-security) - Security extension for Truffle based on [MythX](https://mythx.io).
-- [Sabre](https://github.com/b-mueller/sabre) - Minimum viable MythX client written in JavaScript.
+- [MythX Plugin for Truffle](https://github.com/ConsenSys/truffle-security) - Security verification plugin for Truffle.
+- [Sabre](https://github.com/b-mueller/sabre) - Easy-to-use MythX security analyzer written in JavaScript.
 - [PythX](https://github.com/dmuhs/PythX) - MythX Python library and CLI tool.
 - [Mythril Classic](https://github.com/ConsenSys/mythril-classic) - Swiss army knife for smart contract security.
 - [Slither](https://github.com/trailofbits/slither) - Static analysis framework with detectors for many common Solidity issues. It has taint and value tracking capabilities and is written in Python.
