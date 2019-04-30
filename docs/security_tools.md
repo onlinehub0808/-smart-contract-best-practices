@@ -7,9 +7,7 @@
 
 ### Static and Dynamic Analysis
 
-- [MythX Plugin for Truffle](https://github.com/ConsenSys/truffle-security) - Security verification plugin for Truffle.
-- [Sabre](https://github.com/b-mueller/sabre) - Easy-to-use MythX security analyzer written in JavaScript.
-- [PythX](https://github.com/dmuhs/PythX) - MythX Python library and CLI tool.
+- [Awesome MythX Tools](https://github.com/b-mueller/awesome-mythx-smart-contract-security) - Professional security tools ecosystem with support for Truffle, Embark, CI and many other environments.
 - [Mythril Classic](https://github.com/ConsenSys/mythril-classic) - Swiss army knife for smart contract security.
 - [Slither](https://github.com/trailofbits/slither) - Static analysis framework with detectors for many common Solidity issues. It has taint and value tracking capabilities and is written in Python.
 - [Echidna](https://github.com/trailofbits/echidna) - The only available fuzzer for Ethereum software. Uses property testing to generate malicious inputs that break smart contracts.
