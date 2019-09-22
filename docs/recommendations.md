@@ -236,7 +236,7 @@ contract Token {
     function deposit() public payable {
         balanceOf[msg.sender] += msg.value;
         totalSupply += msg.value;
-        assert(this.balance >= totalSupply);
+        assert(address(this).balance >= totalSupply);
     }
 }
 ```
