@@ -10,7 +10,7 @@ Feel free to submit a pull request, with anything from small fixes, to full new 
 
 See the [issues](https://github.com/ConsenSys/smart-contract-best-practices/issues) for topics that need to be covered or updated. If you have an idea you'd like to discuss, please chat with us in [Gitter](https://gitter.im/ConsenSys/smart-contract-best-practices).
 
-If you've written an article or blog post, please add it to the [bibliography](./bibliography).  
+If you've written an article or blog post, please add it to the [bibliography](./docs/bibliography.md).  
 
 ## Building the documentation site
 
