@@ -2,6 +2,8 @@
 
 This document provides a baseline knowledge of security considerations for intermediate Solidity programmers. It is maintained by [ConsenSys Diligence](https://consensys.net/diligence/), with contributions from our friends in the broader Ethereum community.
 
+Our amazing community has also provided translations in [Chinese](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/README-zh.md) and [Vietnamese](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/README-vi.md).
+
 ## Where to start?
 
 * [General Philosophy](./general_philosophy.md) describes the smart contract security mindset
