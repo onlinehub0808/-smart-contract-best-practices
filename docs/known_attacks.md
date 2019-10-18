@@ -238,50 +238,6 @@ Be careful with the smaller data-types like uint8, uint16, uint24...etc: they ca
 
 One simple solution to mitigate the common mistakes for overflow and underflow is to use `SafeMath.sol` [library](https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/math/SafeMath.sol) for arithmetic functions.
 
-
-### Underflow in Depth: Storage Manipulation
-
- [Doug Hoyte's submission](https://github.com/Arachnid/uscc/tree/master/submissions-2017/doughoyte) to the 2017 underhanded solidity contest received [an honorable mention](http://u.solidity.cc/). The entry is interesting, because it raises the concerns about how C-like underflow might affect Solidity storage. Here is a simplified version:
-
-```sol
-contract UnderflowManipulation {
-    address public owner;
-    uint256 public manipulateMe = 10;
-    function UnderflowManipulation() {
-        owner = msg.sender;
-    }
-
-    uint[] public bonusCodes;
-
-    function pushBonusCode(uint code) {
-        bonusCodes.push(code);
-    }
-
-    function popBonusCode()  {
-        require(bonusCodes.length >=0);  // this is a tautology
-        bonusCodes.length--; // an underflow can be caused here
-    }
-
-    function modifyBonusCode(uint index, uint update)  {
-        require(index < bonusCodes.length);
-        bonusCodes[index] = update; // write to any index less than bonusCodes.length
-    }
-
-}
-```
-
-In general, the variable `manipulateMe`'s location cannot be influenced without going through the `keccak256`, which is infeasible. However, since dynamic arrays are stored sequentially, if a malicious actor wanted to change `manipulateMe` all they would need to do is:
-
- * Call `popBonusCode` to underflow (Note: `array.pop()` method [was added](https://github.com/ethereum/solidity/blob/v0.5.0/Changelog.md) in Solidity 0.5.0)
- * Compute the storage location of `manipulateMe`
- * Modify and update `manipulateMe`'s value using `modifyBonusCode`
-
-!!! Note
-    In practice, this array would be immediately pointed out as fishy, but buried under more complex smart contract architecture, it can arbitrarily allow malicious changes to constant variables, such as total supply of a token.
-
-When considering use of a dynamic array, a container data scructure is a good practice. The Solidity CRUD [part 1](https://medium.com/@robhitchens/solidity-crud-part-1-824ffa69509a) and [part 2](https://medium.com/@robhitchens/solidity-crud-part-2-ed8d8b4f74ec) articles are good resources.
-
-
 ----------------
 
 <a name="dos-with-unexpected-revert"></a>
