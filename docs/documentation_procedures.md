@@ -4,7 +4,7 @@ When launching a contract that will have substantial funds or is required to be 
 
 - Specs, diagrams, state machines, models, and other documentation that helps auditors, reviewers, and the community understand what the system is intended to do.
 - Many bugs can be found just from the specifications, and they are the least costly to fix.
-- Rollout plans that include details listed [here](https://github.com/ConsenSys/smart-contract-best-practices#contract-rollout), and target dates.
+- Rollout plans that include details listed [here](./software_engineering#contract-rollout), and target dates.
 
 ## Status
 
