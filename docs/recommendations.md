@@ -276,7 +276,7 @@ contract Sharer {
 
 ------------------
 
-### Use modifiers only for assertions
+### Use modifiers only for checks
 
 The code inside a modifier is usually executed before the function body, so any state changes or external calls will violate the [Checks-Effects-Interactions](https://solidity.readthedocs.io/en/develop/security-considerations.html#use-the-checks-effects-interactions-pattern) pattern. Moreover, these statements may also remain unnoticed by the developer, as the code for modifier may be far from the function declaration. For example, an external call in modifier can lead to the reentrancy attack:
 

@@ -7,7 +7,7 @@ Our amazing community has also provided translations in [Chinese](https://github
 ## Where to start?
 
 * [General Philosophy](./general_philosophy.md) describes the smart contract security mindset
-* [Solidity Recommendations](./recommendations.md) contains examples of good code patterns
+* [Smart Contract Recommendations](./recommendations.md) contains examples of good code patterns
 * [Known Attacks](./known_attacks.md) describes the different classes of vulnerabilities to avoid
 * [Software Engineering](./software_engineering.md) outlines some architectural and design approaches for risk mitigation
 * [Documentation and Procedures](./documentation_procedures.md) outlines best practices for documenting your system for other developers and auditors
