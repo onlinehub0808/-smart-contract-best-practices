@@ -30,8 +30,7 @@ Complexity increases the likelihood of errors.
 
 ## Stay up to date
 
-Use the resources listed in the [security notifications
-](security_notifications.md) section to keep track of new security developments.
+Keep track of new security developments.
 
   - Check your contracts for any new bug as soon as it is discovered
   - Upgrade to the latest version of any tool or library as soon as possible

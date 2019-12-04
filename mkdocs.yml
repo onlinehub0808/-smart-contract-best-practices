@@ -14,8 +14,6 @@ pages:
   - Token specific recommendations: tokens.md
   - Documentation and Procedures: documentation_procedures.md
   - Security Tools: security_tools.md
-  - Security EIPs: security_eips.md
-  - Security Resources: security_notifications.md
   - Bug Bounty Programs: bug_bounty_list.md
   - About:
     - Reviewers: about/reviewers.md

@@ -12,9 +12,8 @@ Our amazing community has also provided translations in [Chinese](https://github
 * [Software Engineering](./software_engineering.md) outlines some architectural and design approaches for risk mitigation
 * [Documentation and Procedures](./documentation_procedures.md) outlines best practices for documenting your system for other developers and auditors
 * [Security Tools](./security_tools.md) lists tools for improving code quality, and detecting vulnerabilities
-* [Security EIPs](./security_eips.md) lists EIP's related to security issues and vulnerabilities
-* [Security Resources](./security_notifications.md) lists sources of information for staying up to date
 * [Tokens](./tokens.md) outlines best practices specifically related to Tokens.
+* [Bug Bounties](./bug_bounty_list.md) List of bug bounties in the ecosystem.
 
 ## Contributions are welcome!
 
