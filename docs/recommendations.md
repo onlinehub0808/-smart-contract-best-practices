@@ -43,6 +43,8 @@ One particular danger is malicious code may hijack the control flow, leading to 
 
 If you are making a call to an untrusted external contract, *avoid state changes after the call*. This pattern is also sometimes known as the [checks-effects-interactions pattern](http://solidity.readthedocs.io/en/develop/security-considerations.html?highlight=check%20effects#use-the-checks-effects-interactions-pattern).
 
+See [SWC-107](https://swcregistry.io/docs/SWC-107)
+
 --------
 
 #### Avoid `transfer()` and `send()`.
@@ -73,6 +75,8 @@ if(!success) {
 
 ExternalContract(someAddress).deposit.value(100)();
 ```
+
+See [SWC-104](https://swcregistry.io/docs/SWC-104)
 
 --------
 
@@ -125,6 +129,8 @@ contract auction {
 }
 ```
 
+See [SWC-128](https://swcregistry.io/docs/SWC-128)
+
 --------
 
 #### Don't delegatecall to untrusted code
@@ -156,6 +162,8 @@ If `Worker.doWork()` is called with the address of the deployed `Destructor` con
       Don't assume contracts are created with zero balance
       An attacker can send ether to the address of a contract before it is created.  Contracts should not assume that its initial state contains a zero balance.  See [issue 61](https://github.com/ConsenSys/smart-contract-best-practices/issues/61) for more details.
 
+See [SWC-112](https://swcregistry.io/docs/SWC-112)
+
 ------------
 
 ### Remember that Ether can be forcibly sent to an account
@@ -169,6 +177,8 @@ The attacker can do this by creating a contract, funding it with 1 wei, and invo
 cannot be prevented. This is also true for block reward which is sent to the address of the miner, which can be any arbitrary address.
 
 Also, since contract addresses can be precomputed, ether can be sent to an address before the contract is deployed.
+
+See [SWC-132](https://swcregistry.io/docs/SWC-132)
 
 --------
 
@@ -273,6 +283,8 @@ contract Sharer {
     }
 }
 ```
+
+See [SWC-110](https://swcregistry.io/docs/SWC-110) & [SWC-123](https://swcregistry.io/docs/SWC-123)
 
 ------------------
 
@@ -414,6 +426,8 @@ function internalAction() internal {
 }
 ```
 
+See [SWC-100](https://swcregistry.io/docs/SWC-100) and [SWC-108](https://swcregistry.io/docs/SWC-108)
+
 -------
 
 ### Lock pragmas to specific compiler version
@@ -433,6 +447,8 @@ Note: a floating pragma version (ie. `^0.4.25`) will compile fine with `0.4.26-n
 
 !!! Warning
     Pragma statements can be allowed to float when a contract is intended for consumption by other developers, as in the case with contracts in a library or EthPM package. Otherwise, the developer would need to manually update the pragma in order to compile locally.
+
+See [SWC-103](https://swcregistry.io/docs/SWC-103)
 
 --------
 
@@ -560,6 +576,8 @@ You can read more about it here: [Solidity docs](https://solidity.readthedocs.io
 
 It's also worth mentioning that by using `tx.origin` you're limiting interoperability between contracts because the contract that uses tx.origin cannot be used by another contract as a contract can't be the `tx.origin`.
 
+See [SWC-115](https://swcregistry.io/docs/SWC-115)
+
 -------
 
 ### Timestamp Dependence
@@ -598,6 +616,8 @@ The [Yellow Paper](https://ethereum.github.io/yellowpaper/paper.pdf) (Ethereum's
 #### Avoid using `block.number` as a timestamp
 
 It is possible to estimate a time delta using the `block.number` property and [average block time](https://etherscan.io/chart/blocktime), however this is not future proof as block times may change (such as [fork reorganisations](https://blog.ethereum.org/2015/08/08/chain-reorganisation-depth-expectations/) and the [difficulty bomb](https://github.com/ethereum/EIPs/issues/649)). In a sale spanning days, the 15-second rule allows one to achieve a more reliable estimate of time.
+
+See [SWC-116](https://swcregistry.io/docs/SWC-116)
 
 ----------
 
@@ -649,6 +669,8 @@ The consequence of the linearization will yield a `fee` value of 5, since C is t
 For more on security and inheritance, check out this [article](https://pdaian.com/blog/solidity-anti-patterns-fun-with-inheritance-dag-abuse/)
 
 To help contribute, Solidity's Github has a [project](https://github.com/ethereum/solidity/projects/9#card-8027020) with all inheritance-related issues.
+
+See [SWC-125](https://swcregistry.io/docs/SWC-125)
 
 ----------
 

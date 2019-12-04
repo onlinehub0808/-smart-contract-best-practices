@@ -181,6 +181,8 @@ contract StateHolder {
 
 An attacker can call `getLock()`, and then never call `releaseLock()`. If they do this, then the contract will be locked forever, and no further changes will be able to be made. If you use mutexes to protect against reentrancy, you will need to carefully ensure that there are no ways for a lock to be claimed and never released. (There are other potential dangers when programming with mutexes, such as deadlocks and livelocks. You should consult the large amount of literature already written on mutexes, if you decide to go this route.)
 
+See [SWC-107](https://swcregistry.io/docs/SWC-107)
+
 ----------------
 
 
@@ -190,6 +192,8 @@ Above were examples of reentrancy involving the attacker executing malicious cod
 
 Since a transaction is in the mempool for a short while, one can know what actions will occur before it is included in a block. This can be troublesome for things like decentralized markets, where a transaction to buy some tokens can be seen, and a market order implemented before the other transaction gets included. Protecting against this is difficult, as it would come down to the specific contract itself. For example, in markets, it would be better to implement batch auctions (this also protects against high frequency trading concerns). Another is way to use a pre-commit scheme (“I’m going to submit the details later”).
 
+See [SWC-114](https://swcregistry.io/docs/SWC-114)
+
 ---------------
 
 ## Timestamp Dependence
@@ -197,6 +201,8 @@ Be aware that the timestamp of the block can be manipulated by the miner, and al
 
 !!! Note
     See the [Recommendations](./recommendations/#timestamp-dependence) section for design considerations related to Timestamp Dependence.
+
+See [SWC-116](https://swcregistry.io/docs/SWC-116)
 
 ----------------
 
@@ -237,6 +243,8 @@ Be careful with the smaller data-types like uint8, uint16, uint24...etc: they ca
     Be aware there are around [20 cases for overflow and underflow](https://github.com/ethereum/solidity/issues/796#issuecomment-253578925).
 
 One simple solution to mitigate the common mistakes for overflow and underflow is to use `SafeMath.sol` [library](https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/math/SafeMath.sol) for arithmetic functions.
+
+See [SWC-101](https://swcregistry.io/docs/SWC-101)
 
 ----------------
 
@@ -280,6 +288,8 @@ function refundAll() public {
 ```
 
 Again, the recommended solution is to [favor pull over push payments](./recommendations#favor-pull-over-push-for-external-calls).
+
+See [SWC-113](https://swcregistry.io/docs/SWC-113)
 
 -------------
 
@@ -329,6 +339,8 @@ If the attack succeeds, no other transactions will be included in the block. Som
 This attack [was conducted](https://osolmaz.com/2018/10/18/anatomy-block-stuffing) on Fomo3D, a gambling app. The app was designed to reward the last address that purchased a "key". Each key purchase extended the timer, and the game ended once the timer went to 0. The attacker bought a key and then stuffed 13 blocks in a row until the timer was triggered and the payout was released. Transactions sent by attacker took 7.9 million gas on each block, so the gas limit allowed a few small "send" transactions (which take 21,000 gas each), but disallowed any calls to the `buyKey()` function (which costs 300,000+ gas).
 
 A Block Stuffing attack can be used on any contract requiring an action within a certain time period. However, as with any attack, it is only profitable when the expected reward exceeds its cost. Cost of this attack is directly proportional to the number of blocks which need to be stuffed. If a large payout can be obtained by preventing actions from other participants, your contract will likely be targeted by such an attack.
+
+See [SWC-128](https://swcregistry.io/docs/SWC-128)
 
 ----------------
 
@@ -404,6 +416,8 @@ The `selfdestruct` contract method allows a user to specify a beneficiary to sen
 
 !!! Warning
     It is also possible to [precompute](https://github.com/Arachnid/uscc/tree/master/submissions-2017/ricmoo) a contract's address and send Ether to that address before deploying the contract.
+
+See [SWC-132](https://swcregistry.io/docs/SWC-132)
 
 -------------
 
