@@ -1,4 +1,4 @@
-This page demonstrates a number of solidity patterns which should generally be followed when writing smart contracts.
+This page demonstrates a number of patterns which should generally be followed when writing smart contracts.
 
 ## Protocol specific recommendations
 
