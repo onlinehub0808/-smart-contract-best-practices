@@ -9,7 +9,7 @@
 
 ### Static and Dynamic Analysis
 
-- [MythX](https://mythx.io) - Professional security analysis tools and extensions for [Remix](https://docs.mythx.io/en/latest/tools/remix/), [VSCode](https://marketplace.visualstudio.com/items?itemName=mirkogarozzo.mythxvsc), [Truffle](https://docs.mythx.io/en/latest/tools/truffle/), [Embark](https://github.com/flex-dapps/embark-mythx), [Guardrails](https://docs.mythx.io/en/latest/tools/guardrails/), and other environments ([awesome list](https://github.com/b-mueller/awesome-mythx-smart-contract-security-tools)).
+- [MythX](https://mythx.io) - MythX automatically scans for security vulnerabilities throughout your project’s lifecycle. See MythX extensions for [Remix](https://docs.mythx.io/en/latest/tools/remix/), [VSCode](https://marketplace.visualstudio.com/items?itemName=mirkogarozzo.mythxvsc), [Truffle](https://docs.mythx.io/en/latest/tools/truffle/), [Embark](https://github.com/flex-dapps/embark-mythx), , and other environments ([MythX client tools](https://github.com/b-mueller/awesome-mythx-smart-contract-security-tools)).
 - [Mythril](https://github.com/ConsenSys/mythril) - The Swiss army knife for smart contract security.
 - [Slither](https://github.com/trailofbits/slither) - Static analysis framework with detectors for many common Solidity issues. It has taint and value tracking capabilities and is written in Python.
 - [Contract-Library](https://contract-library.com) - Decompiler and security analysis tool for all deployed contracts.
