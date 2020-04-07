@@ -1,7 +1,7 @@
 # Refer to https://github.com/mkdocs/mkdocs/blob/master/mkdocs.yml for a working example
 site_name: Ethereum Smart Contract Best Practices
-site_url: https://github.com/ConsenSys/smart-contract-best-practices
-site_description:
+site_url: https://consensys.github.io/smart-contract-best-practices/
+site_description: Ethereum Smart Contract Security Best Practices
 site_author: ConsenSys
 repo_url: https://github.com/ConsenSys/smart-contract-best-practices
 
@@ -25,6 +25,17 @@ theme:
   custom_dir: 'theme'
 extra_css:
   - 'stylesheets/extra.css'
+
+extra:
+  social:
+    - icon: material/github-box
+      link: https://github.com/ConsenSys/
+    - icon: material/twitter-box
+      link: https://twitter.com/ConsenSysAudits
+    - icon: material/medium
+      link: https://medium.com/consensys-diligence
+    - icon: material/youtube
+      link: https://www.youtube.com/channel/UCkoGLA5DUdXO4Qfo_9RDjIA/playlists
 
 markdown_extensions:
   - markdown.extensions.admonition

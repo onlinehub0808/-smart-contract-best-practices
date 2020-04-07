@@ -76,6 +76,8 @@
     </div>
   {% endif %}
 
+
+
   <!-- Further information -->
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
@@ -94,20 +96,26 @@
           Material for MkDocs</a>
       </div>
 
-      <!-- Customization: Diligence info -->
-      <div class="md-footer-diligence">
-
-        maintained by
-        <a href="https://diligence.consensys.net" target="_blank" rel="noopener">
-          <img src="{{ base_url }}/assets/images/diligence_logo.svg" />
-          ConsenSys Diligence
-        </a>
-      </div>
+<div class="md-footer-meta md-center">
 
       <!-- Social links -->
       {% block social %}
-        {% include "partials/social.html" %}
-      {% endblock %}
+      {% include "partials/social.html" %}
+    {% endblock %}
+</div>
+
+      <!-- Customization: Diligence info -->
+      <div class="md-footer-diligence">
+
+    
+        maintained by
+        <a href="https://diligence.consensys.net" target="_blank" rel="noopener">
+          <img src="{{ base_url }}/assets/images/CDili.png" />
+          ConsenSys Diligence
+        </a>
+
+      </div>
+
     </div>
   </div>
 </footer>
