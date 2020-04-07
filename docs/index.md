@@ -15,6 +15,11 @@ Our amazing community has also provided translations in [Chinese](https://github
 * [Tokens](./tokens.md) outlines best practices specifically related to Tokens.
 * [Bug Bounties](./bug_bounty_list.md) List of bug bounties in the ecosystem.
 
+!!! tip
+    This guideline is updated often, however, if you want to stay on top of the Smart Contract security news and developments
+    sign up for the bi-weekly [Smart Contract Security Newsletter](https://diligence.consensys.net/newsletter/).
+
+
 ## Contributions are welcome!
 
 Feel free to submit a pull request, with anything from small fixes, to full new sections. If you are writing new content, please reference the [contributing](./about/contributing.md) page for guidance on style.
