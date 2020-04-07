@@ -23,6 +23,9 @@ pages:
 theme:
   name: 'material'
   custom_dir: 'theme'
+  logo: 'assets/images/CDili.png'
+  favicon: 'assets/images/CDili_black.png'
+
 extra_css:
   - 'stylesheets/extra.css'
 
