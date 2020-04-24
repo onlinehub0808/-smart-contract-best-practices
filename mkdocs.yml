@@ -25,6 +25,7 @@ theme:
   custom_dir: 'theme'
   logo: 'assets/images/CDili.png'
   favicon: 'assets/images/CDili_black.png'
+  language: en
 
 extra_css:
   - 'stylesheets/extra.css'
@@ -39,6 +40,10 @@ extra:
       link: https://medium.com/consensys-diligence
     - icon: material/youtube
       link: https://www.youtube.com/channel/UCkoGLA5DUdXO4Qfo_9RDjIA/playlists
+
+google_analytics:
+  - UA-64552723-12
+  - auto
 
 markdown_extensions:
   - markdown.extensions.admonition
