@@ -18,7 +18,7 @@
 - [Oyente](https://github.com/melonproject/oyente) - Analyze Ethereum code to find common vulnerabilities, based on this [paper](http://www.comp.nus.edu.sg/~loiluu/papers/oyente.pdf).
 - [Securify](https://github.com/eth-sri/securify2) - Fully automated online static analyzer for smart contracts, providing a security report based on vulnerability patterns.
 - [SmartCheck](https://tool.smartdec.net) - Static analysis of Solidity source code for security vulnerabilities and best practices.
-- [Octopus](https://github.com/quoscient/octopus) - Security Analysis tool for Blockchain Smart Contracts with support of EVM and (e)WASM.
+- [Octopus](https://github.com/pventuzelo/octopus) - Security Analysis tool for Blockchain Smart Contracts with support of EVM and (e)WASM.
 - [sFuzz](https://sfuzz.github.io/) - Efficient fuzzer inspired from AFL to find common vulnerabilities.
 - [Vertigo](https://github.com/JoranHonig/vertigo) - Mutation Testing for Ethereum Smart Contracts.
 
