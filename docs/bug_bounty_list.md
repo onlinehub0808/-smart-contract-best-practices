@@ -13,3 +13,4 @@ The following are ongoing bug bounty programs, either focused on, or including s
 * [MelonPort](https://melonprotocol.com/docs/protocol-security/)
 * [0xProject](https://0x.org/docs/guides/bug-bounty-program#rewards)
 * [Parity](https://www.parity.io/bug-bounty/): Includes client and contract code
+* [Immunefi](https://immunefi.com/): Bug Bounty platform 
