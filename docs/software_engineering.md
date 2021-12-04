@@ -183,13 +183,13 @@ function requestWithdrawal() public {
 
         requestedWithdrawals[msg.sender] = RequestedWithdrawal({
             amount: amountToWithdraw,
-            time: now
+            time: block.timestamp
         });
     }
 }
 
 function withdraw() public {
-    if(requestedWithdrawals[msg.sender].amount > 0 && now > requestedWithdrawals[msg.sender].time + withdrawalWaitPeriod) {
+    if(requestedWithdrawals[msg.sender].amount > 0 && block.timestamp > requestedWithdrawals[msg.sender].time + withdrawalWaitPeriod) {
         uint amountToWithdraw = requestedWithdrawals[msg.sender].amount;
         requestedWithdrawals[msg.sender].amount = 0;
 
