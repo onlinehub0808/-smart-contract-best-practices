@@ -2,7 +2,7 @@ The following is a list of known attacks which you should be aware of, and defen
 
 ## Reentrancy
 
-One of the major dangers of [calling external contracts](./recommendations#external-calls) is that they can take over the control flow, and make changes to your data that the calling function wasn't expecting. This class of bug can take many forms, and both of the major bugs that led to the DAO's collapse were bugs of this sort.
+One of the major dangers of [calling external contracts](./recommendations#external-calls) is that they can take over the control flow, and make changes to your data that the calling function wasn't expecting. This class of bugs can take many forms, and both of the major bugs that led to the DAO's collapse were bugs of this sort.
 
 ### Reentrancy on a Single Function
 
@@ -20,10 +20,10 @@ function withdrawBalance() public {
 }
 ```
 
-Since the user's balance is not set to 0 until the very end of the function, the second (and later) invocations will still succeed, and will withdraw the balance over and over again.
+Since the user's balance is not set to 0 until the very end of the function, the second (and later) invocations will still succeed and will withdraw the balance over and over again.
 
 !!! Factoid
-    A DAO is a Decentralized Autonomous Organization. Its goal is to codify the rules and decisionmaking apparatus of an organization, eliminating the need for documents and people in governing, creating a structure with decentralized control.
+    A DAO is a Decentralized Autonomous Organization. Its goal is to codify the rules and decision-making apparatus of an organization, eliminating the need for documents and people in governing, creating a structure with decentralized control.
 
     On June 17th 2016, [The DAO](https://www.coindesk.com/understanding-dao-hack-journalists) was hacked and 3.6 million Ether ($50 Million) were stolen using the first reentrancy attack.
 
@@ -189,7 +189,7 @@ Above were examples of reentrancy involving the attacker executing malicious cod
 
 ##  Oracle Manipulation
 
-Protocols that rely on external data as inputs (from what's known as an [oracle](https://medium.com/better-programming/what-is-a-blockchain-oracle-f5ccab8dbd72?source=friends_link&sk=d921a38466df8a9176ed8dd767d8c77d)) automatically execute even if the data is incorrect, due to the nature of smart contracts. If a protocol relies on an oracle that is hacked, deprecated, or has malicious intent, all processes that depend on the oracle can now operate with disasterous affects. 
+Protocols that rely on external data as inputs (from what's known as an [oracle](https://medium.com/better-programming/what-is-a-blockchain-oracle-f5ccab8dbd72?source=friends_link&sk=d921a38466df8a9176ed8dd767d8c77d)) automatically execute even if the data is incorrect, due to the nature of smart contracts. If a protocol relies on an oracle that is hacked, deprecated, or has malicious intent, all processes that depend on the oracle can now operate with disastrous effects.
 
 For example:
 
@@ -198,35 +198,35 @@ For example:
 3. Uniswap pool starts responding with a price more than 100x what it should be
 4. Protocol operates as if that were the actual price, giving the manipulator a better price
 
-We've seen examples where this will liquidate positions, allow insane arbitrage, ruin DEX positions and more. 
+We've seen examples where this will liquidate positions, allow insane arbitrage, ruin DEX positions, and more.
 
 ### Oracle Manipulation Solutions
 
 The easiest way to solve this is to use decentralized oracles. [Chainlink](https://chain.link/) is the leading decentralized oracle provider, and the Chainlink network can be leveraged to bring decentralized data on-chain.
 
-Another common solution is to use a time-weighted average price feed, so that price is averaged out over `X` time periods.  Not only does this prevent oracle manipulation, it reduces the chance you can be front-run, as an order executed right before yours won't have as drastic an impact on price.  One tool that gathers Uniswap price feeds every thirty minutes is [Keep3r](https://docs.uniquote.finance/).  If you're looking to build a custom solution, [Uniswap provides a sliding window example](https://github.com/Uniswap/uniswap-v2-periphery/blob/master/contracts/examples/ExampleSlidingWindowOracle.sol).
+Another common solution is to use a time-weighted average price feed, so that price is averaged out over `X` time periods. Not only does this prevent oracle manipulation, but it also reduces the chance you can be front-run, as an order executed right before yours won't have as drastic an impact on price. One tool that gathers Uniswap price feeds every thirty minutes is [Keep3r](https://docs.uniquote.finance/). If you're looking to build a custom solution, [Uniswap provides a sliding window example](https://github.com/Uniswap/uniswap-v2-periphery/blob/master/contracts/examples/ExampleSlidingWindowOracle.sol).
 
-##  Front-Running 
+## Front-Running
 
 Since all transactions are visible in the mempool for a short while before being executed, observers of the network can see and react to an action before it is included in a block. An example of how this can be exploited is with a decentralized exchange where a buy order transaction can be seen, and second order can be broadcast and executed before the first transaction is included. Protecting against this is difficult, as it would come down to the specific contract itself.
 
 
-Front-running, coined originally for traditional financial markets, is the race to order the chaos to the winners benefit. In financial markets, the flow of information gave birth to intermediaries that could simply profit by being the first to know and react to some information. These attacks mostly had been within stock market deals and early domain registries, such as whois gateways.  
+Front-running, coined originally for traditional financial markets, is the race to order the chaos to the winner's benefit. In financial markets, the flow of information gave birth to intermediaries that could simply profit by being the first to know and react to some information. These attacks mostly had been within stock market deals and early domain registries, such as whois gateways.
 
-!!! cite "front-run·ning  (/ˌfrəntˈrəniNG/)"
+!!! cite "front-run·ning (/ˌfrəntˈrəniNG/)"
 
-    *noun*: front-running; 
-    
+    *noun*: front-running;
+
     1. *STOCK MARKET*
-   
-        > the practice by market makers of dealing on advance information provided by their brokers and investment analysts, before their clients have been given the information. 
+
+        > the practice by market makers of dealing on advance information provided by their brokers and investment analysts, before their clients have been given the information.
         <!-- [[OXFORD](https://www.lexico.com/en/definition/front-running)] -->
 
 
 
 ### Taxonomy
 
-By defining a [taxonomy](https://arxiv.org/abs/1902.05164) and differentiating each group from another, we can make it easier to discuss the problem and find solutions for each group. 
+By defining a [taxonomy](https://arxiv.org/abs/1902.05164) and differentiating each group from another, we can make it easier to discuss the problem and find solutions for each group.
 
 We define the following categories of front-running attacks:
 
@@ -237,12 +237,12 @@ We define the following categories of front-running attacks:
 
 #### Displacement
 
-In the first type of attack, *a displacement attack*, it is **not important** for Alice’s (User) function call to run after Mallory (Adversary) runs her function. Alice’s can be orphaned or run with no meaningful effect. Examples of displacement include: 
-* Alice trying to register a domain name and Mallory registering it first; 
-* Alice trying to submit a bug to receive a bounty and Mallory stealing it and submitting it first; 
-* Alice trying to submit a bid in an auction and Mallory copying it. 
+In the first type of attack, *a displacement attack*, it is **not important** for Alice’s (User) function call to run after Mallory (Adversary) runs her function. Alice’s can be orphaned or run with no meaningful effect. Examples of displacement include:
+* Alice trying to register a domain name and Mallory registering it first;
+* Alice trying to submit a bug to receive a bounty and Mallory stealing it and submitting it first;
+* Alice trying to submit a bid in an auction and Mallory copying it.
 
-This attack is commonly performed by increasing the `gasPrice` higher than network average, often by a multiplier of 10 or more. 
+This attack is commonly performed by increasing the `gasPrice` higher than network average, often by a multiplier of 10 or more.
 
 
 #### Insertion
@@ -252,35 +252,35 @@ For this type of attack, it is **important** to the adversary that the original 
 As with displacement attacks, this is usually done by outbidding Alice's transaction in the gas price auction.
 
 !!! info "Transaction Order Dependence"
-    Transaction Order Dependence is equivalent to race condition in smart contracts. An example, if one function sets the reward percentage, and the withdraw function uses that percentage; then then withdraw transaction can be front-run by a change reward function call, which impacts the amount that will be withdrew eventually.
+    Transaction Order Dependence is equivalent to race condition in smart contracts. An example, if one function sets the reward percentage, and the withdraw function uses that percentage; then withdraw transaction can be front-run by a change reward function call, which impacts the amount that will be withdrawn eventually.
 
     See [SWC-114](https://swcregistry.io/docs/SWC-114)
 
-<!-- Based on Geth default ordering, it's easy to sandwich a transaction by sending two transaction each with 1 wei higher or lower.  -->
+<!-- Based on Geth default ordering, it's easy to sandwich a transaction by sending two transactions each with 1 wei higher or lower. -->
 <!-- Cite theo/daniel's talk -->
 
 #### Suppression
 In a suppression attack, a.k.a *Block Stuffing* attacks, after Mallory runs her function, she tries to delay Alice from running her function.
 
-This was the case with the first winner of the "Fomo3d" game, and some other on-chain hacks. The attacker sent multiple transactions with a high `gasPrice` and `gasLimit`  to custom smart contracts that assert (or use other means) to consume all the gas and fill up the block's `gasLimit`. 
+This was the case with the first winner of the "Fomo3d" game and some other on-chain hacks. The attacker sent multiple transactions with a high `gasPrice` and `gasLimit` to custom smart contracts that assert (or use other means) to consume all the gas and fill up the block's `gasLimit`.
 
 
 !!! note "Variants"
-    Each of these attacks have two variants, *asymmetric* and *bulk*. 
-    
-    In some cases, Alice and Mallory are performing different operations. For example, Alice is trying to cancel an offer, and Mallory is trying to fulfill it first. We call this *asymmetric displacement*. In other cases, Mallory is trying to run a large set of functions: for example Alice and others are trying to buy a limited set of shares offered by a firm on a blockchain. We call this *bulk displacement*.
+    Each of these attacks has two variants, *asymmetric* and *bulk*.
+
+    In some cases, Alice and Mallory are performing different operations. For example, Alice is trying to cancel an offer, and Mallory is trying to fulfill it first. We call this *asymmetric displacement*. In other cases, Mallory is trying to run a large set of functions: for example, Alice and others are trying to buy a limited set of shares offered by a firm on a blockchain. We call this *bulk displacement*.
 
 
 ### Mitigations
-Front-running is pervasive issue on public blockchains such as Ethereum. 
+Front-running is a pervasive issue on public blockchains such as Ethereum.
 
-The best remediation is to **remove the benefit of front-running in your application**, mainly by removing the importance of transaction ordering or time. For example, in markets, it would be better to implement batch auctions (this also protects against high frequency trading concerns). Another is way to use a pre-commit scheme (“I’m going to submit the details later”). A third option is to mitigate the cost of front-running by specifying a maximum or minimum acceptable price range on a trade, thereby limiting price slippage. 
+The best remediation is to **remove the benefit of front-running in your application**, mainly by removing the importance of transaction ordering or time. For example, in markets, it would be better to implement batch auctions (this also protects against high-frequency trading concerns). Another way is to use a pre-commit scheme (“I’m going to submit the details later”). A third option is to mitigate the cost of front-running by specifying a maximum or minimum acceptable price range on a trade, thereby limiting price slippage.
 
-**Transaction Ordering:** Go-Ethereum (Geth) nodes, order the transactions based on their `gasPrice` and address nonce. This, however, results in a gas auction between participants in the network to get included in the block currently being mined. 
+**Transaction Ordering:** Go-Ethereum (Geth) nodes, order the transactions based on their `gasPrice` and address nonce. This, however, results in a gas auction between participants in the network to get included in the block currently being mined.
 
-**Confidentiality:**  Another approach is to limit the visibility of the transactions, this can be done using a "commit and reveal" scheme.
+**Confidentiality:** Another approach is to limit the visibility of the transactions, this can be done using a "commit and reveal" scheme.
 <!-- cite and properly define commit and reveal -->
-A simple implementation is to store the keccak256 hash of the data in the first transaction, then reveal the data and verify it against the hash in the second transaction. However note that the transaction itself, leaks the intention and possibly the value of the collateralization. There are enhanced commit and reveal schemes that are more secure, however require more transactions to function, e.g. [submarine sends](https://libsubmarine.org/). 
+A simple implementation is to store the keccak256 hash of the data in the first transaction, then reveal the data and verify it against the hash in the second transaction. However note that the transaction itself leaks the intention and possibly the value of the collateralization. There are enhanced commit and reveal schemes that are more secure, however require more transactions to function, e.g. [submarine sends](https://libsubmarine.org/).
 
 
 
@@ -385,7 +385,7 @@ See [SWC-113](https://swcregistry.io/docs/SWC-113)
 
 ## DoS with Block Gas Limit
 
-Each block has an upper bound on the amount of gas that can be spent, and thus the amount computation that can be done. This is the Block Gas Limit. If the gas spent exceeds this limit, the transaction will fail. This leads to a couple possible Denial of Service vectors:
+Each block has an upper bound on the amount of gas that can be spent, and thus the amount computation that can be done. This is the Block Gas Limit. If the gas spent exceeds this limit, the transaction will fail. This leads to a couple of possible Denial of Service vectors:
 
 ### Gas Limit DoS on a Contract via Unbounded Operations
 
@@ -428,7 +428,7 @@ If the attack succeeds, no other transactions will be included in the block. Som
 
 This attack [was conducted](https://osolmaz.com/2018/10/18/anatomy-block-stuffing) on Fomo3D, a gambling app. The app was designed to reward the last address that purchased a "key". Each key purchase extended the timer, and the game ended once the timer went to 0. The attacker bought a key and then stuffed 13 blocks in a row until the timer was triggered and the payout was released. Transactions sent by attacker took 7.9 million gas on each block, so the gas limit allowed a few small "send" transactions (which take 21,000 gas each), but disallowed any calls to the `buyKey()` function (which costs 300,000+ gas).
 
-A Block Stuffing attack can be used on any contract requiring an action within a certain time period. However, as with any attack, it is only profitable when the expected reward exceeds its cost. Cost of this attack is directly proportional to the number of blocks which need to be stuffed. If a large payout can be obtained by preventing actions from other participants, your contract will likely be targeted by such an attack.
+A Block Stuffing attack can be used on any contract requiring an action within a certain time period. However, as with any attack, it is only profitable when the expected reward exceeds its cost. The cost of this attack is directly proportional to the number of blocks which need to be stuffed. If a large payout can be obtained by preventing actions from other participants, your contract will likely be targeted by such an attack.
 
 See [SWC-128](https://swcregistry.io/docs/SWC-128)
 
@@ -467,7 +467,7 @@ If given just the right amount of gas, the `Relayer` would complete execution re
 
 An attacker can use this to censor transactions, causing them to fail by sending them with a low amount of gas. This attack is a form of "[griefing](https://en.wikipedia.org/wiki/Griefer)": It doesn't directly benefit the attacker, but causes grief for the victim. A dedicated attacker, willing to consistently spend a small amount of gas could theoretically censor all transactions this way, if they were the first to submit them to `Relayer`.
 
-One way to address this is to implement logic requiring forwarders to provide enough gas to finish the subcall. If the miner tried to conduct the attack in this scenario, the `require` statement would fail and the inner call would revert. A user can specify a minimum gasLimit along with the other data (in this example, typically the `_gasLimit` value would be verified by a signature, but that is ommitted for simplicity in this case).
+One way to address this is to implement logic requiring forwarders to provide enough gas to finish the subcall. If the miner tried to conduct the attack in this scenario, the `require` statement would fail and the inner call would revert. A user can specify a minimum gasLimit along with the other data (in this example, typically the `_gasLimit` value would be verified by a signature, but that is omitted for simplicity in this case).
 
 ```sol
 // contract called by Relayer
