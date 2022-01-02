@@ -51,7 +51,7 @@ See [SWC-107](https://swcregistry.io/docs/SWC-107)
 
 `.transfer()` and `.send()` forward exactly 2,300 gas to the recipient. The goal of this hardcoded gas stipend was to prevent [reentrancy vulnerabilities](./known_attacks#reentrancy), but this only makes sense under the assumption that gas costs are constant. Recently [EIP 1884](https://eips.ethereum.org/EIPS/eip-1884) was included in the Istanbul hard fork. One of the changes included in EIP 1884 is an increase to the gas cost of the `SLOAD` operation, causing a contract's fallback function to cost more than 2300 gas.
 
-It's recommended to stop using `.transfer()` and `.send()` and instead use `.call()`. 
+It's recommended to stop using `.transfer()` and `.send()` and instead use `.call()`.
 
 ```
 // bad
@@ -182,7 +182,7 @@ If `Worker.doWork()` is called with the address of the deployed `Destructor` con
 
 !!! Warning
       Don't assume contracts are created with zero balance
-      An attacker can send ether to the address of a contract before it is created.  Contracts should not assume that its initial state contains a zero balance.  See [issue 61](https://github.com/ConsenSys/smart-contract-best-practices/issues/61) for more details.
+      An attacker can send ether to the address of a contract before it is created.  Contracts should not assume that their  initial state contains a zero balance. See [issue 61](https://github.com/ConsenSys/smart-contract-best-practices/issues/61) for more details.
 
 See [SWC-112](https://swcregistry.io/docs/SWC-112)
 
@@ -212,13 +212,13 @@ Examples:
 
 * In rock paper scissors, require both players to submit a hash of their intended move first, then require both players to submit their move; if the submitted move does not match the hash throw it out.
 * In an auction, require players to submit a hash of their bid value in an initial phase (along with a deposit greater than their bid value), and then submit their auction bid value in the second phase.
-* When developing an application that depends on a random number generator, the order should always be *(1)* players submit moves, *(2)* random number generated, *(3)* players paid out. The method by which random numbers are generated is itself an area of active research; current best-in-class solutions include Bitcoin block headers (verified through http://btcrelay.org), hash-commit-reveal schemes (ie. one party generates a number, publishes its hash to "commit" to the value, and then reveals the value later) and [RANDAO](http://github.com/randao/randao). As Ethereum is a deterministic protocol, no variable within the protocol could be used as an unpredictable random number. Also be aware that miners are in some extent in control of the `block.blockhash()` value<sup><a href='https://ethereum.stackexchange.com/questions/419/when-can-blockhash-be-safely-used-for-a-random-number-when-would-it-be-unsafe'>\*</a></sup>.
+* When developing an application that depends on a random number generator, the order should always be *(1)* players submit moves, *(2)* random number generated, *(3)* players paid out. The method by which random numbers are generated is itself an area of active research; current best-in-class solutions include Bitcoin block headers (verified through http://btcrelay.org), hash-commit-reveal schemes (ie. one party generates a number, publishes its hash to "commit" to the value, and then reveals the value later) and [RANDAO](http://github.com/randao/randao). As Ethereum is a deterministic protocol, no variable within the protocol could be used as an unpredictable random number. Also, be aware that miners are in some extent in control of the `block.blockhash()` value<sup><a href='https://ethereum.stackexchange.com/questions/419/when-can-blockhash-be-safely-used-for-a-random-number-when-would-it-be-unsafe'>\*</a></sup>.
 
 --------
 
 ### Beware of the possibility that some participants may "drop offline" and not return
 
-Do not make refund or claim processes dependent on a specific party performing a particular action with no other way of getting the funds out. For example, in a rock-paper-scissors game, one common mistake is to not make a payout until both players submit their moves; however, a malicious player can "grief" the other by simply never submitting their move - in fact, if a player sees the other player's revealed move and determines that they lost, they have no reason to submit their own move at all. This issue may also arise in the context of state channel settlement. When such situations are an issue, (1) provide a way of circumventing non-participating participants, perhaps through a time limit, and (2) consider adding an additional economic incentive for participants to submit information in all of the situations in which they are supposed to do so.
+Do not make refund or claim processes dependent on a specific party performing a particular action with no other way of getting the funds out. For example, in a rock-paper-scissors game, one common mistake is to not make a payout until both players submit their moves; however, a malicious player can "grief" the other by simply never submitting their move - in fact, if a player sees the other player's revealed move and determines that they lost, they have no reason to submit their own move at all. This issue may also arise in the context of state channel settlement. When such situations are an issue, (1) provide a way of circumventing non-participating participants, perhaps through a time limit, and (2) consider adding economic incentive for participants to submit information in all of the situations in which they are supposed to do so.
 
 --------
 
@@ -476,7 +476,7 @@ See [SWC-103](https://swcregistry.io/docs/SWC-103)
 
 ### Use events to monitor contract activity
 
-It can be useful to have a way to monitor the contract's activity after it was deployed. One way to accomplish this is to look at all transactions of the contract, however that may be insufficient, as message calls between contracts are not recorded in the blockchain. Moreover, it shows only the input parameters, not the actual changes being made to the state. Also events could be used to trigger functions in the user interface.
+It can be useful to have a way to monitor the contract's activity after it was deployed. One way to accomplish this is to look at all transactions of the contract, however that may be insufficient, as message calls between contracts are not recorded in the blockchain. Moreover, it shows only the input parameters, not the actual changes being made to the state. Also, events could be used to trigger functions in the user interface.
 
 ```sol
 contract Charity {
@@ -698,7 +698,7 @@ See [SWC-125](https://swcregistry.io/docs/SWC-125)
 
 ### Use interface type instead of the address for type safety
 
-When a function takes a contract address as an argument, it is better to pass an interface or contract type rather than raw `address`. If the function is called elsewhere within the source code, the compiler it will provide additional type safety guarantees.
+When a function takes a contract address as an argument, it is better to pass an interface or contract type rather than a raw `address`. If the function is called elsewhere within the source code, the compiler will provide additional type safety guarantees.
 
 Here we see two alternatives:
 
@@ -759,7 +759,7 @@ modifier isNotContract(address _a) {
 }
 ```
 
-The idea is straight forward: if an address contains code, it's not an EOA but a contract account. However, **a contract does not have source code available during construction**. This means that while the constructor is running, it can make calls to other contracts, but `extcodesize` for its address returns zero. Below is a minimal example that shows how this check can be circumvented:
+The idea is straightforward: if an address contains code, it's not an EOA but a contract account. However, **a contract does not have source code available during construction**. This means that while the constructor is running, it can make calls to other contracts, but `extcodesize` for its address returns zero. Below is a minimal example that shows how this check can be circumvented:
 
 ```sol
 contract OnlyForEOA {    
