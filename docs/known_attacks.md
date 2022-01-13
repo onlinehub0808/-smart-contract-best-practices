@@ -332,7 +332,7 @@ Be careful with the smaller data-types like uint8, uint16, uint24...etc: they ca
 !!! Warning
     Be aware there are around [20 cases for overflow and underflow](https://github.com/ethereum/solidity/issues/796#issuecomment-253578925).
 
-One simple solution to mitigate the common mistakes for overflow and underflow is to use `SafeMath.sol` [library](https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/math/SafeMath.sol) for arithmetic functions.
+One simple solution to mitigate the common mistakes for overflow and underflow is to use `SafeMath.sol` [library](https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/math/SafeMath.sol) for arithmetic functions. Solidity automatically reverts on integer overflow and underflow, as of version 0.8.0.
 
 See [SWC-101](https://swcregistry.io/docs/SWC-101)
 
