@@ -238,6 +238,7 @@ We define the following categories of front-running attacks:
 #### Displacement
 
 In the first type of attack, *a displacement attack*, it is **not important** for Alice’s (User) function call to run after Mallory (Adversary) runs her function. Alice’s can be orphaned or run with no meaningful effect. Examples of displacement include:
+
 * Alice trying to register a domain name and Mallory registering it first;
 * Alice trying to submit a bug to receive a bounty and Mallory stealing it and submitting it first;
 * Alice trying to submit a bid in an auction and Mallory copying it.
