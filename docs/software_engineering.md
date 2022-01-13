@@ -2,7 +2,7 @@ As we discussed in the [General Philosophy](/general_philosophy/) section, it is
 
 The approach we advocate is to "prepare for failure". It is impossible to know in advance whether your code is secure. However, you can architect your contracts in a way that allows them to fail gracefully, and with minimal damage. This section presents a variety of techniques that will help you prepare for failure.
 
-Note: There's always a risk when you add a new component to your system. A badly designed fail-safe could itself become a vulnerability - as can the interaction between a number of well designed fail-safes. Be thoughtful about each technique you use in your contracts, and consider carefully how they work together to create a robust system.
+Note: There's always a risk when you add a new component to your system. A badly designed fail-safe could itself become a vulnerability - as can the interaction between a number of well-designed fail-safes. Be thoughtful about each technique you use in your contracts, and consider carefully how they work together to create a robust system.
 
 ### Upgrading Broken Contracts
 
@@ -12,7 +12,7 @@ Note: There's always a risk when you add a new component to your system. A badly
 
 Code will need to be changed if errors are discovered or if improvements need to be made. It is no good to discover a bug, but have no way to deal with it.
 
-Designing an effective upgrade system for smart contracts is an area of active research, and we won't be able to cover all of the complications in this document. However, there are two basic approaches that are most commonly used. The simpler of the two is to have a registry contract that holds the address of the latest version of the contract. A more seamless approach for contract users is to have a contract that forwards calls and data onto the latest version of the contract.
+Designing an effective upgrade system for smart contracts is an area of active research, and we won't be able to cover all of the complications in this document. However, two basic approaches are most commonly used. The simpler of the two is to have a registry contract that holds the address of the latest version of the contract. A more seamless approach for contract users is to have a contract that forwards calls and data onto the latest version of the contract.
 
 Whatever the technique, it's important to have modularization and good separation between components, so that code changes do not break functionality, orphan data, or require substantial costs to port. In particular, it is usually beneficial to separate complex logic from your data storage, so that you do not have to recreate all of the data in order to change the functionality.
 
@@ -21,7 +21,7 @@ It's also critical to have a secure way for parties to decide to upgrade the cod
 Regardless of your approach, it is important to have some way to upgrade your contracts, or they will become unusable when the inevitable bugs are discovered in them.
 
 
-#### Example 1: Use a registry contract to store latest version of a contract
+#### Example 1: Use a registry contract to store the latest version of a contract
 
 In this example, the calls aren't forwarded, so users should fetch the current address each time before interacting with it.
 
@@ -122,7 +122,7 @@ You must be extremely careful with how you store data with this method. If your 
 - Why a new version of the called contract (`LogicContract`) [must have the same storage layout as the previous version](https://github.com/OpenZeppelin/openzeppelin-sdk/issues/37), and only append new variables to the storage
 - [How a contract's constructor can affect upgradeability](https://blog.openzeppelin.com/towards-frictionless-upgradeability/)
 - How the ABI specifies [function selectors](https://solidity.readthedocs.io/en/v0.4.24/abi-spec.html?highlight=signature#function-selector) and how [function-name collision](https://medium.com/nomic-labs-blog/malicious-backdoors-in-ethereum-proxies-62629adf3357) can be used to exploit a contract that uses `delegatecall`
-- How `delegatecall` to a non-existent contract will return true even if the called contract does no exist. For more details see [Breaking the proxy pattern](https://blog.trailofbits.com/2018/09/05/contract-upgrade-anti-patterns/) and Solidity docs on [Error handling](https://solidity.readthedocs.io/en/latest/control-structures.html#error-handling-assert-require-revert-and-exceptions).
+- How `delegatecall` to a non-existent contract will return true even if the called contract does not exist. For more details see [Breaking the proxy pattern](https://blog.trailofbits.com/2018/09/05/contract-upgrade-anti-patterns/) and Solidity docs on [Error handling](https://solidity.readthedocs.io/en/latest/control-structures.html#error-handling-assert-require-revert-and-exceptions).
 - Remember the [importance of immutability to achieve truslessness](https://diligence.consensys.net/blog/2019/01/upgradeability-is-a-bug/)
 
 \* *Extended from [Proxy pattern recommendations section](https://blog.trailofbits.com/2018/09/05/contract-upgrade-anti-patterns/)*
@@ -213,18 +213,18 @@ uint internal currentPeriodAmount; // amount already withdrawn this period
 constructor(uint _period, uint _limit) public {
     period = _period;
     limit = _limit;
-    
+
     currentPeriodEnd = block.number + period;
 }
-    
+
 function withdraw(uint amount) public {
     // Update period before proceeding
     updatePeriod();
-    
+
     // Prevent overflow
     uint totalAmount = currentPeriodAmount + amount;
     require(totalAmount >= currentPeriodAmount, 'overflow');
-    
+
     // Disallow withdraws that exceed current rate limit
     require(currentPeriodAmount + amount < limit, 'exceeds period limit');
     currentPeriodAmount += amount;
