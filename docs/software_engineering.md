@@ -204,7 +204,7 @@ Rate limiting halts or requires approval for substantial changes. For example, a
 
 Example:
 
-```
+```sol
 uint internal period; // how many blocks before limit resets
 uint internal limit; // max ether to withdraw per period
 uint internal currentPeriodEnd; // block which the current period ends at
