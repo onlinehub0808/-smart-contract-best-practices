@@ -1,1 +1,24 @@
+name: Lint, build, and deploy
+on: [push, pull_request]
 
+jobs:
+  build:
+    name: Clone and build the repo
+    runs-on: ubuntu-latest
+    env:
+      SHOULD_DEPLOY: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    steps:
+      - name: Clone the repository
+        uses: actions/checkout@v2
+      - name: Install Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install requirements
+        run: pip install -r requirements.txt
+      - name: Build the site with mkdocs
+        run: mkdocs build
+      - name: Check Markdown format (max 99 columns)
+        run: mdformat --check --wrap 99 docs
+      - run: mkdocs gh-deploy --force
+        if: ${{ success() && env.SHOULD_DEPLOY }}
