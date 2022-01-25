@@ -8,7 +8,6 @@ repo_name: Github
 remote_branch: gh-pages
 remote_name: origin
 
-
 nav:
   - Home: index.md
   - General Philosophy: general_philosophy.md
@@ -26,13 +25,26 @@ nav:
 
 theme:
   name: 'material'
-  custom_dir: 'theme'
+  custom_dir: 'custom'
   logo: 'assets/images/CDili.png'
   favicon: 'assets/images/CDili_black.png'
   language: en
   features:
     - navigation.instant
     - header.autohide
+  palette: 
+    - scheme: default
+      primary: black
+      accent: deep-purple
+      toggle:
+        icon: material/lightbulb
+        name: Switch to light mode
+    - scheme: slate
+      primary: black
+      accent: cyan
+      toggle:
+        icon: material/lightbulb-outline
+        name: Switch to dark mode
 
 extra_css:
   - 'stylesheets/extra.css'
