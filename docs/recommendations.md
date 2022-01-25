@@ -215,12 +215,13 @@ If `Worker.doWork()` is called with the address of the deployed `Destructor` con
 argument, the `Worker` contract will self-destruct. Delegate execution only to trusted contracts,
 and **never to a user supplied address**.
 
-!!! Warning Don't assume contracts are created with zero balance An attacker can send ether to the
-address of a contract before it is created. Contracts should not assume that their initial state
-contains a zero balance. See
-[issue 61](https://github.com/ConsenSys/smart-contract-best-practices/issues/61) for more details.
+!!! Warning
+    Don't assume contracts are created with zero balance An attacker can send ether to the
+    address of a contract before it is created. Contracts should not assume that their initial state
+    contains a zero balance. See
+    [issue 61](https://github.com/ConsenSys/smart-contract-best-practices/issues/61) for more details.
 
-See [SWC-112](https://swcregistry.io/docs/SWC-112)
+    See [SWC-112](https://swcregistry.io/docs/SWC-112)
 
 ______________________________________________________________________
 
@@ -359,14 +360,11 @@ ______________________________________________________________________
 ### Use `assert()`, `require()`, `revert()` properly
 
 !!! Info
-
-```
-The convenience functions **assert** and **require** can be used to check for conditions and throw an exception if the condition is not met.
+    The convenience functions **assert** and **require** can be used to check for conditions and throw an exception if the condition is not met.
 
 The **assert** function should only be used to test for internal errors, and to check invariants.
 
 The **require** function should be used to ensure valid conditions, such as inputs, or contract state variables are met, or to validate return values from calls to external contracts. <sup><a href='https://solidity.readthedocs.io/en/latest/control-structures.html#error-handling-assert-require-revert-and-exceptions'>\*</a></sup>
-```
 
 Following this paradigm allows formal analysis tools to verify that the invalid opcode can never be
 reached: meaning no invariants in the code are violated and that the code is formally verified.
@@ -427,11 +425,11 @@ contract Election {
 In this case, the `Registry` contract can make a reentrancy attack by calling `Election.vote()`
 inside `isVoter()`.
 
-!!! Note Use
-[modifiers](https://solidity.readthedocs.io/en/develop/contracts.html#function-modifiers) to
-replace duplicate condition checks in multiple functions, such as `isOwner()`, otherwise use
-`require` or `revert` inside the function. This makes your smart contract code more readable and
-easier to audit.
+!!! Note
+    Use [modifiers](https://solidity.readthedocs.io/en/develop/contracts.html#function-modifiers) to
+    replace duplicate condition checks in multiple functions, such as `isOwner()`, otherwise use
+    `require` or `revert` inside the function. This makes your smart contract code more readable and
+    easier to audit.
 
 ______________________________________________________________________
 
@@ -528,10 +526,8 @@ otherwise if the transaction has `msg.value > 0` will revert
 ([except when forced](./recommendations/#remember-that-ether-can-be-forcibly-sent-to-an-account)).
 
 !!! Note
+    Something that might not be obvious: The `payable` modifier only applies to calls from *external* contracts. If I call a non-payable function in the payable function in the same contract, the non-payable function won't fail, though `msg.value` is still set.
 
-```
-Something that might not be obvious: The `payable` modifier only applies to calls from *external* contracts. If I call a non-payable function in the payable function in the same contract, the non-payable function won't fail, though `msg.value` is still set
-```
 
 ### Explicitly mark visibility in functions and state variables
 
@@ -599,11 +595,12 @@ pragma solidity 0.4.4;
 Note: a floating pragma version (ie. `^0.4.25`) will compile fine with `0.4.26-nightly.2018.9.25`,
 however nightly builds should never be used to compile code for production.
 
-!!! Warning Pragma statements can be allowed to float when a contract is intended for consumption
-by other developers, as in the case with contracts in a library or EthPM package. Otherwise, the
-developer would need to manually update the pragma in order to compile locally.
+!!! Warning
+    Pragma statements can be allowed to float when a contract is intended for consumption
+    by other developers, as in the case with contracts in a library or EthPM package. Otherwise, the
+    developer would need to manually update the pragma in order to compile locally.
 
-See [SWC-103](https://swcregistry.io/docs/SWC-103)
+    See [SWC-103](https://swcregistry.io/docs/SWC-103)
 
 ______________________________________________________________________
 
@@ -669,11 +666,8 @@ in the event list of that contract along with the amount of donated money.
 
 ______________________________________________________________________
 
-!!! Note **Prefer newer Solidity constructs**
-
-```
-Prefer constructs/aliases such as `selfdestruct` (over `suicide`) and `keccak256` (over `sha3`).  Patterns like `require(msg.sender.send(1 ether))` can also be simplified to using `transfer()`, as in `msg.sender.transfer(1 ether)`. Check out [Solidity Change log](https://github.com/ethereum/solidity/blob/develop/Changelog.md) for more similar changes.
-```
+!!! Note "Prefer newer Solidity constructs"
+    Prefer constructs/aliases such as `selfdestruct` (over `suicide`) and `keccak256` (over `sha3`).  Patterns like `require(msg.sender.send(1 ether))` can also be simplified to using `transfer()`, as in `msg.sender.transfer(1 ether)`. Check out [Solidity Change log](https://github.com/ethereum/solidity/blob/develop/Changelog.md) for more similar changes.
 
 ______________________________________________________________________
 
@@ -745,16 +739,17 @@ will be the address of the contract and not the address of the user who called t
 You can read more about it here:
 [Solidity docs](https://solidity.readthedocs.io/en/develop/security-considerations.html#tx-origin)
 
-!!! Warning Besides the issue with authorization, there is a chance that `tx.origin` will be
-removed from the Ethereum protocol in the future, so code that uses `tx.origin` won't be compatible
-with future releases
-[Vitalik: 'Do NOT assume that tx.origin will continue to be usable or meaningful.'](https://ethereum.stackexchange.com/questions/196/how-do-i-make-my-dapp-serenity-proof/200#200)
+!!! Warning
+    Besides the issue with authorization, there is a chance that `tx.origin` will be
+    removed from the Ethereum protocol in the future, so code that uses `tx.origin` won't be compatible
+    with future releases
+    [Vitalik: 'Do NOT assume that tx.origin will continue to be usable or meaningful.'](https://ethereum.stackexchange.com/questions/196/how-do-i-make-my-dapp-serenity-proof/200#200)
 
-It's also worth mentioning that by using `tx.origin` you're limiting interoperability between
-contracts because the contract that uses tx.origin cannot be used by another contract as a contract
-can't be the `tx.origin`.
+    It's also worth mentioning that by using `tx.origin` you're limiting interoperability between
+    contracts because the contract that uses tx.origin cannot be used by another contract as a contract
+    can't be the `tx.origin`.
 
-See [SWC-115](https://swcregistry.io/docs/SWC-115)
+    See [SWC-115](https://swcregistry.io/docs/SWC-115)
 
 ______________________________________________________________________
 
@@ -800,8 +795,9 @@ and
 both reject blocks with timestamp more than 15 seconds in future. Therefore, a good rule of thumb
 in evaluating timestamp usage is:
 
-!!! Note If the scale of your time-dependent event can vary by 15 seconds and maintain integrity,
-it is safe to use a `block.timestamp`.
+!!! Note
+    If the scale of your time-dependent event can vary by 15 seconds and maintain integrity,
+    it is safe to use a `block.timestamp`.
 
 #### Avoid using `block.number` as a timestamp
 
@@ -981,15 +977,10 @@ Because contract addresses can be pre-computed, this check could also fail if it
 which is empty at block `n`, but which has a contract deployed to it at some block greater than
 `n`.
 
-!!! warning
+!!! Warning "This issue is nuanced."
+    If your goal is to prevent other contracts from being able to call your contract, the `extcodesize` check is probably sufficient. An alternative approach is to check the value of `(tx.origin == msg.sender)`, though this also [has drawbacks](recommendations/#avoid-using-txorigin).
 
-```
-This issue is nuanced.
-
-If your goal is to prevent other contracts from being able to call your contract, the `extcodesize` check is probably sufficient. An alternative approach is to check the value of `(tx.origin == msg.sender)`, though this also [has drawbacks](recommendations/#avoid-using-txorigin).
-
-There may be other situations in which the `extcodesize` check serves your purpose. Describing all of them here is out of scope. Understand the underlying behaviors of the EVM and use your Judgement.
-```
+    There may be other situations in which the `extcodesize` check serves your purpose. Describing all of them here is out of scope. Understand the underlying behaviors of the EVM and use your Judgement.
 
 ## Deprecated/historical recommendations
 
@@ -1018,7 +1009,7 @@ event LogTransfer() {}
 function transfer() external {}
 ```
 
-!!! Note In
-[v0.4.21](https://github.com/ethereum/solidity/blob/develop/Changelog.md#0421-2018-03-07) Solidity
-introduced the `emit` keyword to indicate an event `emit EventName();`. As of 0.5.0, it is
-required.
+!!! Note
+    In [v0.4.21](https://github.com/ethereum/solidity/blob/develop/Changelog.md#0421-2018-03-07) Solidity
+    introduced the `emit` keyword to indicate an event `emit EventName();`. As of 0.5.0, it is
+    required.

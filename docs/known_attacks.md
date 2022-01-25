@@ -29,9 +29,10 @@ function withdrawBalance() public {
 Since the user's balance is not set to 0 until the very end of the function, the second (and later)
 invocations will still succeed and will withdraw the balance over and over again.
 
-!!! Factoid A DAO is a Decentralized Autonomous Organization. Its goal is to codify the rules and
-decision-making apparatus of an organization, eliminating the need for documents and people in
-governing, creating a structure with decentralized control.
+!!! Factoid
+    A DAO is a Decentralized Autonomous Organization. Its goal is to codify the rules and
+    decision-making apparatus of an organization, eliminating the need for documents and people in
+    governing, creating a structure with decentralized control.
 
 ```
 On June 17th 2016, [The DAO](https://www.coindesk.com/understanding-dao-hack-journalists) was hacked and 3.6 million Ether ($50 Million) were stolen using the first reentrancy attack.
@@ -274,15 +275,12 @@ that could simply profit by being the first to know and react to some informatio
 mostly had been within stock market deals and early domain registries, such as whois gateways.
 
 !!! cite "front-run·ning (/ˌfrəntˈrəniNG/)"
+    *noun*: front-running;
 
-```
-*noun*: front-running;
+    1. *STOCK MARKET*
 
-1. *STOCK MARKET*
-
-    > the practice by market makers of dealing on advance information provided by their brokers and investment analysts, before their clients have been given the information.
-    <!-- [[OXFORD](https://www.lexico.com/en/definition/front-running)] -->
-```
+        > the practice by market makers of dealing on advance information provided by their brokers and investment analysts, before their clients have been given the information.
+        <!-- [[OXFORD](https://www.lexico.com/en/definition/front-running)] -->
 
 ### Taxonomy
 
@@ -321,14 +319,13 @@ then run after, Mallory will profit on the price difference without having to ho
 As with displacement attacks, this is usually done by outbidding Alice's transaction in the gas
 price auction.
 
-!!! info "Transaction Order Dependence" Transaction Order Dependence is equivalent to race
-condition in smart contracts. An example, if one function sets the reward percentage, and the
-withdraw function uses that percentage; then withdraw transaction can be front-run by a change
-reward function call, which impacts the amount that will be withdrawn eventually.
+!!! info "Transaction Order Dependence"
+    Transaction Order Dependence is equivalent to race
+    condition in smart contracts. An example, if one function sets the reward percentage, and the
+    withdraw function uses that percentage; then withdraw transaction can be front-run by a change
+    reward function call, which impacts the amount that will be withdrawn eventually.
 
-```
-See [SWC-114](https://swcregistry.io/docs/SWC-114)
-```
+    See [SWC-114](https://swcregistry.io/docs/SWC-114)
 
 <!-- Based on Geth default ordering, it's easy to sandwich a transaction by sending two transactions each with 1 wei higher or lower. -->
 
@@ -343,11 +340,11 @@ This was the case with the first winner of the "Fomo3d" game and some other on-c
 attacker sent multiple transactions with a high `gasPrice` and `gasLimit` to custom smart contracts
 that assert (or use other means) to consume all the gas and fill up the block's `gasLimit`.
 
-!!! note "Variants" Each of these attacks has two variants, *asymmetric* and *bulk*.
+!!! note "Variants"
+    Each of these attacks has two variants, *asymmetric* and *bulk*.
 
-```
-In some cases, Alice and Mallory are performing different operations. For example, Alice is trying to cancel an offer, and Mallory is trying to fulfill it first. We call this *asymmetric displacement*. In other cases, Mallory is trying to run a large set of functions: for example, Alice and others are trying to buy a limited set of shares offered by a firm on a blockchain. We call this *bulk displacement*.
-```
+    In some cases, Alice and Mallory are performing different operations. For example, Alice is trying to cancel an offer, and Mallory is trying to fulfill it first. We call this *asymmetric displacement*. In other cases, Mallory is trying to run a large set of functions: for example, Alice and others are trying to buy a limited set of shares offered by a firm on a blockchain. We call this *bulk displacement*.
+
 
 ### Mitigations
 
@@ -382,10 +379,11 @@ ______________________________________________________________________
 Be aware that the timestamp of the block can be manipulated by the miner, and all direct and
 indirect uses of the timestamp should be considered.
 
-!!! Note See the [Recommendations](./recommendations/#timestamp-dependence) section for design
-considerations related to Timestamp Dependence.
+!!! Note
+    See the [Recommendations](./recommendations/#timestamp-dependence) section for design
+    considerations related to Timestamp Dependence.
 
-See [SWC-116](https://swcregistry.io/docs/SWC-116)
+    See [SWC-116](https://swcregistry.io/docs/SWC-116)
 
 ______________________________________________________________________
 
@@ -430,16 +428,16 @@ and get set to its maximum value.
 Be careful with the smaller data-types like uint8, uint16, uint24...etc: they can even more easily
 hit their maximum value.
 
-!!! Warning Be aware there are around
-[20 cases for overflow and underflow](https://github.com/ethereum/solidity/issues/796#issuecomment-253578925).
+!!! Warning
+    Be aware there are around [20 cases for overflow and underflow](https://github.com/ethereum/solidity/issues/796#issuecomment-253578925).
 
-One simple solution to mitigate the common mistakes for overflow and underflow is to use
-`SafeMath.sol`
-[library](https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/math/SafeMath.sol)
-for arithmetic functions. Solidity automatically reverts on integer overflow and underflow, as of
-version 0.8.0.
+    One simple solution to mitigate the common mistakes for overflow and underflow is to use
+    `SafeMath.sol`
+    [library](https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/math/SafeMath.sol)
+    for arithmetic functions. Solidity automatically reverts on integer overflow and underflow, as of
+    version 0.8.0.
 
-See [SWC-101](https://swcregistry.io/docs/SWC-101)
+    See [SWC-101](https://swcregistry.io/docs/SWC-101)
 
 ______________________________________________________________________
 
@@ -613,8 +611,9 @@ If given just the right amount of gas, the `Relayer` would complete execution re
 `_data`argument in the `executed` mapping, but the subcall would fail because it received
 insufficient gas to complete execution.
 
-!!! Note When a contract makes a sub-call to another contract, the EVM limits the gas forwarded to
-[to 63/64 of the remaining gas](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-150.md),
+!!! Note
+    When a contract makes a sub-call to another contract, the EVM limits the gas forwarded to
+    [to 63/64 of the remaining gas](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-150.md),
 
 An attacker can use this to censor transactions, causing them to fail by sending them with a low
 amount of gas. This attack is a form of "[griefing](https://en.wikipedia.org/wiki/Griefer)": It
@@ -669,11 +668,10 @@ The `selfdestruct` contract method allows a user to specify a beneficiary to sen
 `selfdestruct`
 [does not trigger a contract's fallback function](https://solidity.readthedocs.io/en/develop/security-considerations.html#sending-and-receiving-ether).
 
-!!! Warning It is also possible to
-[precompute](https://github.com/Arachnid/uscc/tree/master/submissions-2017/ricmoo) a contract's
-address and send Ether to that address before deploying the contract.
+!!! Warning
+    It is also possible to [precompute](https://github.com/Arachnid/uscc/tree/master/submissions-2017/ricmoo) a contract's address and send Ether to that address before deploying the contract.
 
-See [SWC-132](https://swcregistry.io/docs/SWC-132)
+    See [SWC-132](https://swcregistry.io/docs/SWC-132)
 
 ______________________________________________________________________
 

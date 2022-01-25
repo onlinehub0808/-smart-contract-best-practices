@@ -14,10 +14,11 @@ how they work together to create a robust system.
 
 ### Upgrading Broken Contracts
 
-!!! warning Smart Contract upgradeability is an active area of research. There are many important
-questions, and risks related to smart contract upgradeability. Do your research into the state of
-the art. We welcome discussion on the
-[related issue](https://github.com/ConsenSys/smart-contract-best-practices/issues/164).
+!!! warning
+    Smart Contract upgradeability is an active area of research. There are many important
+    questions, and risks related to smart contract upgradeability. Do your research into the state of
+    the art. We welcome discussion on the
+    [related issue](https://github.com/ConsenSys/smart-contract-best-practices/issues/164).
 
 Code will need to be changed if errors are discovered or if improvements need to be made. It is no
 good to discover a bug, but have no way to deal with it.
