@@ -3,7 +3,7 @@ on: [push, pull_request]
 
 jobs:
   build:
-    name: Clone and build the repo
+    name: Test and deploy
     runs-on: ubuntu-latest
     env:
       SHOULD_DEPLOY: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
