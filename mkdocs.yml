@@ -33,6 +33,7 @@ theme:
     - navigation.instant
     - header.autohide
     - navigation.sections
+    - navigation.top
   palette: 
     - scheme: default
       primary: black
