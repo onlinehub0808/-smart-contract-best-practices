@@ -8,7 +8,8 @@ repo_name: Github
 remote_branch: gh-pages
 remote_name: origin
 
-pages:
+
+nav:
   - Home: index.md
   - General Philosophy: general_philosophy.md
   - Secure Development Recommendations: recommendations.md
