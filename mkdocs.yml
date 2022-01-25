@@ -32,22 +32,24 @@ theme:
   language: en
   features:
     - navigation.instant
+    - header.autohide
 
 extra_css:
   - 'stylesheets/extra.css'
 
 extra:
   social:
-    - icon: material/github-box
+    - icon: fontawesome//solid/shield-alt
+      link: https://consensys.net/diligence/blog/
+    - icon: fontawesome/brands/github
       link: https://github.com/ConsenSys/
-    - icon: material/twitter-box
+    - icon: fontawesome/brands/twitter
       link: https://twitter.com/ConsenSysAudits
-    - icon: material/medium
+    - icon: fontawesome/brands/medium
       link: https://medium.com/consensys-diligence
-    - icon: material/youtube
+    - icon: fontawesome/brands/youtube
       link: https://www.youtube.com/channel/UCkoGLA5DUdXO4Qfo_9RDjIA/playlists
 
-extra:
   analytics:
     provider: google
     property: UA-64552723-12
