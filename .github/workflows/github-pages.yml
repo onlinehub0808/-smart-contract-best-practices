@@ -1,0 +1,23 @@
+name: Lint, build, and deploy
+on:
+  push:
+    branches:
+      - master 
+
+jobs:
+  lint:
+    name: Check Markdown format (max 99 columns)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/workflows/build.yml
+      - run: mdformat --check --wrap 99 docs
+  deploy:
+    name: Deploy the site if pushed to master
+    needs: lint
+    runs-on: ubuntu-latest
+    env:
+      SHOULD_DEPLOY: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    steps:
+      - uses: ./.github/workflows/build.yml
+      - run: mkdocs gh-deploy --force
+        if: ${{ env.SHOULD_DEPLOY }}

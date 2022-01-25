@@ -2,10 +2,13 @@
 site_name: Ethereum Smart Contract Best Practices
 site_url: https://consensys.github.io/smart-contract-best-practices/
 site_description: Ethereum Smart Contract Security Best Practices
-site_author: ConsenSys
+site_author: ConsenSys Diligence
 repo_url: https://github.com/ConsenSys/smart-contract-best-practices
+repo_name: Github
+remote_branch: gh-pages
+remote_name: origin
 
-pages:
+nav:
   - Home: index.md
   - General Philosophy: general_philosophy.md
   - Secure Development Recommendations: recommendations.md
@@ -22,46 +25,78 @@ pages:
 
 theme:
   name: 'material'
-  custom_dir: 'theme'
+  custom_dir: 'custom'
   logo: 'assets/images/CDili.png'
   favicon: 'assets/images/CDili_black.png'
   language: en
+  features:
+    - navigation.instant
+    - header.autohide
+    - navigation.sections
+    - navigation.top
+  palette: 
+    - scheme: default
+      primary: black
+      accent: deep-purple
+      toggle:
+        icon: material/lightbulb
+        name: Switch to light mode
+    - scheme: slate
+      primary: black
+      accent: cyan
+      toggle:
+        icon: material/lightbulb-outline
+        name: Switch to dark mode
 
 extra_css:
   - 'stylesheets/extra.css'
 
 extra:
   social:
-    - icon: material/github-box
+    - icon: fontawesome//solid/shield-alt
+      link: https://consensys.net/diligence/blog/
+    - icon: fontawesome/brands/github
       link: https://github.com/ConsenSys/
-    - icon: material/twitter-box
+    - icon: fontawesome/brands/twitter
       link: https://twitter.com/ConsenSysAudits
-    - icon: material/medium
+    - icon: fontawesome/brands/medium
       link: https://medium.com/consensys-diligence
-    - icon: material/youtube
+    - icon: fontawesome/brands/youtube
       link: https://www.youtube.com/channel/UCkoGLA5DUdXO4Qfo_9RDjIA/playlists
 
-google_analytics:
-  - UA-64552723-12
-  - auto
+  analytics:
+    provider: google
+    property: UA-64552723-12
+  consent:
+    title: Cookie consent
+    description: >-
+      We use cookies to recognize your repeated visits and preferences, as well
+      as to measure the effectiveness of our documentation and whether users
+      find what they're searching for. With your consent, you're helping us to
+      make our documentation better.
 
 markdown_extensions:
-  - markdown.extensions.admonition
-  - markdown.extensions.def_list
-  - markdown.extensions.footnotes
-  - markdown.extensions.meta
-  - markdown.extensions.toc(permalink=true)
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.critic:
+      mode: view
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - admonition
+  - def_list
+  - footnotes
+  - meta
   - pymdownx.highlight
   - pymdownx.inlinehilite
-  - pymdownx.arithmatex
-  - pymdownx.betterem(smart_enable=all)
   - pymdownx.caret
-  - pymdownx.critic
   - pymdownx.details
   - pymdownx.magiclink
   - pymdownx.mark
   - pymdownx.smartsymbols
   - pymdownx.superfences
-  - pymdownx.tasklist(custom_checkbox=true)
   - pymdownx.tilde
   - markdown_include.include
