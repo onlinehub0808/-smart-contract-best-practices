@@ -1,0 +1,19 @@
+name: Attempt to build the repository
+on:
+  workflow_call:
+
+jobs:
+  build:
+    name: Clone and build the repo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone the repository
+        uses: actions/checkout@v2
+      - name: Install Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install requirements
+        run: pip install -r requirements.txt
+      - name: Build the site with mkdocs
+        run: mkdocs build
