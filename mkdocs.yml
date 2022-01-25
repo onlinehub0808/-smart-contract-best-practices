@@ -2,8 +2,11 @@
 site_name: Ethereum Smart Contract Best Practices
 site_url: https://consensys.github.io/smart-contract-best-practices/
 site_description: Ethereum Smart Contract Security Best Practices
-site_author: ConsenSys
+site_author: ConsenSys Diligence
 repo_url: https://github.com/ConsenSys/smart-contract-best-practices
+repo_name: Github
+remote_branch: gh-pages
+remote_name: origin
 
 pages:
   - Home: index.md
