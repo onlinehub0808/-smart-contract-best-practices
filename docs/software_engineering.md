@@ -276,7 +276,7 @@ certain amount of tokens issued by the contract over a time period.
 
 Example:
 
-```
+```sol
 uint internal period; // how many blocks before limit resets
 uint internal limit; // max ether to withdraw per period
 uint internal currentPeriodEnd; // block which the current period ends at
