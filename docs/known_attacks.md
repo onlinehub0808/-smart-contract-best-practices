@@ -557,7 +557,7 @@ guarantee inclusion in the block, but the higher the price is, the higher is the
 If the attack succeeds, no other transactions will be included in the block. Sometimes, an
 attacker's goal is to block transactions to a specific contract prior to specific time.
 
-This attack [was conducted](https://osolmaz.com/2018/10/18/anatomy-block-stuffing) on Fomo3D, a
+This attack [was conducted](https://solmaz.io/2018/10/18/anatomy-block-stuffing/) on Fomo3D, a
 gambling app. The app was designed to reward the last address that purchased a "key". Each key
 purchase extended the timer, and the game ended once the timer went to 0. The attacker bought a key
 and then stuffed 13 blocks in a row until the timer was triggered and the payout was released.
