@@ -5,7 +5,7 @@ contracts.
 
 The following recommendations apply to the development of any contract system on Ethereum.
 
-### External Calls
+<!-- ### External Calls
 
 #### Use caution when making external calls
 
@@ -221,11 +221,11 @@ and **never to a user supplied address**.
     contains a zero balance. See
     [issue 61](https://github.com/ConsenSys/smart-contract-best-practices/issues/61) for more details.
 
-    See [SWC-112](https://swcregistry.io/docs/SWC-112)
+    See [SWC-112](https://swcregistry.io/docs/SWC-112) -->
 
 ______________________________________________________________________
 
-### Remember that Ether can be forcibly sent to an account
+<!-- ### Remember that Ether can be forcibly sent to an account
 
 Beware of coding an invariant that strictly checks the balance of a contract.
 
@@ -240,11 +240,11 @@ arbitrary address.
 Also, since contract addresses can be precomputed, ether can be sent to an address before the
 contract is deployed.
 
-See [SWC-132](https://swcregistry.io/docs/SWC-132)
+See [SWC-132](https://swcregistry.io/docs/SWC-132) -->
 
 ______________________________________________________________________
 
-### Remember that on-chain data is public
+<!-- ### Remember that on-chain data is public
 
 Many applications require submitted data to be private up until some point in time in order to
 work. Games (eg. on-chain rock-paper-scissors) and auction mechanisms (eg. sealed-bid
@@ -271,11 +271,11 @@ Examples:
   Ethereum is a deterministic protocol, no variable within the protocol could be used as an
   unpredictable random number. Also, be aware that miners are in some extent in control of the
   `block.blockhash()`
-  value<sup><a href='https://ethereum.stackexchange.com/questions/419/when-can-blockhash-be-safely-used-for-a-random-number-when-would-it-be-unsafe'>\*</a></sup>.
+  value<sup><a href='https://ethereum.stackexchange.com/questions/419/when-can-blockhash-be-safely-used-for-a-random-number-when-would-it-be-unsafe'>\*</a></sup>. -->
 
 ______________________________________________________________________
 
-### Beware of the possibility that some participants may "drop offline" and not return
+<!-- ### Beware of the possibility that some participants may "drop offline" and not return
 
 Do not make refund or claim processes dependent on a specific party performing a particular action
 with no other way of getting the funds out. For example, in a rock-paper-scissors game, one common
@@ -285,11 +285,11 @@ player's revealed move and determines that they lost, they have no reason to sub
 at all. This issue may also arise in the context of state channel settlement. When such situations
 are an issue, (1) provide a way of circumventing non-participating participants, perhaps through a
 time limit, and (2) consider adding economic incentive for participants to submit information in
-all of the situations in which they are supposed to do so.
+all of the situations in which they are supposed to do so. -->
 
 ______________________________________________________________________
 
-### Beware of negation of the most negative signed integer
+<!-- ### Beware of negation of the most negative signed integer
 
 Solidity provides several types to work with signed integers. Like in most programming languages,
 in Solidity a signed integer with `N` bits can represent values from `-2^(N-1)` to `2^(N-1)-1`.
@@ -319,7 +319,7 @@ One way to handle this is to check the value of a variable before negation and t
 to the `MIN_INT`. Another option is to make sure that the most negative number will never be
 achieved by using a type with a higher capacity (e.g. `int32` instead of `int16`).
 
-A similar issue with `int` types occurs when `MIN_INT` is multiplied or divided by `-1`.
+A similar issue with `int` types occurs when `MIN_INT` is multiplied or divided by `-1`. -->
 
 ______________________________________________________________________
 

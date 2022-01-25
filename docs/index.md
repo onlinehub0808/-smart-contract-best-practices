@@ -18,9 +18,9 @@ Our amazing community has also provided translations in
 - [Tokens](./tokens.md) outlines best practices specifically related to Tokens.
 - [Documentation and Procedures](./documentation_procedures.md) outlines best practices for
   documenting your system for other developers and auditors
-- [Security Tools](./security_tools.md) lists tools for improving code quality, and detecting
+- [Security Tools](./security-tools.md) lists tools for improving code quality, and detecting
   vulnerabilities
-- [Bug Bounties](./bug_bounty_list.md) List of bug bounties in the ecosystem.
+- [Bug Bounties](./bug-bounty-programs.md) List of bug bounties in the ecosystem.
 
 !!! tip
     This guideline is updated often, however, if you want to stay on top of the Smart Contract

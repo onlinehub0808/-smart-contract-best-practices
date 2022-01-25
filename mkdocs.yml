@@ -10,14 +10,53 @@ remote_name: origin
 
 nav:
   - Home: index.md
-  - General Philosophy: general_philosophy.md
-  - Secure Development Recommendations: recommendations.md
-  - Known Attacks: known_attacks.md
-  - Software Engineering Techniques: software_engineering.md
-  - Token specific recommendations: tokens.md
-  - Documentation and Procedures: documentation_procedures.md
-  - Security Tools: security_tools.md
-  - Bug Bounty Programs: bug_bounty_list.md
+  - Zen of Smart Contract Security: general_philosophy.md
+  - Development Recommendations:
+    - General:
+      - External Calls: development-recommendations/general/external-calls.md
+      - Force-feeding Ether: development-recommendations/general/force-feeding.md
+      - Public on-chain Data: development-recommendations/general/public-data.md
+      - Unreliable Participants: development-recommendations/general/participants.md
+      - Negation of Signed Integers: development-recommendations/general/negative-int.md
+    - Precautions:
+      - Upgradeability: development-recommendations/precautions/upgradeability.md
+      - Circuit Breakers: development-recommendations/precautions/circuit-breakers.md
+      - Speed Bumps: development-recommendations/precautions/speed-bumps.md
+      - Rate Limiting: development-recommendations/precautions/rate-limiting.md
+      - Deployment: development-recommendations/precautions/deployment.md
+      - Safe Haven: development-recommendations/precautions/safe-haven.md
+    - Solidity-specific:
+      - Assert, Require, Revert: development-recommendations/solidity-specific/assert-require-revert.md
+      - Modifiers as Guards: development-recommendations/solidity-specific/modifiers-as-guards.md
+      - Integer Division: development-recommendations/solidity-specific/integer-division.md
+      - Abstract vs Interfaces: development-recommendations/solidity-specific/abstract-vs-interfaces.md
+      - Fallback Functions: development-recommendations/solidity-specific/fallback-functions.md
+      - Payability: development-recommendations/solidity-specific/payability.md
+      - Visibility: development-recommendations/solidity-specific/visibility.md
+      - Locking Pragmas: development-recommendations/solidity-specific/locking-pragmas.md
+      - Event Monitoring: development-recommendations/solidity-specific/event-monitoring.md
+      - Shadowing: development-recommendations/solidity-specific/shadowing.md
+      - tx.origin: development-recommendations/solidity-specific/tx-origin.md
+      - Timestamp Dependence: development-recommendations/solidity-specific/timestamp-dependence.md
+      - Complex Inheritance: development-recommendations/solidity-specific/complex-inheritance.md
+      - Interface Types: development-recommendations/solidity-specific/interface-types.md
+      - EXTCODESIZE Checks: development-recommendations/solidity-specific/extcodesize-checks.md
+    - Token-specific:
+      - Standardization: development-recommendations/token-specific/standardization.md
+      - Frontrunning: development-recommendations/token-specific/frontrunning.md
+      - Zero Address: development-recommendations/token-specific/zero-address.md
+      - Contract Address: development-recommendations/token-specific/contract-address.md
+    - Deprecated:
+      - Division by Zero: development-recommendations/deprecated/division-by-zero.md
+      - Functions and Events: development-recommendations/deprecated/functions-and-events.md
+      - Constructor Naming: development-recommendations/deprecated/constructor-naming.md
+  - Security Tools:
+    - Visualization: security-tools/visualization.md
+    - Static and Dynamic Analysis: security-tools/static-and-dynamic-analysis.md
+    - Classification: security-tools/classification.md
+    - Testing: security-tools/testing.md
+    - Linters and Formatters: linters-and-formatters.md
+  - Bug Bounty Programs: bug-bounty-programs.md
   - About:
     - Reviewers: about/reviewers.md
     - License: about/license.md
@@ -30,6 +69,7 @@ theme:
   favicon: 'assets/images/CDili_black.png'
   language: en
   features:
+    - toc.integrate
     - navigation.instant
     - header.autohide
     - navigation.sections
