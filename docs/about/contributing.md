@@ -8,9 +8,8 @@ need to be expanded on a bit here.
 ## Editing and Submitting changes
 
 1. Fork the repo
-1. Make changes to the markdown files in the [docs directory](../../../../tree/master/docs) of the
-   master branch
-1. Submit a Pull Request
+2. Make changes to the markdown files in the `docs/` directory of the master branch
+3. Submit a Pull Request
 
 ## Audience
 

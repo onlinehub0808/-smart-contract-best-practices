@@ -1,4 +1,4 @@
-One of the major dangers of [calling external contracts](./recommendations#external-calls) is that
+One of the major dangers of [calling external contracts](../development-recommendations/general/external-calls.md) is that
 they can take over the control flow, and make changes to your data that the calling function wasn't
 expecting. This class of bugs can take many forms, and both of the major bugs that led to the DAO's
 collapse were bugs of this sort.
@@ -145,7 +145,7 @@ function untrustedGetFirstWithdrawalBonus(address recipient) public {
 ```
 
 In addition to the fix making reentry impossible,
-[untrusted functions have been marked](./recommendations#mark-untrusted-contracts). This same
+[untrusted functions have been marked](../development-recommendations/general/external-calls.md). This same
 pattern repeats at every level: since `untrustedGetFirstWithdrawalBonus()` calls
 `untrustedWithdrawReward()`, which calls an external contract, you must also treat
 `untrustedGetFirstWithdrawalBonus()` as insecure.

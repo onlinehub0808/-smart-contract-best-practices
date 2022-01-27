@@ -24,7 +24,7 @@ attacker can win any auction. When it tries to refund the old leader, it reverts
 fails. This means that a malicious bidder can become the leader while making sure that any refunds
 to their address will *always* fail. In this way, they can prevent anyone else from calling the
 `bid()` function, and stay the leader forever. A recommendation is to set up a
-[pull payment system](./recommendations#favor-pull-over-push-for-external-calls) instead, as
+[pull payment system](../development-recommendations/general/external-calls.md) instead, as
 described earlier.
 
 Another example is when a contract may iterate through an array to pay users (e.g., supporters in a
@@ -45,7 +45,7 @@ function refundAll() public {
 ```
 
 Again, the recommended solution is to
-[favor pull over push payments](./recommendations#favor-pull-over-push-for-external-calls).
+[favor pull over push payments](../development-recommendations/general/external-calls.md).
 
 See [SWC-113](https://swcregistry.io/docs/SWC-113)
 
@@ -68,7 +68,7 @@ gas cost of refunding each of the attacker's addresses could, therefore, end up 
 gas limit, blocking the refund transaction from happening at all.
 
 This is another reason to
-[favor pull over push payments](./recommendations#favor-pull-over-push-for-external-calls).
+[favor pull over push payments](../development-recommendations/general/external-calls.md).
 
 If you absolutely must loop over an array of unknown size, then you should plan for it to
 potentially take multiple blocks, and therefore require multiple transactions. You will need to
