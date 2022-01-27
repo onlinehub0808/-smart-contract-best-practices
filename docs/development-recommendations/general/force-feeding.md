@@ -1,5 +1,3 @@
-### Remember that Ether can be forcibly sent to an account
-
 Beware of coding an invariant that strictly checks the balance of a contract.
 
 An attacker can forcibly send ether to any account and this cannot be prevented (not even with a

@@ -1,5 +1,3 @@
-### Beware of the possibility that some participants may "drop offline" and not return
-
 Do not make refund or claim processes dependent on a specific party performing a particular action
 with no other way of getting the funds out. For example, in a rock-paper-scissors game, one common
 mistake is to not make a payout until both players submit their moves; however, a malicious player

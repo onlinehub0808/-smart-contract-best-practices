@@ -1,5 +1,3 @@
-### External Calls
-
 #### Use caution when making external calls
 
 Calls to untrusted contracts can introduce several unexpected risks or errors. External calls may

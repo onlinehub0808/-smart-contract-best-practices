@@ -10,7 +10,7 @@ remote_name: origin
 
 nav:
   - Home: index.md
-  - Zen of Smart Contract Security: general_philosophy.md
+  - General Philosophy: zen-of-smart-contract-security.md
   - Development Recommendations:
     - General:
       - External Calls: development-recommendations/general/external-calls.md
@@ -19,6 +19,7 @@ nav:
       - Unreliable Participants: development-recommendations/general/participants.md
       - Negation of Signed Integers: development-recommendations/general/negative-int.md
     - Precautions:
+      - General: development-recommendations/precautions/general.md
       - Upgradeability: development-recommendations/precautions/upgradeability.md
       - Circuit Breakers: development-recommendations/precautions/circuit-breakers.md
       - Speed Bumps: development-recommendations/precautions/speed-bumps.md
@@ -46,16 +47,36 @@ nav:
       - Frontrunning: development-recommendations/token-specific/frontrunning.md
       - Zero Address: development-recommendations/token-specific/zero-address.md
       - Contract Address: development-recommendations/token-specific/contract-address.md
+    - Documentation:
+      - General: development-recommendations/documentation/general.md
+      - Specification: development-recommendations/documentation/specification.md
+      - Status: development-recommendations/documentation/status.md
+      - Procedures: development-recommendations/documentation/procedures.md
+      - Known Issues: development-recommendations/documentation/known-issues.md
+      - History: development-recommendations/documentation/history.md
+      - Contact: development-recommendations/documentation/contact.md
     - Deprecated:
       - Division by Zero: development-recommendations/deprecated/division-by-zero.md
       - Functions and Events: development-recommendations/deprecated/functions-and-events.md
       - Constructor Naming: development-recommendations/deprecated/constructor-naming.md
+  - Attacks:
+    - General: attacks/general.md
+    - Reentrancy: attacks/reentrancy.md
+    - Oracle Manipulation: attacks/oracle-manipulation.md
+    - Frontrunning: attacks/frontrunning.md
+    - Timestamp Dependence: attacks/timestamp-dependence.md
+    - Insecure Arithmetic: attacks/insecure-arithmetic.md
+    - Denial of Service: attacks/denial-of-service.md
+    - Griefing: attacks/griefing.md
+    - Force Feeding: attacks/force-feeding.md
+    - Deprecated/Historical: attacks/deprecated.md
+    - More: attacks/more.md
   - Security Tools:
     - Visualization: security-tools/visualization.md
-    - Static and Dynamic Analysis: security-tools/static-and-dynamic-analysis.md
+    - Static and Dynamic Analysis: security-tools/static-or-dynamic-analysis.md
     - Classification: security-tools/classification.md
     - Testing: security-tools/testing.md
-    - Linters and Formatters: linters-and-formatters.md
+    - Linters and Formatters: security-tools/linters-and-formatters.md
   - Bug Bounty Programs: bug-bounty-programs.md
   - About:
     - Reviewers: about/reviewers.md
@@ -72,8 +93,11 @@ theme:
     - toc.integrate
     - navigation.instant
     - header.autohide
-    - navigation.sections
+    # - navigation.sections
     - navigation.top
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.indexes
   palette: 
     - scheme: default
       primary: black

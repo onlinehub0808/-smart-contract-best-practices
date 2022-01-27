@@ -1,5 +1,3 @@
-### Remember that on-chain data is public
-
 Many applications require submitted data to be private up until some point in time in order to
 work. Games (eg. on-chain rock-paper-scissors) and auction mechanisms (eg. sealed-bid
 [Vickrey auctions](https://en.wikipedia.org/wiki/Vickrey_auction)) are two major categories of

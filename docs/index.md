@@ -10,7 +10,7 @@ Our amazing community has also provided translations in
 
 ## Where to start?
 
-- [General Philosophy](./general_philosophy.md) describes the smart contract security mindset
+- [General Philosophy](./zen-of-smart-contract-security.md) describes the smart contract security mindset
 - [Smart Contract Recommendations](./recommendations.md) contains examples of good code patterns
 - [Known Attacks](./known_attacks.md) describes the different classes of vulnerabilities to avoid
 - [Software Engineering](./software_engineering.md) outlines some architectural and design
