@@ -7,11 +7,20 @@ repo_url: https://github.com/ConsenSys/smart-contract-best-practices
 repo_name: Github
 remote_branch: gh-pages
 remote_name: origin
+strict: true
 
 nav:
   - Home: index.md
-  - General Philosophy: zen-of-smart-contract-security.md
+  - General Philosophy:
+    - general-philosophy/index.md
+    - Prepare for Failure: general-philosophy/prepare-for-failure.md
+    - Stay up to Date: general-philosophy/stay-up-to-date.md
+    - Keep it Simple: general-philosophy/simplicity.md
+    - Rolling out: general-philosophy/rollout.md
+    - Blockchain Properties: general-philosophy/blockchain-properties.md
+    - Simplicity vs. Complexity: general-philosophy/simplicity-vs-complexity.md
   - Development Recommendations:
+    - development-recommendations/index.md
     - General:
       - External Calls: development-recommendations/general/external-calls.md
       - Force-feeding Ether: development-recommendations/general/force-feeding.md
@@ -60,7 +69,7 @@ nav:
       - Functions and Events: development-recommendations/deprecated/functions-and-events.md
       - Constructor Naming: development-recommendations/deprecated/constructor-naming.md
   - Attacks:
-    - General: attacks/general.md
+    - attacks/index.md
     - Reentrancy: attacks/reentrancy.md
     - Oracle Manipulation: attacks/oracle-manipulation.md
     - Frontrunning: attacks/frontrunning.md
@@ -72,6 +81,7 @@ nav:
     - Deprecated/Historical: attacks/deprecated.md
     - More: attacks/more.md
   - Security Tools:
+    - security-tools/index.md
     - Visualization: security-tools/visualization.md
     - Static and Dynamic Analysis: security-tools/static-or-dynamic-analysis.md
     - Classification: security-tools/classification.md
@@ -79,7 +89,7 @@ nav:
     - Linters and Formatters: security-tools/linters-and-formatters.md
   - Bug Bounty Programs: bug-bounty-programs.md
   - About:
-    - Reviewers: about/reviewers.md
+    - about/index.md
     - License: about/license.md
     - Contributing: about/contributing.md
 
@@ -117,7 +127,7 @@ extra_css:
 
 extra:
   social:
-    - icon: fontawesome//solid/shield-alt
+    - icon: fontawesome/solid/shield-alt
       link: https://consensys.net/diligence/blog/
     - icon: fontawesome/brands/github
       link: https://github.com/ConsenSys/
