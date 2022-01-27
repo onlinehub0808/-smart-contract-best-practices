@@ -22,7 +22,7 @@ It's also critical to have a secure way for parties to decide to upgrade the cod
 your contract, code changes may need to be approved by a single trusted party, a group of members,
 or a vote of the full set of stakeholders. If this process can take some time, you will want to
 consider if there are other ways to react more quickly in case of an attack, such as an
-[emergency stop or circuit-breaker](#circuit-breakers-pause-contract-functionality).
+[emergency stop or circuit-breaker](./circuit-breakers.md).
 
 Regardless of your approach, it is important to have some way to upgrade your contracts, or they
 will become unusable when the inevitable bugs are discovered in them.
@@ -142,7 +142,7 @@ different storage layout than the first, your data may end up corrupted. When us
 implementations of `delegatecall`, you should carefully consider and understand\*:
 
 - How the EVM handles the
-  [layout of state variables in storage](https://solidity.readthedocs.io/en/latest/miscellaneous.html#layout-of-state-variables-in-storage),
+  [layout of state variables in storage](https://docs.soliditylang.org/en/latest/internals/layout_in_storage.html),
   including packing multiple variables into a single storage slot if possible
 - How and why
   [the order of inheritance](https://github.com/OpenZeppelin/openzeppelin-sdk/issues/37) impacts

@@ -43,7 +43,7 @@ hit their maximum value.
 
     One simple solution to mitigate the common mistakes for overflow and underflow is to use
     `SafeMath.sol`
-    [library](https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/math/SafeMath.sol)
+    [library](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/ae54e6de1d77c60881e4c85ffbdb7f9d76b71efe/contracts/utils/math/SafeMath.sol)
     for arithmetic functions. Solidity automatically reverts on integer overflow and underflow, as of
     version 0.8.0.
 
