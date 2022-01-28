@@ -28,6 +28,12 @@ pip install -r requirements.txt
 mkdocs build 
 ```
 
+To run the server (and restart on failure):
+
+```
+until mkdocs serve; do :; done
+```
+
 You can also use the `mkdocs serve` command to view the site on localhost, and live reload whenever you save changes.
 
 ## Redeploying the documentation site
