@@ -25,7 +25,7 @@ Our amazing community has also provided translations in
 ## Contributions are welcome!
 
 Feel free to submit a pull request, with anything from small fixes, to full new sections. If you
-are writing new content, please reference the [contributing](./about/contributing.md) page for
+are writing new content, please reference the [contributing](./about/index.md) page for
 guidance on style.
 
 See the [issues](https://github.com/ConsenSys/smart-contract-best-practices/issues) for topics that

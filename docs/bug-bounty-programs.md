@@ -1,3 +1,8 @@
+---
+hide:
+  - navigation
+---
+
 The following are ongoing bug bounty programs, either focused on, or including smart contracts in
 their scope. Issues and PRs are welcome to add new bounties, or remove those which are no longer
 active.

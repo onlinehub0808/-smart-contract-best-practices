@@ -91,7 +91,6 @@ nav:
   - About:
     - about/index.md
     - License: about/license.md
-    - Contributing: about/contributing.md
 
 theme:
   name: 'material'
@@ -152,6 +151,7 @@ markdown_extensions:
       mode: view
   - pymdownx.tasklist:
       custom_checkbox: true
+  - meta
   - admonition
   - def_list
   - footnotes
