@@ -83,7 +83,7 @@ nav:
   - Security Tools:
     - security-tools/index.md
     - Visualization: security-tools/visualization.md
-    - Static and Dynamic Analysis: security-tools/static-or-dynamic-analysis.md
+    - Static and Dynamic Analysis: security-tools/static-and-dynamic-analysis.md
     - Classification: security-tools/classification.md
     - Testing: security-tools/testing.md
     - Linters and Formatters: security-tools/linters-and-formatters.md
