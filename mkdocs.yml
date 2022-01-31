@@ -151,7 +151,6 @@ markdown_extensions:
       mode: view
   - pymdownx.tasklist:
       custom_checkbox: true
-  - meta
   - admonition
   - def_list
   - footnotes
