@@ -10,17 +10,12 @@ Our amazing community has also provided translations in
 
 ## Where to start?
 
-- [General Philosophy](./general_philosophy.md) describes the smart contract security mindset
-- [Smart Contract Recommendations](./recommendations.md) contains examples of good code patterns
-- [Known Attacks](./known_attacks.md) describes the different classes of vulnerabilities to avoid
-- [Software Engineering](./software_engineering.md) outlines some architectural and design
-  approaches for risk mitigation
-- [Tokens](./tokens.md) outlines best practices specifically related to Tokens.
-- [Documentation and Procedures](./documentation_procedures.md) outlines best practices for
-  documenting your system for other developers and auditors
-- [Security Tools](./security_tools.md) lists tools for improving code quality, and detecting
+- [General Philosophy](./general-philosophy/index.md) describes the smart contract security mindset
+- [Development Recommendations](./development-recommendations/index.md) contains examples of good code patterns
+- [Known Attacks](./attacks/index.md) describes the different classes of vulnerabilities to avoid
+- [Security Tools](./security-tools/index.md) lists tools for improving code quality, and detecting
   vulnerabilities
-- [Bug Bounties](./bug_bounty_list.md) List of bug bounties in the ecosystem.
+- [Bug Bounties](./bug-bounty-programs.md) List of bug bounties in the ecosystem.
 
 !!! tip
     This guideline is updated often, however, if you want to stay on top of the Smart Contract
@@ -30,7 +25,7 @@ Our amazing community has also provided translations in
 ## Contributions are welcome!
 
 Feel free to submit a pull request, with anything from small fixes, to full new sections. If you
-are writing new content, please reference the [contributing](./about/contributing.md) page for
+are writing new content, please reference the [contributing](./about/index.md) page for
 guidance on style.
 
 See the [issues](https://github.com/ConsenSys/smart-contract-best-practices/issues) for topics that
