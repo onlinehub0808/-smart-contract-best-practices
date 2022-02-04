@@ -8,7 +8,6 @@ their scope. Issues and PRs are welcome to add new bounties, or remove those whi
 active.
 
 - [Airswap](https://medium.com/fluidity/smart-contracts-and-bug-bounty-ad75733eb53f)
-- [Colony.io](https://blog.colony.io/announcing-the-colony-network-bug-bounty-f44cabaca9a3/)
 - [Ethereum Foundation](https://bounty.ethereum.org/#bounty-scope): Has a large scope, including
   clients, Solidity and Vyper, and more.
 - [Etherscan.io](https://etherscan.io/bugbounty)
