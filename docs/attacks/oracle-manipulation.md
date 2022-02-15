@@ -16,13 +16,17 @@ positions, and more.
 
 ### Oracle Manipulation Solutions
 
-The easiest way to solve this is to use decentralized oracles. [Chainlink](https://chain.link/) is
-the leading decentralized oracle provider, and the Chainlink network can be leveraged to bring
-decentralized data on-chain.
+The easiest way to solve this is to use decentralized oracles such as:
+
+* [Chainlink](https://chain.link/) is the leading decentralized oracle provider, and the Chainlink network can be leveraged to bring decentralized data on-chain.
+* [Tellor](https://tellor.io/) is an oracle that provides censorship resistant data, secured by crypto-economic incentives, that ensure data can be provided by anyone, anytime, and checked by everyone.
+* [Witnet](https://witnet.io/) leverages state-of-the-art cryptographic and economic techniques to provide your smart contracts with secure data input.
+
+Using a median of multiple oracles provides heighten security since it is harder and more expensive to attack multiple oracles than one and it ensures that your smart contract gets the data it needs even if one oracle or API call fails. 
 
 Another common solution is to use a time-weighted average price feed, so that price is averaged out
-over `X` time periods. Not only does this prevent oracle manipulation, but it also reduces the
+over `X` time periods and multiple sources. Not only does this prevent oracle manipulation, but it also reduces the
 chance you can be front-run, as an order executed right before yours won't have as drastic an
-impact on price. One tool that gathers Uniswap price feeds every thirty minutes is
+impact on price. However, always keep in mind that low liquidity assets are generally easier/cheaper to manipulate, even for a period of time. One tool that gathers Uniswap price feeds every thirty minutes is
 [Keep3r](https://docs.uniquote.finance/). If you're looking to build a custom solution,
 [Uniswap provides a sliding window example](https://github.com/Uniswap/uniswap-v2-periphery/blob/master/contracts/examples/ExampleSlidingWindowOracle.sol).
