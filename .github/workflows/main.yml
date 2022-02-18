@@ -19,7 +19,7 @@ jobs:
       - name: Build the site with mkdocs
         run: mkdocs build
       - name: Check dead links
-        run: linkcheckMarkdown -r docs
+        run: linkcheckMarkdown -r --sync docs
       - name: Deploy to Github Pages
         if: fromJSON(env.SHOULD_DEPLOY)
         run: mkdocs gh-deploy --force
