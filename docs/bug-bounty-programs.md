@@ -7,7 +7,7 @@ The following are ongoing bug bounty programs, either focused on, or including s
 their scope. Issues and PRs are welcome to add new bounties, or remove those which are no longer
 active.
 
-- [Airswap](https://medium.com/fluidity/smart-contracts-and-bug-bounty-ad75733eb53f)
+- [Airswap](https://medium.com/fluidity/airswap-bug-bounty-4d7ec41f3ea7)
 - [Ethereum Foundation](https://bounty.ethereum.org/#bounty-scope): Has a large scope, including
   clients, Solidity and Vyper, and more.
 - [Etherscan.io](https://etherscan.io/bugbounty)
