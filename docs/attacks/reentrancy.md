@@ -171,7 +171,7 @@ function withdraw(uint amount) payable public returns (bool) {
     require(!lockBalances && amount > 0 && balances[msg.sender] >= amount);
     lockBalances = true;
 
-    (bool success, ) = msg.sender.call(amount)("");
+    (bool success, ) = msg.sender.call.value(amount)("");
 
     if (success) { // Normally insecure, but the mutex saves it
       balances[msg.sender] -= amount;
