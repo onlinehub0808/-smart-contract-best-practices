@@ -1,4 +1,4 @@
-As we discussed in the [General Philosophy](../../general_philosophy/) section, it is not enough to
+As we discussed in the [General Philosophy](../../general-philosophy/) section, it is not enough to
 protect yourself against the known attacks. Since the cost of failure on a blockchain can be very
 high, you must also adapt the way you write software, to account for that risk.
 
