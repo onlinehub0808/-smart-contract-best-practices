@@ -108,7 +108,7 @@ Additionally, such centralized systems can have an inherent risk due to compromi
 ## Decentralized Oracle Security
 
 Decentralized oracles aim to diversify the group of data collectors to a point where disrupting a quorum of participants becomes unfeasible for an attacker.
-There are further security considerations in a decentralized scenario, stemming from how participants are incentivized and what sort of misbehavior if left unpunished.
+In a decentralized scenario, further security considerations stem from how participants are incentivized and what sort of misbehavior if left unpunished.
 Participants providing (valid) data to the oracle system are economically rewarded.
 Aiming to maximize their profit, the participants are incentivized to provide the cheapest version of their service possible.
 
@@ -125,7 +125,8 @@ Freeloading in decentralized oracle data marketplaces can amplify a price race t
 With less competition in cheaper price ranges, a few freeloading nodes could even be able to take over a data feed.
 Freeloading attacks can be easily prevented for more complex data feeds by implementing a commit-reveal scheme.
 This security measure will prevent oracle system participants from peeking into each other's data.
-For simpler data provisioning, consistency checks punishing nodes that obviously copy data from well-known public services can be implemented to disincentivize data collectors contributing to the centralization of the overall service.
+For simpler data provisioning, consistency checks punishing nodes that obviously copy data from well-known public services can be implemented.
+Data collectors contributing to the centralization of the overall service will be disincentivized.
 
 ### Mirroring
 
@@ -136,7 +137,7 @@ With a single data read, the reward for providing the information is multiplied 
 As the number of mirroring participants grows, this increased weight on a single data point can significantly deteriorate error correction mechanisms.
 A similar outcome to a mirroring attack can happen accidentally when a large, uninformed part of a community relies on a single data source.
 
-To mitigate (purposeful) mirroring attacks, a commit-reveal scheme is ineffective as it does not consider private data transfers between Sybil nodes.
+A commit-reveal scheme is ineffective to mitigate (purposeful) mirroring attacks as it does not consider private data transfers between Sybil nodes.
 Due to the lack of transparency in Sybil communications, mirroring attacks can be very hard to detect in practice.
 
 
