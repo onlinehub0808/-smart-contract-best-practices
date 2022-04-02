@@ -18,8 +18,9 @@ jobs:
         run: pip install -r requirements.txt
       - name: Build the site with mkdocs
         run: mkdocs build
-      - name: Check dead links
-        run: linkcheckMarkdown -r --sync docs
+      # Disabled as Github IPs trigger a 403 on Etherscan.
+      # - name: Check dead links
+      #   run: linkcheckMarkdown -r --sync docs
       - name: Deploy to Github Pages
         if: fromJSON(env.SHOULD_DEPLOY)
         run: mkdocs gh-deploy --force

@@ -105,6 +105,42 @@ Depending on the size and structure of the system, this centralized trust can le
 Additionally, such centralized systems can have an inherent risk due to compromised private keys.
 
 
+## Decentralized Oracle Security
+
+Decentralized oracles aim to diversify the group of data collectors to a point where disrupting a quorum of participants becomes unfeasible for an attacker.
+In a decentralized scenario, further security considerations stem from how participants are incentivized and what sort of misbehavior if left unpunished.
+Participants providing (valid) data to the oracle system are economically rewarded.
+Aiming to maximize their profit, the participants are incentivized to provide the cheapest version of their service possible.
+
+### Freeloading
+
+**Freeloading** attacks are the simplest form to save work and maximize profit.
+A node can leverage another oracle or off-chain component (such as an API) and simply copy the values without validation.
+For example, an oracle providing weather data might expect data providers to measure temperature and wind speed in a specific location.
+Nodes are, however, incentivized to use a publicly available weather data API and simply surface their data to the system.
+Besides the apparent data source centralization issue, freeloading attacks at scale can also severely affect the data's correctness.
+This effect is most visible when sampling rates vary, e.g., the on-chain oracle expects a sampling rate of 10 minutes while freeloading nodes provide data from an API that is updated once every hour.
+
+Freeloading in decentralized oracle data marketplaces can amplify a price race to the bottom as freeloading only requires a simple lookup. At the same time, proper data provisioning might involve a more significant computational overhead.
+With less competition in cheaper price ranges, a few freeloading nodes could even be able to take over a data feed.
+Freeloading attacks can be easily prevented for more complex data feeds by implementing a commit-reveal scheme.
+This security measure will prevent oracle system participants from peeking into each other's data.
+For simpler data provisioning, consistency checks punishing nodes that obviously copy data from well-known public services can be implemented.
+Data collectors contributing to the centralization of the overall service will be disincentivized.
+
+### Mirroring
+
+**Mirroring** attacks are a flavor of Sybil attacks and can go hand-in-hand with freeloading.
+Similarly, misbehaving nodes aim to save work by reading from a centralized data source, optionally with a reduced sampling rate.
+A single node reading from the centralized data source then replicates its values across other participants who mirror that data.
+With a single data read, the reward for providing the information is multiplied by the number of participants.
+As the number of mirroring participants grows, this increased weight on a single data point can significantly deteriorate error correction mechanisms.
+A similar outcome to a mirroring attack can happen accidentally when a large, uninformed part of a community relies on a single data source.
+
+A commit-reveal scheme is ineffective to mitigate (purposeful) mirroring attacks as it does not consider private data transfers between Sybil nodes.
+Due to the lack of transparency in Sybil communications, mirroring attacks can be very hard to detect in practice.
+
+
 ## Solutions
 
 Currently, the easiest ways to solve the oracle problem are decentralized oracles, such as:
