@@ -20,7 +20,7 @@ Our amazing community has also provided translations in
 !!! tip
     This guideline is updated often, however, if you want to stay on top of the Smart Contract
     security news and developments sign up for the bi-weekly
-    [Smart Contract Security Newsletter](https://diligence.consensys.net/newsletter/).
+    [Smart Contract Security Newsletter](https://consensys.net/diligence/newsletter/).
 
 ## Contributions are welcome!
 
