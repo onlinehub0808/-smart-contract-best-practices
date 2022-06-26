@@ -21,6 +21,6 @@ Examples:
   hash-commit-reveal schemes (ie. one party generates a number, publishes its hash to "commit" to
   the value, and then reveals the value later) and [RANDAO](http://github.com/randao/randao). As
   Ethereum is a deterministic protocol, no variable within the protocol could be used as an
-  unpredictable random number. Also, be aware that miners are in some extent in control of the
+  unpredictable random number. Also, be aware that [miners are in some extent in control of the
   `block.blockhash()`
-  value<sup><a href='https://ethereum.stackexchange.com/questions/419/when-can-blockhash-be-safely-used-for-a-random-number-when-would-it-be-unsafe'>\*</a></sup>.
+  value](https://ethereum.stackexchange.com/questions/419/when-can-blockhash-be-safely-used-for-a-random-number-when-would-it-be-unsafe).
