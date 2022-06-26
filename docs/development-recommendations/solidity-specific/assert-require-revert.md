@@ -33,7 +33,7 @@ through the `deposit()` function!
 
 The **assert** function should only be used to test for internal errors, and to check invariants.
 
-The **require** function should be used to ensure valid conditions, such as inputs, or contract state variables are met, or to validate return values from calls to external contracts. <sup><a href='https://solidity.readthedocs.io/en/latest/control-structures.html#error-handling-assert-require-revert-and-exceptions'>\*</a></sup>
+The [**require** function should be used to ensure valid conditions](https://docs.soliditylang.org/en/latest/control-structures.html#panic-via-assert-and-error-via-require), such as inputs, or contract state variables are met, or to validate return values from calls to external contracts.
 
 Following this paradigm allows formal analysis tools to verify that the invalid opcode can never be
 reached: meaning no invariants in the code are violated and that the code is formally verified.
