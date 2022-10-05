@@ -8,6 +8,6 @@ gracefully, and with minimal damage. This section presents a variety of techniqu
 you prepare for failure.
 
 Note: There's always a risk when you add a new component to your system. A badly designed fail-safe
-could itself become a vulnerability - as can the interaction between a number of well-designed
+could itself become a vulnerability, as can the interaction between a number of well-designed
 fail-safes. Be thoughtful about each technique you use in your contracts, and consider carefully
 how they work together to create a robust system.

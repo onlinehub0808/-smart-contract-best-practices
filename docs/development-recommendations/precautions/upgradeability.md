@@ -165,7 +165,7 @@ implementations of `delegatecall`, you should carefully consider and understand\
   and Solidity docs on
   [Error handling](https://solidity.readthedocs.io/en/latest/control-structures.html#error-handling-assert-require-revert-and-exceptions).
 - Remember the
-  [importance of immutability to achieve truslessness](https://diligence.consensys.net/blog/2019/01/upgradeability-is-a-bug/)
+  [importance of immutability to achieve trustlessness](https://consensys.net/diligence/blog/2019/01/upgradeability-is-a-bug/)
 
 \* *Extended from
 [Proxy pattern recommendations section](https://blog.trailofbits.com/2018/09/05/contract-upgrade-anti-patterns/)*

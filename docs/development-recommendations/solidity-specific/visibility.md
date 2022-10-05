@@ -10,10 +10,11 @@ incorrect assumptions about who can call the function or access the variable.
 - `Public` functions are part of the contract interface and can be either called internally or via
   messages. For public state variables, an automatic getter function (see below) is generated.
 - `Internal` functions and state variables can only be accessed internally, without using `this`.
-- `Private` functions and state variables are only visible for the contract they are defined in and
-  not in derived contracts. **Note**: Everything that is inside a contract is visible to all
-  observers external to the blockchain, even `Private`
-  variables.<sup><a href='https://solidity.readthedocs.io/en/develop/contracts.html?#visibility-and-getters'>\*</a></sup>
+- `Private` functions and state variables are only visible for the contract they
+  are defined in and not in derived contracts. **Note**: [Everything inside a
+  contract is visible to all observers external to the
+  blockchain](https://solidity.readthedocs.io/en/develop/contracts.html?#visibility-and-getters),
+  even `Private` variables.
 
 ```sol
 // bad
