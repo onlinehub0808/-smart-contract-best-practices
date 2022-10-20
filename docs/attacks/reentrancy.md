@@ -29,11 +29,9 @@ invocations will still succeed and will withdraw the balance over and over again
     decision-making apparatus of an organization, eliminating the need for documents and people in
     governing, creating a structure with decentralized control.
 
-```
-On June 17th 2016, [The DAO](https://www.coindesk.com/understanding-dao-hack-journalists) was hacked and 3.6 million Ether ($50 Million) were stolen using the first reentrancy attack.
 
+On June 17th 2016, [The DAO](https://www.coindesk.com/understanding-dao-hack-journalists) was hacked and 3.6 million Ether ($50 Million) were stolen using the first reentrancy attack.
 Ethereum Foundation issued a critical update to rollback the hack. This resulted in Ethereum being forked into Ethereum Classic and Ethereum.
-```
 
 In the example given, the best way to prevent this attack is to make sure you don't call an
 external function until you've done all the internal work you need to do:
