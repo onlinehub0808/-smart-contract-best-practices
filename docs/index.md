@@ -17,11 +17,6 @@ Our amazing community has also provided translations in
   vulnerabilities
 - [Bug Bounties](./bug-bounty-programs.md) List of bug bounties in the ecosystem.
 
-!!! tip
-    This guideline is updated often, however, if you want to stay on top of the Smart Contract
-    security news and developments sign up for the bi-weekly
-    [Smart Contract Security Newsletter](https://consensys.net/diligence/newsletter/).
-
 ## Contributions are welcome!
 
 Feel free to submit a pull request, with anything from small fixes, to full new sections. If you
