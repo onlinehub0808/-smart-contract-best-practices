@@ -1,3 +1,4 @@
+<link href="./index.css" rel="stylesheet"></link>
 This section is about tools that can detect vulnerabilities or help developers maintain a high
 code quality to reduce the likelihood and impact of vulnerabilities.
 
@@ -8,3 +9,18 @@ code quality to reduce the likelihood and impact of vulnerabilities.
 | [Classification](./classification.md)                           | Resources attempting to classify vulnerabilities and weaknesses in smart contracts.                 |
 | [Testing](./testing.md)                                         | Tools for running, measuring, and managing smart contract related tests                             |
 | [Linters and Formatters](./linters-and-formatters.md)           | Any tools that highlight code smells and make smart contract code adhere to format standards.       |
+
+<div class="security-tools-wrapper">
+    <div class="inner-wrapper">
+        <div class="left">
+            <div>
+                <p class="title">The Diligence Security Tooling Guide</p>
+                <p class="sub-title">Download a free copy of the Diligence Security Tooling Guide to discover the top tools in Web3 you can use at any phase of your smart contract development to test and improve security.</p>
+            </div>
+            <a href="https://consensys-diligence.younetco.com/diligence/resources/security-tooling-guide/" target="_blank">Download guide</a>
+        </div>
+        <div class="right">
+            <img src="../img/security-tools.png" alt="The Diligence Security Tooling Guide" />
+        </div>
+    </div>
+</div>
