@@ -17,7 +17,7 @@ code quality to reduce the likelihood and impact of vulnerabilities.
                 <p class="title">The Diligence Security Tooling Guide</p>
                 <p class="sub-title">Download a free copy of the Diligence Security Tooling Guide to discover the top tools in Web3 you can use at any phase of your smart contract development to test and improve security.</p>
             </div>
-            <a href="https://consensys-diligence.younetco.com/diligence/resources/security-tooling-guide/" target="_blank">Download guide</a>
+            <a href="https://consensys.net/diligence/resources/security-tooling-guide?utm_source=github&utm_medium=devcommunity&utm_campaign=2022_Nov_diligence-security-tooling-guide_content_content" target="_blank">Download guide</a>
         </div>
         <div class="right">
             <img src="../img/security-tools.png" alt="The Diligence Security Tooling Guide" />
