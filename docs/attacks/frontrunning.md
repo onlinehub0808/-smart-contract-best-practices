@@ -93,7 +93,7 @@ Another way is to use a pre-commit scheme (“I’m going to submit the details 
 is to mitigate the cost of front-running by specifying a maximum or minimum acceptable price range
 on a trade, thereby limiting price slippage.
 
-**Transaction Ordering:** Go-Ethereum (Geth) nodes, order the transactions based on their
+**Transaction Ordering:** Go-Ethereum (Geth) nodes order the transactions based on their
 `gasPrice` and address nonce. This, however, results in a gas auction between participants in the
 network to get included in the block currently being mined.
 
