@@ -86,7 +86,7 @@ uint256 nextPayeeIndex;
 
 function payOut() {
     uint256 i = nextPayeeIndex;
-    while (i < payees.length && msg.gas > 200000) {
+    while (i < payees.length && gasleft() > 200000) {
       payees[i].addr.send(payees[i].value);
       i++;
     }
