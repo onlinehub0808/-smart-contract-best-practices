@@ -1,4 +1,4 @@
-- [Solidity Visual Auditor](https://marketplace.visualstudio.com/items?itemName=tintinweb.solidity-visual-auditor)
+- [Solidity Visual Developer](https://marketplace.visualstudio.com/items?itemName=tintinweb.solidity-visual-auditor)
   \- This extension contributes security centric syntax and semantic highlighting, a detailed class
   outline and advanced Solidity code insights to Visual Studio Code
 - [Sūrya](https://github.com/ConsenSys/surya) - Utility tool for smart contract systems, offering a
