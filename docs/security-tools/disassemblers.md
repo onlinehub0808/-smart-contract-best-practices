@@ -1,0 +1,4 @@
+- [Ethersplay](https://github.com/crytic/ethersplay) - Binary Ninja plugin which enables an EVM disassembler and related analysis tools. 
+- [Pyevmasm](https://github.com/crytic/pyevmasm) - Assembler and disassembler library for the Ethereum Virtual Machine (EVM). It includes a commandline utility and a Python API.
+- [IDA-EVM](https://github.com/crytic/ida-evm) - IDA Processor Module for the Ethereum Virtual Machine (EVM).
+- [JEB Ethereum Smart Contract Decompiler](https://www.pnfsoftware.com/blog/ethereum-smart-contract-decompiler/) - JEB decompiler plugin for Ethereum Smart Contracts
