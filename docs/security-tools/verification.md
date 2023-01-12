@@ -1,0 +1,3 @@
+- [Scribble](https://consensys.net/diligence/scribble/) - Runtime verification tool for Solidity that enables you to write specifications to test, fuzz or symbolically execute contracts (e.g using Mythril or the MythX service) to check if your properties can be violated.
+- [KEVM](https://github.com/kframework/evm-semantics) - Formal verification framework that models EVM semantics.
+- [Certora Prover](https://certora.atlassian.net/wiki/spaces/CPD/pages) - Formal verification tool that checks if a smart contract satisfies a set of rules written in CVL (Certora Verification Language).
